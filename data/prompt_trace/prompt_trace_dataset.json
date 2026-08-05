@@ -1,0 +1,186 @@
+{
+  "dataset_version": "prompt-trace-assets@2026-07-27",
+  "input_to_terminal_trace": {
+    "auto_prompt_snapshot": {
+      "missing_production_file_count": 0,
+      "next_conditional_edge": "production-equivalence-improved -> human-admit-surface",
+      "next_route_node": "human-admit-readiness",
+      "packet_state": "measured",
+      "required_next_loop": [
+        "present the exact production-equivalence evidence bundle",
+        "preserve candidate/provider-truth boundaries",
+        "rerun small-loop, materialization, final-repo, and SSOT gates"
+      ]
+    },
+    "dataflow_nodes": [
+      "inputs/plan-package-inputs.yaml",
+      "inputs/frozen/gcr-047d548af8f8e34c-conversation.md",
+      "ROUTES.md#plan-package-materialization",
+      "scripts/write_loop_auto_prompt.py",
+      "_engine-run/loop-auto-prompt.gcr-production-quality.md",
+      "lineage/intent-to-artifact.yaml",
+      "data/commit_lineage/gcr_molecular_commits.json",
+      "repo/agent-skills-repo/"
+    ],
+    "directory_roots": [
+      "loop_wiki/evolve-unknown-discovery-plan-truth/",
+      "prototype/unknown-discovery-gcr-order/agent-skills-repo/small-loop/",
+      "repo/agent-skills-repo/"
+    ],
+    "input_content_sha256": "8fe152eb94179a56b6bd1b43a40c50690741ddf2ebc3a95c6b7b5e05776372a4",
+    "input_excerpt": "如何實作 — 核心協議：嚴格禁止任何無評測技能資產流向生產環境；最低基準要求 10–20 個真實測試 Prompt，並以 Git Hook 阻斷缺乏防禦性測試的 Diff。",
+    "input_id": "gcr-047d548-conversation",
+    "input_registry_path": "loop_wiki/evolve-unknown-discovery-plan-truth/inputs/plan-package-inputs.yaml",
+    "intent_commit_terminal": [
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "3b0fda780b1a4294bfc0e458da4aba8ac31189f0",
+        "intent_slice": "GCR-SLICE-01",
+        "subject": "chore(skill): sync GCR registry boundary",
+        "terminal_artifacts_abs": [
+          "<host-repo>/.claude/skills/skill-authoring/modules/panorama.md",
+          "<host-repo>/.gitignore"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "bdafec3919e80a218ec42524a1840adfffe563d7",
+        "intent_slice": "GCR-SLICE-02",
+        "subject": "feat(gcr): add guided conversation production route",
+        "terminal_artifacts_abs": [
+          "<host-repo>/.claude/skills/gemini-conversation-research/SKILL.md",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/templates/gemini-conversation-research/golden/guided-conversation-cases.json",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/templates/gemini-conversation-research/evals/check_guided_conversation_cases.py"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "be16ec5584c2ef53436d3dada581c6b5db188e45",
+        "intent_slice": "GCR-SLICE-03",
+        "subject": "feat(plan-input): ingest 874b5c GCR source artifacts",
+        "terminal_artifacts_abs": [
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/inputs/generic/874b5c3430c13837-conversation.traditional.md",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/packets/inbox/source-ingest-874b5c-conversation-traditional.yaml",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/scripts/convert_gemini_conversation_traditional.py"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "638de1a97354ca953886072247f632194861e71a",
+        "intent_slice": "GCR-SLICE-04",
+        "subject": "feat(plan-package): materialize wiki graph sync endpoint",
+        "terminal_artifacts_abs": [
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/scripts/execute_plan_package.py",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/plan-package.yaml",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/scripts/test_plan_package_runner.sh"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "21a5c5d6684cbb6eaebf197b2a9aaccef6023b65",
+        "intent_slice": "GCR-SLICE-05",
+        "subject": "feat(agent-skills-repo): add openwiki graph sync surface",
+        "terminal_artifacts_abs": [
+          "<target-repo>/README.md",
+          "<target-repo>/PROJECT-SSOT.md",
+          "<target-repo>/openwiki/wiki-graph-sync-architecture.md",
+          "<target-repo>/scripts/sync_wiki_to_graph.py",
+          "<target-repo>/scripts/check_wiki_graph_sync.py"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "0d6fc37da5229546ffefa79a3baf63e8efe0873c",
+        "intent_slice": "GCR-SLICE-06",
+        "subject": "test(plan-truth): update GCR dataflow baseline anchors",
+        "terminal_artifacts_abs": [
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/baselines/dataflow-stats.json",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/scripts/test_dataflow_stats.sh",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/verify.sh"
+        ]
+      },
+      {
+        "commit_repo": "skill-bettor",
+        "commit_sha": "65aaaccb24c04a02f53158b8e8b2850c3d8392b7",
+        "intent_slice": "GCR-SLICE-07",
+        "subject": "fix(wiki-graph): keep sync validators side-effect free",
+        "terminal_artifacts_abs": [
+          "<target-repo>/scripts/check_wiki_graph_sync.py",
+          "<target-repo>/tests/test_skill_asset_governance.py",
+          "<host-repo>/loop_wiki/evolve-unknown-discovery-plan-truth/scripts/execute_plan_package.py"
+        ]
+      }
+    ],
+    "strict_commit_query": "git log --all --format='%H%x09%s%x09%b' --grep='Intent-Slice: GCR-SLICE-'",
+    "trace_id": "gcr-input-small-loop-auto-prompt-terminal-commit"
+  },
+  "privacy_policy": {
+    "classification": "local-structured-prompt-metadata",
+    "cloud_upload_allowed": false,
+    "model_training_use": "local_or_private_finetune_candidate_after_human_admit",
+    "raw_external_model_outputs_stored": false,
+    "terms_guard": "store prompt/context metadata, route decisions, and verdicts; do not store proprietary Opus/Codex/agy full answers without separate admit"
+  },
+  "records": [
+    {
+      "context_role": "stable state graph contract",
+      "evidence_gate": "scripts/check_prompt_trace_assets.py",
+      "lineage_edge": "prompt-trace-assets",
+      "must_preserve": [
+        "match/generate/validate split",
+        "semantic truth context",
+        "no single-prompt collapse"
+      ],
+      "prompt_slot": "fixed_prompt",
+      "route": "ROUTES.md#plan-package-materialization",
+      "source_path": "loop_wiki/evolve-unknown-discovery-plan-truth/PROMPT.md",
+      "state_node": "S1.match",
+      "trace_id": "prompt-trace-fixed-context-gcr",
+      "training_eligibility": "metadata-only-local",
+      "typescript_target": "adapters/typescript/runtime/prompt-trace/fixed-context.ts"
+    },
+    {
+      "context_role": "runtime feedback context generated from physical migration stats",
+      "evidence_gate": "scripts/check_prompt_trace_assets.py",
+      "lineage_edge": "prompt-trace-assets",
+      "must_preserve": [
+        "target-selftest edge",
+        "physical count drift",
+        "TypeScript runtime backlog"
+      ],
+      "prompt_slot": "iteration_auto_prompt",
+      "route": "ROUTES.md#migration-feedback",
+      "source_path": "loop_wiki/evolve-unknown-discovery-plan-truth/_engine-run/golden-seed-migration-context.md",
+      "state_node": "S3.generate",
+      "trace_id": "prompt-trace-iteration-auto-migration-feedback",
+      "training_eligibility": "metadata-only-local",
+      "typescript_target": "adapters/typescript/runtime/prompt-trace/iteration-auto-context.ts"
+    },
+    {
+      "context_role": "emergent adversarial replay evidence and missing-context repair",
+      "evidence_gate": "scripts/check_prompt_trace_assets.py",
+      "lineage_edge": "prompt-trace-assets",
+      "must_preserve": [
+        "agy file-output canary",
+        "external verification required",
+        "candidate_until_human_admit"
+      ],
+      "prompt_slot": "emergent_prompt",
+      "route": "ROUTES.md#gcr-production-guidance",
+      "source_path": "loop_wiki/evolve-unknown-discovery-plan-truth/data/agy-replay-execution-report.json",
+      "state_node": "S4.validate",
+      "trace_id": "prompt-trace-emergent-agy-replay",
+      "training_eligibility": "metadata-only-local",
+      "typescript_target": "adapters/typescript/runtime/prompt-trace/emergent-context.ts"
+    }
+  ],
+  "schema_version": "prompt-trace-dataset@0.2.0",
+  "selection_actors": [
+    "codex",
+    "agy",
+    "external-verify",
+    "judge-loop-chooser",
+    "openwiki"
+  ],
+  "selection_question": "Can TypeScript+Bun prompt/context routing exceed the Python loop and an agy replay under the same GCR context?"
+}

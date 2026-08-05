@@ -1,0 +1,76 @@
+name: wiki-graph-sync
+
+on:
+  push:
+    paths:
+      - 'openwiki/**/*.md'
+      - 'data/wiki_graph/schema.json'
+      - 'scripts/sync_wiki_to_graph.py'
+      - 'scripts/check_wiki_graph_sync.py'
+  pull_request:
+    paths:
+      - 'openwiki/**/*.md'
+      - 'data/wiki_graph/schema.json'
+      - 'scripts/sync_wiki_to_graph.py'
+      - 'scripts/check_wiki_graph_sync.py'
+  workflow_dispatch:
+
+jobs:
+  local-first-wiki-graph-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Project Markdown Wiki into local graph artifacts
+        run: |
+          python scripts/sync_wiki_to_graph.py \
+            --wiki-root openwiki \
+            --schema data/wiki_graph/schema.json \
+            --event-log data/wiki_graph/event_log.jsonl \
+            --graph-out data/wiki_graph/sample_graph.json \
+            --commit-sha "$GITHUB_SHA"
+      - name: Validate hybrid retrieval and schema contract
+        run: python scripts/check_wiki_graph_sync.py
+      - name: Upload local graph projection
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-graph-local-projection
+          path: |
+            data/wiki_graph/event_log.jsonl
+            data/wiki_graph/sample_graph.json
+
+  external-graph-write-disabled-by-default:
+    if: ${{ vars.ENABLE_GRAPH_DB_WRITE == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Write projection to external Graph DB only after explicit opt-in
+        run: |
+          python scripts/sync_wiki_to_graph.py \
+            --wiki-root openwiki \
+            --schema data/wiki_graph/schema.json \
+            --event-log data/wiki_graph/event_log.jsonl \
+            --graph-out data/wiki_graph/sample_graph.json \
+            --commit-sha "$GITHUB_SHA" \
+            --write-external-graph
+        env:
+          ENABLE_GRAPH_DB_WRITE: ${{ vars.ENABLE_GRAPH_DB_WRITE }}
+          GRAPH_DB_KIND: ${{ vars.GRAPH_DB_KIND || 'generic-http-json' }}
+          GRAPH_DB_DATABASE: ${{ vars.GRAPH_DB_DATABASE || 'neo4j' }}
+          GRAPH_DB_URI: ${{ secrets.GRAPH_DB_URI }}
+          GRAPH_DB_USER: ${{ secrets.GRAPH_DB_USER }}
+          GRAPH_DB_PASSWORD: ${{ secrets.GRAPH_DB_PASSWORD }}

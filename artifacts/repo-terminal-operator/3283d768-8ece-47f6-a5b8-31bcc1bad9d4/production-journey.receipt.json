@@ -1,0 +1,272 @@
+{
+  "schema_version": "repo-terminal-production-journey-receipt@v1",
+  "status": "failed",
+  "entrypoint": ".agents/skills/repo-terminal-operator/repo-adapter.ts",
+  "evidence_scope": "deterministic-preflight-entrypoint",
+  "writer_execution_safety": "unobserved-repo-local-agent-boundary",
+  "scenarios": [
+    {
+      "id": "valid-packet",
+      "status": "passed",
+      "expected": "passed",
+      "entrypoint_observed": "passed",
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "id": "stale-head-recovery",
+      "status": "passed",
+      "expected": "typed expected-head failure",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "diagnostic": ""
+    },
+    {
+      "id": "race-condition",
+      "status": "failed",
+      "expected": "four bounded concurrent passes",
+      "aggregation_semantics": "all-members-required-all-settled-for-resource-ownership",
+      "attempts": 4,
+      "entrypoint_scope": "process-isolated-read-only-preflight",
+      "bounded_concurrency": 4,
+      "deterministic_receipts": false,
+      "shared_mutation_observed": false,
+      "diagnostic": [
+        {
+          "status": "fulfilled",
+          "exit_code": 2,
+          "receipt_status": "failed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "5097f20fc19b3b2362de9129178bbee2d2b2555eb29949e4d5980d0d5c7752b1"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 2,
+          "receipt_status": "failed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "656ef9422303a2bb6d7589aec387816bf610ec4be3f43f8fc114e38c7429bfbb"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "a26a60a07771b1ebfffa2fea407ae44320463b0319c7d339f93091ab44acc0fd"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 2,
+          "receipt_status": "failed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "5097f20fc19b3b2362de9129178bbee2d2b2555eb29949e4d5980d0d5c7752b1"
+        }
+      ]
+    },
+    {
+      "id": "silent-failure",
+      "status": "passed",
+      "expected": "typed failure with original parse diagnostic",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "typed_failure_receipt": true,
+      "original_error_preserved": true,
+      "diagnostic": "JSON Parse error: Expected '}'"
+    },
+    {
+      "id": "resource-leak",
+      "status": "passed",
+      "expected": "twelve bounded exits with reaped subprocesses, drained streams, and cleared timers",
+      "attempts": 12,
+      "subprocesses_reaped": true,
+      "timers_cleared": true,
+      "stdout_consumed": true,
+      "stderr_consumed": true,
+      "timed_out_count": 0,
+      "timeout_cleanup_probe": {
+        "exitCode": 124,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": true,
+        "cancelled": false,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "cancellation_cleanup_probe": {
+        "exitCode": 130,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": false,
+        "cancelled": true,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "diagnostic": [
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "safety_coverage": [
+    "race-condition",
+    "silent-failure",
+    "resource-leak"
+  ],
+  "native_escape_probe_launched": true,
+  "artifact_path": "repo/agent-skills-repo/artifacts/repo-terminal-operator/3283d768-8ece-47f6-a5b8-31bcc1bad9d4/production-journey.receipt.json"
+}

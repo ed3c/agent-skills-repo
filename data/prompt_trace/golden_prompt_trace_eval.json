@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "case_id": "prompt-slot-separation",
+      "expected_slots": [
+        "fixed_prompt",
+        "iteration_auto_prompt",
+        "emergent_prompt"
+      ],
+      "input_trace_ids": [
+        "prompt-trace-fixed-context-gcr",
+        "prompt-trace-iteration-auto-migration-feedback",
+        "prompt-trace-emergent-agy-replay"
+      ],
+      "must_include": [
+        "state_node",
+        "route",
+        "typescript_target",
+        "evidence_gate"
+      ],
+      "must_not_include": [
+        "single_prompt"
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "adversarial-selection-contract",
+      "expected_actors": [
+        "codex",
+        "agy",
+        "external-verify",
+        "judge-loop-chooser",
+        "openwiki"
+      ],
+      "input_trace_ids": [
+        "prompt-trace-emergent-agy-replay"
+      ],
+      "must_include": [
+        "candidate_until_human_admit",
+        "external verification required"
+      ],
+      "must_not_include": [
+        "promote_without_terminal_evidence"
+      ],
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "training-privacy-contract",
+      "expected_cloud_upload_allowed": false,
+      "expected_raw_external_model_outputs_stored": false,
+      "input_trace_ids": [
+        "prompt-trace-fixed-context-gcr",
+        "prompt-trace-iteration-auto-migration-feedback",
+        "prompt-trace-emergent-agy-replay"
+      ],
+      "must_include": [
+        "metadata-only-local",
+        "human_admit"
+      ],
+      "must_not_include": [
+        "raw_external_model_output"
+      ],
+      "verdict": "PASS"
+    }
+  ],
+  "eval_version": "golden-prompt-trace-eval@2026-07-23",
+  "judge_policy": "local deterministic first; LLM judges are comparison actors only after human admit"
+}

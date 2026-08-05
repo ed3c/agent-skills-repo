@@ -1,0 +1,31 @@
+{
+  "cloud_upload_allowed": false,
+  "datasets": [
+    {
+      "classification": "synthetic-local",
+      "cloud_allowed": false,
+      "contains_external_private_source": false,
+      "contains_user_secret": false,
+      "path": "data/autoresearch_traces/local_trace_samples.jsonl",
+      "required_before_cloud": [
+        "human_admit",
+        "secret_scan",
+        "redaction_review"
+      ]
+    },
+    {
+      "classification": "synthetic-local-failure",
+      "cloud_allowed": false,
+      "contains_external_private_source": false,
+      "contains_user_secret": false,
+      "path": "data/autoresearch_traces/failure_trace_samples.jsonl",
+      "required_before_cloud": [
+        "human_admit",
+        "secret_scan",
+        "redaction_review"
+      ]
+    }
+  ],
+  "default_policy": "local-only-until-human-admit",
+  "schema_version": "trace-privacy-classification@0.1.0"
+}

@@ -1,0 +1,271 @@
+{
+  "schema_version": "repo-terminal-production-journey-receipt@v1",
+  "status": "passed",
+  "entrypoint": ".agents/skills/repo-terminal-operator/repo-adapter.ts",
+  "evidence_scope": "deterministic-preflight-entrypoint",
+  "writer_execution_safety": "unobserved-repo-local-agent-boundary",
+  "scenarios": [
+    {
+      "id": "valid-packet",
+      "status": "passed",
+      "expected": "passed",
+      "entrypoint_observed": "passed",
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "id": "stale-head-recovery",
+      "status": "passed",
+      "expected": "typed expected-head failure",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "diagnostic": ""
+    },
+    {
+      "id": "race-condition",
+      "status": "passed",
+      "expected": "four bounded concurrent passes",
+      "aggregation_semantics": "all-members-required-all-settled-for-resource-ownership",
+      "attempts": 4,
+      "entrypoint_scope": "process-isolated-read-only-preflight",
+      "bounded_concurrency": 4,
+      "deterministic_receipts": true,
+      "shared_mutation_observed": false,
+      "diagnostic": [
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "435ac5d03a2202b314faacea67e0d1eac197c6632e1fff18e247a0d09762179f"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "435ac5d03a2202b314faacea67e0d1eac197c6632e1fff18e247a0d09762179f"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "435ac5d03a2202b314faacea67e0d1eac197c6632e1fff18e247a0d09762179f"
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "435ac5d03a2202b314faacea67e0d1eac197c6632e1fff18e247a0d09762179f"
+        }
+      ]
+    },
+    {
+      "id": "silent-failure",
+      "status": "passed",
+      "expected": "typed failure with original parse diagnostic",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "typed_failure_receipt": true,
+      "original_error_preserved": true,
+      "diagnostic": "JSON Parse error: Expected '}'"
+    },
+    {
+      "id": "resource-leak",
+      "status": "passed",
+      "expected": "twelve bounded exits with reaped subprocesses, drained streams, and cleared timers",
+      "attempts": 12,
+      "subprocesses_reaped": true,
+      "timers_cleared": true,
+      "stdout_consumed": true,
+      "stderr_consumed": true,
+      "timed_out_count": 0,
+      "timeout_cleanup_probe": {
+        "exitCode": 124,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": true,
+        "cancelled": false,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "cancellation_cleanup_probe": {
+        "exitCode": 130,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": false,
+        "cancelled": true,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "diagnostic": [
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "safety_coverage": [
+    "race-condition",
+    "silent-failure",
+    "resource-leak"
+  ],
+  "artifact_path": "repo/agent-skills-repo/artifacts/repo-terminal-operator/production-journey.receipt.json"
+}

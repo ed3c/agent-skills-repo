@@ -1,0 +1,420 @@
+{
+  "schema_version": "repo-terminal-production-journey-receipt@v1",
+  "status": "passed",
+  "entrypoint": ".agents/skills/repo-terminal-operator/repo-adapter.ts",
+  "evidence_scope": "deterministic-preflight-entrypoint",
+  "writer_execution_safety": "unobserved-repo-local-agent-boundary",
+  "scenarios": [
+    {
+      "id": "valid-packet",
+      "status": "passed",
+      "expected": "passed",
+      "entrypoint_observed": "passed",
+      "exit_code": 0,
+      "diagnostic": ""
+    },
+    {
+      "id": "stale-head-recovery",
+      "status": "passed",
+      "expected": "typed expected-head failure",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "diagnostic": ""
+    },
+    {
+      "id": "race-condition",
+      "status": "passed",
+      "expected": "four bounded concurrent passes",
+      "aggregation_semantics": "all-members-required-all-settled-for-resource-ownership",
+      "attempts": 4,
+      "entrypoint_scope": "process-isolated-read-only-preflight",
+      "bounded_concurrency": 4,
+      "deterministic_receipts": true,
+      "shared_mutation_observed": false,
+      "diagnostic": [
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "7cb1ed9b1e7a4ad3536b054bff7f718fc1d41af11c105289a3817ca307a73d48",
+          "receipt_checks": [
+            {
+              "id": "input-contract",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"contract-validation-receipt@v1\",\"contract\":\"terminal-slice-packet@v2\",\"status\":\"passed\",\"input_sha256\":\"38b0b8dbf97d8c11023d898d3835b8cbdc06166d07173fc5bcd33cf9e99fa0c0\",\"errors\":[]}"
+            },
+            {
+              "id": "target-repo",
+              "status": "passed",
+              "detail": "repo/agent-skills-repo"
+            },
+            {
+              "id": "expected-head",
+              "status": "passed",
+              "detail": "6249a942036ab89c1d4f607fdc4c91f7dd465263"
+            },
+            {
+              "id": "live-lease",
+              "status": "passed",
+              "detail": "2026-08-01T03:47:10.607Z"
+            },
+            {
+              "id": "allowed-paths",
+              "status": "passed",
+              "detail": "2 path(s)"
+            },
+            {
+              "id": "claim-set",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"guided-claim-set-validation@v1\",\"status\":\"passed\",\"input\":\"orkspace/guided/user-production-safety-20260731.claim-set.json\",\"claim_count\":2,\"coverage\":{\"start_offset\":0,\"end_offset\":13777,\"contiguous\":true},\"errors\":[]}"
+            },
+            {
+              "id": "agentic-tdd-receipt",
+              "status": "passed",
+              "detail": "verification/production-safety-agentic-tdd.json#red,verification/production-safety-agentic-tdd.json#green"
+            }
+          ]
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "7cb1ed9b1e7a4ad3536b054bff7f718fc1d41af11c105289a3817ca307a73d48",
+          "receipt_checks": [
+            {
+              "id": "input-contract",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"contract-validation-receipt@v1\",\"contract\":\"terminal-slice-packet@v2\",\"status\":\"passed\",\"input_sha256\":\"38b0b8dbf97d8c11023d898d3835b8cbdc06166d07173fc5bcd33cf9e99fa0c0\",\"errors\":[]}"
+            },
+            {
+              "id": "target-repo",
+              "status": "passed",
+              "detail": "repo/agent-skills-repo"
+            },
+            {
+              "id": "expected-head",
+              "status": "passed",
+              "detail": "6249a942036ab89c1d4f607fdc4c91f7dd465263"
+            },
+            {
+              "id": "live-lease",
+              "status": "passed",
+              "detail": "2026-08-01T03:47:10.607Z"
+            },
+            {
+              "id": "allowed-paths",
+              "status": "passed",
+              "detail": "2 path(s)"
+            },
+            {
+              "id": "claim-set",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"guided-claim-set-validation@v1\",\"status\":\"passed\",\"input\":\"orkspace/guided/user-production-safety-20260731.claim-set.json\",\"claim_count\":2,\"coverage\":{\"start_offset\":0,\"end_offset\":13777,\"contiguous\":true},\"errors\":[]}"
+            },
+            {
+              "id": "agentic-tdd-receipt",
+              "status": "passed",
+              "detail": "verification/production-safety-agentic-tdd.json#red,verification/production-safety-agentic-tdd.json#green"
+            }
+          ]
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "7cb1ed9b1e7a4ad3536b054bff7f718fc1d41af11c105289a3817ca307a73d48",
+          "receipt_checks": [
+            {
+              "id": "input-contract",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"contract-validation-receipt@v1\",\"contract\":\"terminal-slice-packet@v2\",\"status\":\"passed\",\"input_sha256\":\"38b0b8dbf97d8c11023d898d3835b8cbdc06166d07173fc5bcd33cf9e99fa0c0\",\"errors\":[]}"
+            },
+            {
+              "id": "target-repo",
+              "status": "passed",
+              "detail": "repo/agent-skills-repo"
+            },
+            {
+              "id": "expected-head",
+              "status": "passed",
+              "detail": "6249a942036ab89c1d4f607fdc4c91f7dd465263"
+            },
+            {
+              "id": "live-lease",
+              "status": "passed",
+              "detail": "2026-08-01T03:47:10.607Z"
+            },
+            {
+              "id": "allowed-paths",
+              "status": "passed",
+              "detail": "2 path(s)"
+            },
+            {
+              "id": "claim-set",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"guided-claim-set-validation@v1\",\"status\":\"passed\",\"input\":\"orkspace/guided/user-production-safety-20260731.claim-set.json\",\"claim_count\":2,\"coverage\":{\"start_offset\":0,\"end_offset\":13777,\"contiguous\":true},\"errors\":[]}"
+            },
+            {
+              "id": "agentic-tdd-receipt",
+              "status": "passed",
+              "detail": "verification/production-safety-agentic-tdd.json#red,verification/production-safety-agentic-tdd.json#green"
+            }
+          ]
+        },
+        {
+          "status": "fulfilled",
+          "exit_code": 0,
+          "receipt_status": "passed",
+          "process_reaped": true,
+          "timer_cleared": true,
+          "timed_out": false,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "receipt_sha256": "7cb1ed9b1e7a4ad3536b054bff7f718fc1d41af11c105289a3817ca307a73d48",
+          "receipt_checks": [
+            {
+              "id": "input-contract",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"contract-validation-receipt@v1\",\"contract\":\"terminal-slice-packet@v2\",\"status\":\"passed\",\"input_sha256\":\"38b0b8dbf97d8c11023d898d3835b8cbdc06166d07173fc5bcd33cf9e99fa0c0\",\"errors\":[]}"
+            },
+            {
+              "id": "target-repo",
+              "status": "passed",
+              "detail": "repo/agent-skills-repo"
+            },
+            {
+              "id": "expected-head",
+              "status": "passed",
+              "detail": "6249a942036ab89c1d4f607fdc4c91f7dd465263"
+            },
+            {
+              "id": "live-lease",
+              "status": "passed",
+              "detail": "2026-08-01T03:47:10.607Z"
+            },
+            {
+              "id": "allowed-paths",
+              "status": "passed",
+              "detail": "2 path(s)"
+            },
+            {
+              "id": "claim-set",
+              "status": "passed",
+              "detail": "{\"schema_version\":\"guided-claim-set-validation@v1\",\"status\":\"passed\",\"input\":\"orkspace/guided/user-production-safety-20260731.claim-set.json\",\"claim_count\":2,\"coverage\":{\"start_offset\":0,\"end_offset\":13777,\"contiguous\":true},\"errors\":[]}"
+            },
+            {
+              "id": "agentic-tdd-receipt",
+              "status": "passed",
+              "detail": "verification/production-safety-agentic-tdd.json#red,verification/production-safety-agentic-tdd.json#green"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "silent-failure",
+      "status": "passed",
+      "expected": "typed failure with original parse diagnostic",
+      "entrypoint_observed": "failed",
+      "exit_code": 2,
+      "typed_failure_receipt": true,
+      "original_error_preserved": true,
+      "diagnostic": "JSON Parse error: Expected '}'"
+    },
+    {
+      "id": "resource-leak",
+      "status": "passed",
+      "expected": "twelve bounded exits with reaped subprocesses, drained streams, and cleared timers",
+      "attempts": 12,
+      "subprocesses_reaped": true,
+      "timers_cleared": true,
+      "stdout_consumed": true,
+      "stderr_consumed": true,
+      "timed_out_count": 0,
+      "timeout_cleanup_probe": {
+        "exitCode": 124,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": true,
+        "cancelled": false,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "cancellation_cleanup_probe": {
+        "exitCode": 130,
+        "stdout": "",
+        "stderr": "",
+        "timedOut": false,
+        "cancelled": true,
+        "processReaped": true,
+        "timerCleared": true,
+        "stdoutConsumed": true,
+        "stderrConsumed": true,
+        "cleanupErrors": []
+      },
+      "diagnostic": [
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        },
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "process_reaped": true,
+          "timer_cleared": true,
+          "stdout_consumed": true,
+          "stderr_consumed": true,
+          "cleanup_errors": [],
+          "parse_error": null,
+          "stderr": ""
+        }
+      ]
+    }
+  ],
+  "safety_coverage": [
+    "race-condition",
+    "silent-failure",
+    "resource-leak"
+  ],
+  "native_escape_probe_launched": true,
+  "artifact_path": "repo/agent-skills-repo/artifacts/repo-terminal-operator/347cec45-dbf6-4c60-bef2-c1cc29b27a1a/production-journey.receipt.json"
+}

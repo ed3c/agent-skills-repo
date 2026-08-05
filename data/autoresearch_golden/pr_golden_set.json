@@ -1,0 +1,93 @@
+{
+  "dataset_version": "autoresearch-golden@0.1.0",
+  "source_input": "<home>/antigravity/gemini_research/gcr/37731ad84bf5b546.md",
+  "eval_policy": "local-first; cloud judge disabled by default",
+  "cases": [
+    {
+      "id": "golden-pr-stateful-metric-loop",
+      "prompt": "Plan an autoresearch optimization for improving skill route precision with a numeric verifier, guardrail, and keep/discard iterations.",
+      "expected_route": "/autoresearch:plan",
+      "risk_level": "medium",
+      "must_include": [
+        "state_graph",
+        "S1 match",
+        "S3 generate",
+        "S4 validate",
+        "Metric",
+        "Guard",
+        "Iterations"
+      ],
+      "must_not_include": [
+        "single prompt",
+        "unbounded"
+      ],
+      "trace_tags": [
+        "stateful-workflow",
+        "deterministic-guardrail"
+      ],
+      "judge_rubric": "Pass only if match/generate/validate are separate states and the loop has a numeric verifier plus guard."
+    },
+    {
+      "id": "golden-pr-compressed-context-recovery",
+      "prompt": "The input conversation is compressed; recover semantic truth and Domain terms before generating the plan.",
+      "expected_route": "/autoresearch:plan",
+      "risk_level": "high",
+      "must_include": [
+        "low_compression_context",
+        "domain_terms",
+        "known_unknowns",
+        "human_required",
+        "conditional_edge.S3.compressed_context"
+      ],
+      "must_not_include": [
+        "assume complete context"
+      ],
+      "trace_tags": [
+        "semantic-truth",
+        "domain-term-ledger"
+      ],
+      "judge_rubric": "Pass only if compressed context and missing terms route to recovery before promotion."
+    },
+    {
+      "id": "golden-pr-native-yield-debug",
+      "prompt": "Debug an intermittent production failure with logs, reproduction, and root-cause instrumentation.",
+      "expected_route": "native-yield:diagnose",
+      "risk_level": "medium",
+      "must_include": [
+        "native-yield",
+        "diagnose",
+        "conditional_edge.S2.native_skill_better"
+      ],
+      "must_not_include": [
+        "/autoresearch:debug"
+      ],
+      "trace_tags": [
+        "native-yield",
+        "guardrail"
+      ],
+      "judge_rubric": "Pass only if debug work yields to native diagnosis rather than external autoresearch debug."
+    },
+    {
+      "id": "golden-pr-local-first-evals",
+      "prompt": "Build evals and guardrails for autoresearch-composer with Golden Dataset, pytest, LLM-as-a-Judge, CI, and local trace sampling; cloud hooks should exist but be off by default.",
+      "expected_route": "/autoresearch:evals",
+      "risk_level": "high",
+      "must_include": [
+        "Golden Dataset",
+        "pytest",
+        "LLM-as-a-Judge",
+        "local-first trace",
+        "cloud disabled by default"
+      ],
+      "must_not_include": [
+        "requires OPENAI_API_KEY by default"
+      ],
+      "trace_tags": [
+        "golden-dataset",
+        "local-first-trace",
+        "cloud-disabled"
+      ],
+      "judge_rubric": "Pass only if local deterministic evals run without secrets and cloud judge remains opt-in."
+    }
+  ]
+}

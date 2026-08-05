@@ -1,0 +1,53 @@
+{
+  "schema_version": "real-driver-ablation-verification-run@0.1.0",
+  "run_id": "gemini-interactions-real-driver-2026-07-27",
+  "status": "fail",
+  "decision": "A2_FAIL_DO_NOT_PROMOTE",
+  "model": "gpt-5.6-sol",
+  "model_source": "codex-session-turn-context",
+  "loader_probe_passed": true,
+  "cases_sha256": "31dda969947482b0d1a2ae429098e3372ec6211210b4d06aa25fc24c97c23c5e",
+  "skill_sha256": "d6ef23433ae12093360becef0143b373406e61dd368291491e80f10709043464",
+  "runs_per_case_per_arm": 3,
+  "case_count": 10,
+  "total_case_runs": 60,
+  "preregistered_delta_threshold": 0.2,
+  "raw_summary_delta": 0.1333,
+  "normalized_with_skill_success_rate": 0.5,
+  "normalized_without_skill_success_rate": 0.4,
+  "normalized_delta": 0.1,
+  "normalization": "A case pass requires regex checks to pass and agent exit_code to equal zero; four timed-out partial outputs are failures.",
+  "agent_failures": 4,
+  "metadata_complete": false,
+  "failure_reasons": [
+    "normalized delta 0.10 is below the preregistered 0.20 threshold",
+    "four agent calls timed out with exit_code 124",
+    "timed-out calls have no complete runtime model receipt, so metadata completeness is false",
+    "the measured runner used a shared repository cwd; agent side effects became visible to later samples, so sample independence is not proven"
+  ],
+  "arm_totals": {
+    "with_skill": {"passes": 15, "runs": 30, "timeouts": 2},
+    "without_skill": {"passes": 12, "runs": 30, "timeouts": 2}
+  },
+  "case_results": [
+    {"case_id": "happy-client-create", "with_skill_passes": 2, "without_skill_passes": 3, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "happy-compliance-review", "with_skill_passes": 0, "without_skill_passes": 0, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "happy-migration", "with_skill_passes": 3, "without_skill_passes": 2, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "happy-streaming", "with_skill_passes": 1, "without_skill_passes": 1, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "happy-tool-call", "with_skill_passes": 2, "without_skill_passes": 0, "with_skill_timeouts": 1, "without_skill_timeouts": 2},
+    {"case_id": "negative-angular-ui", "with_skill_passes": 2, "without_skill_passes": 0, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "negative-cloud-deploy", "with_skill_passes": 0, "without_skill_passes": 0, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "negative-general-python", "with_skill_passes": 2, "without_skill_passes": 3, "with_skill_timeouts": 1, "without_skill_timeouts": 0},
+    {"case_id": "negative-static-extract", "with_skill_passes": 3, "without_skill_passes": 3, "with_skill_timeouts": 0, "without_skill_timeouts": 0},
+    {"case_id": "negative-vue-widget", "with_skill_passes": 0, "without_skill_passes": 0, "with_skill_timeouts": 0, "without_skill_timeouts": 0}
+  ],
+  "raw_artifact_path": "repo/agent-skills-repo/artifacts/real-driver-ablation-approved",
+  "raw_summary_sha256": "bf0b314db3d5ba69125bd8121d71e6f9875da780d8d28059d1da822815fbd04e",
+  "raw_artifact_tree_sha256": "d20c06fd22cc50a39e896e0560044339e952f28afe7a609b02211d209f0256a4",
+  "notes": [
+    "The compact receipt is committed; raw outputs remain local and gitignored because they total tens of MB and contain full prompts.",
+    "The raw summary predates the exit-aware pass fix, so normalized rates in this receipt are authoritative for the failure decision.",
+    "Three TypeScript files observed during the shared-cwd run were quarantined under local gitignored artifacts/eval-side-effects-2026-07-27; the driver now uses one ephemeral cwd per invocation.",
+    "No fourth model run is permitted: the same measurement problem reached the project three-attempt limit."
+  ]
+}

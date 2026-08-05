@@ -1,0 +1,39 @@
+name: autoresearch-eval
+
+on:
+  pull_request:
+    paths:
+      - 'skills/autoresearch_composer/**'
+      - 'data/autoresearch_golden/**'
+      - 'data/autoresearch_traces/**'
+      - 'scripts/eval_autoresearch_composer.py'
+      - 'scripts/sample_autoresearch_traces.py'
+      - 'tests/test_autoresearch_eval_suite.py'
+  workflow_dispatch:
+
+jobs:
+  local-first-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest
+      - run: python scripts/eval_autoresearch_composer.py --dataset data/autoresearch_golden/pr_golden_set.json
+      - run: python scripts/sample_autoresearch_traces.py
+      - run: python -m pytest -q -m evals
+
+  cloud-judge-disabled-by-default:
+    if: ${{ vars.ENABLE_CLOUD_EVALS == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest
+      - run: python scripts/eval_autoresearch_composer.py --dataset data/autoresearch_golden/nightly_golden_set.jsonl --mode cloud
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ENABLE_LLM_JUDGE: ${{ vars.ENABLE_CLOUD_EVALS }}

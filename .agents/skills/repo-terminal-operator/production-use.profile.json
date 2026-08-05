@@ -1,0 +1,17 @@
+{
+  "schema_version": "repo-gate-profile@v1",
+  "command_timeout_ms": 60000,
+  "required_evidence_scope": "writer-entrypoint",
+  "required_safety_checks": [
+    "race-condition",
+    "silent-failure",
+    "resource-leak"
+  ],
+  "commands": [
+    [
+      "bun",
+      "run",
+      "../../skills/repo-neural-perception/scripts/writer-contained-production-profile.ts"
+    ]
+  ]
+}

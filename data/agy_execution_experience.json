@@ -1,0 +1,113 @@
+{
+  "schema_version": "agy-execution-experience@0.1.0",
+  "source_repo": "<home>/antigravity",
+  "absorbed_for": "unknown-discovery-gcr-order/agent-skills-repo",
+  "status": "portable-rules-only",
+  "model_profile": {
+    "model_inventory_command": "agy models",
+    "model_inventory_observed_at": "2026-07-22",
+    "model_inventory_observed_by": "codex",
+    "observed_model_ids": [
+      "gemini-3.6-flash-high",
+      "gemini-3.6-flash-medium",
+      "gemini-3.6-flash-low",
+      "gemini-3.5-flash-high",
+      "gemini-3.5-flash-medium",
+      "gemini-3.5-flash-low",
+      "gemini-3.1-pro-high",
+      "gemini-3.1-pro-low",
+      "claude-sonnet-4-6",
+      "claude-opus-4-6-thinking",
+      "gpt-oss-120b-medium"
+    ],
+    "selected_model_id": "gemini-3.6-flash-high",
+    "reasoning_effort": "high",
+    "thinking_mode": "extended",
+    "human_label": "Gemini 3.6 Flash high 思考延長",
+    "selection_status": "verified-model-inventory-and-file-output-canary",
+    "selection_rule": "Use an exact model id observed from `agy models`; high suffix is the physical reasoning-effort selector for this agy CLI."
+  },
+  "execution_canary": {
+    "executed_at": "2026-07-22",
+    "command_model_id": "gemini-3.6-flash-high",
+    "command_effort": "high",
+    "stdout_observed": "CANARY_DONE",
+    "artifact_path": "/private/tmp/agy-gemini36-flash-high-canary.txt",
+    "artifact_bytes_repr": "b'CANARY_OK\\n'",
+    "artifact_strip_equals": "CANARY_OK",
+    "artifact_sha256": "c0bb504d8c6cb7280ab683bb08cdba16724567270d8f614bf62992b3c9083e0f",
+    "verification_status": "passed-strip-equals"
+  },
+  "lessons": [
+    {
+      "lesson_id": "AGY-001",
+      "title": "File-output canary before trusting agy availability",
+      "source_ref": "<home>/antigravity/truth-verify/t0/agy-guard.sh:1-31",
+      "rule": "Run a file-write canary and require exact output before treating agy as available.",
+      "portable_enforcement": "semantic_arbitration_report requires this profile; actual agy run remains packet-required."
+    },
+    {
+      "lesson_id": "AGY-002",
+      "title": "Exit code and stdout are not enough for silent no-op",
+      "source_ref": "<home>/antigravity/truth-verify/t0/tv-gm-worker.sh:53-79",
+      "rule": "After an agy worker call, require rc success, non-empty expected output file, and schema-valid JSONL.",
+      "portable_enforcement": "final repo keeps semantic arbitration below promotion until terminal artifact checks exist."
+    },
+    {
+      "lesson_id": "AGY-003",
+      "title": "Run from the policy-bearing host CWD",
+      "source_ref": "<home>/antigravity/truth-verify/t0/tv-gm-worker.sh:3-9",
+      "rule": "Use sandbox file-write mode from the agy host project directory; do not use --new-project or a CWD that drops policy.",
+      "portable_enforcement": "agy is represented as external-loop pending rather than silently substituted."
+    },
+    {
+      "lesson_id": "AGY-004",
+      "title": "Mount only the writable run dir",
+      "source_ref": "<home>/antigravity/truth-verify/t0/tv-gm-worker.sh:8-16",
+      "rule": "Use absolute output paths and mount only the run dir; do not mount sealed answer fixtures.",
+      "portable_enforcement": "future agy packet must name output artifact and artifact identity, not hidden chat output."
+    },
+    {
+      "lesson_id": "AGY-005",
+      "title": "Treat external source text as untrusted data",
+      "source_ref": "<home>/antigravity/truth-verify/t0/tv-gm-worker.sh:30-43",
+      "rule": "Wrap article/source content in explicit untrusted-data delimiters and require one verdict row per claim.",
+      "portable_enforcement": "semantic-arbitration packet remains claim-level and findings-only."
+    },
+    {
+      "lesson_id": "AGY-006",
+      "title": "Track Gemini calls and seconds as a separate axis",
+      "source_ref": "<home>/antigravity/truth-verify/t0/tv-gm-worker.sh:81-84",
+      "rule": "Record gemini_call and author_secs as a side axis; do not fold it into unrelated token metrics.",
+      "portable_enforcement": "profile records agy evidence as an explicit pending side axis."
+    },
+    {
+      "lesson_id": "AGY-007",
+      "title": "Agy is Gemini findings, not judge or admit",
+      "source_ref": "<home>/antigravity/.agents/skills/truth-verify-loop/SKILL.md:53-56",
+      "rule": "Never use agy as the final judge; agy produces cross-family findings only.",
+      "portable_enforcement": "semantic_arbitration_claims.json keeps agy status packet-required-not-executed."
+    },
+    {
+      "lesson_id": "AGY-008",
+      "title": "Cross-family absence is dispatch-fail for strict truth loops",
+      "source_ref": "<home>/antigravity/.agents/skills/loop-harness-standard/modules/harness-spec.md:426-433",
+      "rule": "If a strict truth route requires cross-family evidence, fallback to same-family is a degraded finding, not a pass.",
+      "portable_enforcement": "pending agy findings block semantic promotion."
+    },
+    {
+      "lesson_id": "AGY-009",
+      "title": "Use exact agy model ids from observed inventory",
+      "source_ref": "<home>/antigravity/.agents/skills/loop-harness-standard/modules/harness-spec.md:447-450",
+      "rule": "Record `agy models` output before selecting a model, then use exact model ids observed from the inventory such as gemini-3.6-flash-high; historical display-name guidance is subordinate to the current CLI inventory.",
+      "portable_enforcement": "semantic_arbitration_report requires selected_model_id to be present in observed_model_ids and requires the high/extended thinking profile before any future agy runner is trusted."
+    },
+    {
+      "lesson_id": "AGY-010",
+      "title": "For complex generation, stdout may be a summary, not the artifact",
+      "source_ref": "<home>/antigravity/AGENTS.md:72",
+      "rule": "Parse file:// artifact links or otherwise read the real generated file; require content guards such as minimum length and topic relevance.",
+      "portable_enforcement": "semantic promotion requires terminal data artifacts, not stdout-only success."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "repo-gate-profile@v1",
+  "command_timeout_ms": 90000,
+  "commands": [
+    ["bun", "run", ".agents/skills/repo-terminal-operator/repo-code-quality.ts"]
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "commercial_license_allowlist": [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC"
+  ],
+  "default_embedding_model": {
+    "dimension": 16,
+    "embedding_model_id": "local-hash-embedding@0.1.0",
+    "model_license": "N/A-deterministic-local-hash-no-model-weights"
+  },
+  "event_schema_version": "wiki-event@0.1.0",
+  "external_graph_write_policy": "disabled-by-default",
+  "hybrid_retrieval_contract": "hybrid-retrieval-contract@0.1.0",
+  "required_event_fields": [
+    "event_id",
+    "event_type",
+    "source_path",
+    "commit_sha",
+    "content_sha256",
+    "occurred_at",
+    "payload"
+  ],
+  "required_graph_fields": [
+    "nodes",
+    "edges",
+    "chunks",
+    "retrieval"
+  ],
+  "required_provenance_fields": [
+    "code_license",
+    "model_license",
+    "data_license",
+    "commercial_use",
+    "copyleft_risk"
+  ],
+  "schema_version": "wiki-graph-schema@0.1.0"
+}

@@ -1,0 +1,137 @@
+{
+  "schema_version": "semantic-arbitration-claims@0.1.0",
+  "plan_name": "unknown-discovery-gcr-order",
+  "repo_name": "agent-skills-repo",
+  "claims": [
+    {
+      "claim_id": "MULTI-INPUT-001",
+      "claim_text": "Multiple inputs may update the same plan package only through the input registry plus paired source-ingest packets.",
+      "grounding": "technical_equivalent",
+      "promotion_status": "not-promoted-findings-only",
+      "terminal_code_artifacts": [
+        "scripts/check_plan_package_compat.py",
+        "scripts/git_gate.py",
+        "scripts/semantic_arbitration_report.py"
+      ],
+      "terminal_data_artifacts": [
+        "plan-package.compat.yaml",
+        ".plan-package.lock.yaml",
+        "data/semantic_arbitration_claims.json",
+        "data/agy_execution_experience.json"
+      ],
+      "skill_cross_checks": [
+        {
+          "skill": "judge-loop-chooser",
+          "role": "classifies the claim as technical_equivalent only when the registry, packet state, and validator are concrete artifacts"
+        },
+        {
+          "skill": "external-verify",
+          "role": "not applicable to local registry mechanics; reserved for external official claims"
+        },
+        {
+          "skill": "repo-agent-native",
+          "role": "requires source refs and terminal code/data artifacts before equivalence is claimed"
+        }
+      ],
+      "adversarial_reviews": [
+        {
+          "actor": "codex",
+          "status": "executed-findings-only",
+          "finding": "later input may downgrade an overclaim but cannot silently promote candidate truth"
+        },
+        {
+          "actor": "agy",
+          "status": "packet-required-not-executed",
+          "finding": "must be run before any semantic promotion beyond candidate"
+        }
+      ]
+    },
+    {
+      "claim_id": "P11-QUALITY-001",
+      "claim_text": "The 117/117 P11 result proves local zero-LLM regex canary coverage, not real synthetic case quality.",
+      "grounding": "candidate",
+      "promotion_status": "not-promoted-findings-only",
+      "terminal_code_artifacts": [
+        "scripts/synthetic_case_generator.py",
+        "scripts/synthetic_case_quality_report.py",
+        "scripts/interactions_patch_assert_runner.py",
+        "scripts/semantic_arbitration_report.py"
+      ],
+      "terminal_data_artifacts": [
+        "skills/gemini_interactions/cases.json",
+        "plan-package.compat.yaml",
+        "data/semantic_arbitration_claims.json",
+        "data/agy_execution_experience.json"
+      ],
+      "skill_cross_checks": [
+        {
+          "skill": "judge-loop-chooser",
+          "role": "downgrades 117/117 from production truth to candidate because case diversity and negative cases are insufficient"
+        },
+        {
+          "skill": "external-verify",
+          "role": "must verify post-cutoff Gemini API naming against official primary sources before production SDK truth"
+        },
+        {
+          "skill": "repo-agent-native",
+          "role": "uses terminal script output and data files rather than script names to infer implementation quality"
+        }
+      ],
+      "adversarial_reviews": [
+        {
+          "actor": "codex",
+          "status": "executed-findings-only",
+          "finding": "case labels rotate over 10 scenarios and two expected-check sets; quality_status remains insufficient"
+        },
+        {
+          "actor": "agy",
+          "status": "packet-required-not-executed",
+          "finding": "cross-family attack vectors are required before promotion"
+        }
+      ]
+    },
+    {
+      "claim_id": "OFFICIAL-API-001",
+      "claim_text": "Gemini Interactions API implementation details remain external claims until official primary-source verification is attached.",
+      "grounding": "human_required",
+      "promotion_status": "not-promoted-findings-only",
+      "terminal_code_artifacts": [
+        "scripts/llm_judge.py",
+        "scripts/interactions_patch_assert_runner.py",
+        "scripts/semantic_arbitration_report.py"
+      ],
+      "terminal_data_artifacts": [
+        "skills/gemini_interactions/references/deploy_guide.md",
+        "plan-package.compat.yaml",
+        "data/semantic_arbitration_claims.json",
+        "data/agy_execution_experience.json"
+      ],
+      "skill_cross_checks": [
+        {
+          "skill": "judge-loop-chooser",
+          "role": "keeps official API truth out of technical_equivalent unless a primary-source artifact is present"
+        },
+        {
+          "skill": "external-verify",
+          "role": "owns official primary-source claim verification"
+        },
+        {
+          "skill": "repo-agent-native",
+          "role": "can prove local files exist and gates run, but cannot prove external SDK truth"
+        }
+      ],
+      "adversarial_reviews": [
+        {
+          "actor": "codex",
+          "status": "executed-findings-only",
+          "finding": "local regex compatibility must not be confused with official SDK validity"
+        },
+        {
+          "actor": "agy",
+          "status": "packet-required-not-executed",
+          "finding": "must independently challenge official-source mapping before admit"
+        }
+      ]
+    }
+  ]
+}

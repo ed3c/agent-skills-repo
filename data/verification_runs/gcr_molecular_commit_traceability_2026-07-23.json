@@ -1,0 +1,24 @@
+{
+  "schema_version": "molecular-commit-verification-run@0.1.0",
+  "run_id": "gcr-molecular-commit-traceability-2026-07-23",
+  "status": "pass",
+  "commit_count": 7,
+  "passed_commit_count": 7,
+  "failed_commit_count": 0,
+  "validator_abs": "<target-repo>/scripts/validate_molecular_commit_lineage.py",
+  "ledger_abs": "<target-repo>/data/commit_lineage/gcr_molecular_commits.json",
+  "proof_commands": [
+    "python3 repo/agent-skills-repo/scripts/validate_molecular_commit_lineage.py --selftest",
+    "python3 repo/agent-skills-repo/scripts/validate_molecular_commit_lineage.py --require-current-history",
+    "git show --name-only --format= <commit_sha>"
+  ],
+  "commit_shas": [
+    "3b0fda780b1a4294bfc0e458da4aba8ac31189f0",
+    "bdafec3919e80a218ec42524a1840adfffe563d7",
+    "be16ec5584c2ef53436d3dada581c6b5db188e45",
+    "638de1a97354ca953886072247f632194861e71a",
+    "21a5c5d6684cbb6eaebf197b2a9aaccef6023b65",
+    "0d6fc37da5229546ffefa79a3baf63e8efe0873c",
+    "65aaaccb24c04a02f53158b8e8b2850c3d8392b7"
+  ]
+}

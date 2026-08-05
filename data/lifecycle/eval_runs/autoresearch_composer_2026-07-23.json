@@ -1,0 +1,46 @@
+{
+  "cloud_judge_enabled": false,
+  "commands": [
+    {
+      "case_count": 4,
+      "command": "python3 scripts/eval_autoresearch_composer.py --dataset data/autoresearch_golden/pr_golden_set.json",
+      "mode": "local",
+      "passed_cases": 4
+    },
+    {
+      "case_count": 3,
+      "command": "python3 scripts/eval_autoresearch_composer.py --dataset data/autoresearch_golden/nightly_golden_set.jsonl",
+      "mode": "local",
+      "passed_cases": 3
+    },
+    {
+      "cloud_judge_enabled": false,
+      "command": "python3 scripts/sample_autoresearch_traces.py",
+      "observed_state_count": 5,
+      "sample_count": 3
+    },
+    {
+      "case_count": 12,
+      "command": "python3 scripts/ablation_engine.py --cases skills/autoresearch_composer/cases.json --json",
+      "delta": 1.0,
+      "negative_case_count": 6,
+      "positive_case_count": 6,
+      "verdict": "PASS"
+    }
+  ],
+  "environment": "local-first",
+  "result_summary": {
+    "ablation_delta": 1.0,
+    "failure_trace_samples": 2,
+    "nightly_cases": 3,
+    "nightly_passed": 3,
+    "pr_cases": 4,
+    "pr_passed": 4,
+    "status": "PASS",
+    "trace_samples": 3
+  },
+  "run_date": "2026-07-23",
+  "run_id": "autoresearch-composer-2026-07-23-local",
+  "schema_version": "skill-lifecycle-eval-run@0.1.0",
+  "skill_id": "autoresearch_composer"
+}

@@ -1,0 +1,17 @@
+[project]
+name = "agent-skills-repo"
+version = "0.1.0"
+description = "GCR skill asset governance seed with deterministic local defenses."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "evals: local-first Golden Dataset and deterministic judge tests",
+  "llm_judge: LLM-as-a-Judge integration tests; cloud path disabled by default",
+  "trace: local trace sampling and guardrail tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

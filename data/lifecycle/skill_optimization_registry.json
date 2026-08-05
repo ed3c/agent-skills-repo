@@ -1,0 +1,41 @@
+{
+  "registry_role": "multi-skill optimization evidence index",
+  "repo_name": "agent-skills-repo",
+  "required_per_skill_artifacts": [
+    "source_skill_path",
+    "repo_skill_path",
+    "openwiki_page",
+    "golden_dataset_versions",
+    "eval_run_ids",
+    "trace_datasets",
+    "promotion_record_ids",
+    "current_status",
+    "cloud_policy"
+  ],
+  "schema_version": "skill-lifecycle-registry@0.1.0",
+  "skills": [
+    {
+      "cloud_policy": "implemented-disabled-by-default",
+      "current_status": "production-seed-candidate",
+      "eval_run_ids": [
+        "autoresearch-composer-2026-07-23-local"
+      ],
+      "golden_dataset_versions": [
+        "autoresearch-pr-golden@2026-07-23",
+        "autoresearch-nightly-golden@2026-07-23"
+      ],
+      "openwiki_page": "openwiki/autoresearch-composer-lifecycle.md",
+      "promotion_record_ids": [
+        "promotion-autoresearch-composer-2026-07-23"
+      ],
+      "repo_skill_path": "skills/autoresearch_composer/skills.md",
+      "skill_id": "autoresearch_composer",
+      "source_skill_path": "<host-repo>/.claude/skills/autoresearch-composer",
+      "structured_openwiki_page": "openwiki/structured-lifecycle-data.md",
+      "trace_datasets": [
+        "data/autoresearch_traces/local_trace_samples.jsonl",
+        "data/autoresearch_traces/failure_trace_samples.jsonl"
+      ]
+    }
+  ]
+}

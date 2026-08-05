@@ -1,0 +1,45 @@
+{
+  "records": [
+    {
+      "dataset_versions": [
+        "autoresearch-pr-golden@2026-07-23",
+        "autoresearch-nightly-golden@2026-07-23"
+      ],
+      "eval_run_id": "autoresearch-composer-2026-07-23-local",
+      "human_admit": "required_before_promotion",
+      "human_admit_binding": {
+        "binding_status": "prepared_unsigned",
+        "dataset_versions": [
+          "autoresearch-pr-golden@2026-07-23",
+          "autoresearch-nightly-golden@2026-07-23"
+        ],
+        "lineage_edge_id": "EDGE-066",
+        "lineage_path": "prototype/unknown-discovery-gcr-order/agent-skills-repo/small-loop/lineage/intent-to-artifact.yaml",
+        "molecular_commit": "0006-regression-ci-seed.md",
+        "plan_package_input_ids": [
+          "gcr-047d548-conversation",
+          "real-synthetic-case-generation-research",
+          "gcr-37731ad-eval-guardrails-lifecycle",
+          "gcr-874b5c-event-sourcing-graphrag"
+        ],
+        "route": "ROUTES.md#plan-package-materialization",
+        "routes_edge_id": "plan-package-materialization"
+      },
+      "lineage_edge_id": "EDGE-066",
+      "lineage_path": "prototype/unknown-discovery-gcr-order/agent-skills-repo/small-loop/lineage/intent-to-artifact.yaml",
+      "molecular_commit": "0006-regression-ci-seed.md",
+      "plan_package_input_ids": [
+        "gcr-047d548-conversation",
+        "real-synthetic-case-generation-research",
+        "gcr-37731ad-eval-guardrails-lifecycle",
+        "gcr-874b5c-event-sourcing-graphrag"
+      ],
+      "promotion_status": "candidate_until_human_admit",
+      "record_id": "promotion-autoresearch-composer-2026-07-23",
+      "route": "ROUTES.md#plan-package-materialization",
+      "routes_edge_id": "plan-package-materialization",
+      "skill_id": "autoresearch_composer"
+    }
+  ],
+  "schema_version": "skill-lifecycle-promotion-records@0.1.0"
+}

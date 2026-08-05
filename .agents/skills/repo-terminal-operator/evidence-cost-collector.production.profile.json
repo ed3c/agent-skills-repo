@@ -1,0 +1,23 @@
+{
+  "schema_version": "repo-gate-profile@v1",
+  "mode": "production-only",
+  "activation_env": "REPO_EVIDENCE_COLLECTOR_PRODUCTION=1",
+  "command_timeout_ms": 15000,
+  "required_evidence_scope": "evidence-cost-collector/axis-scoped",
+  "required_safety_checks": [
+    "race-condition",
+    "silent-failure",
+    "resource-leak",
+    "timeout",
+    "cancellation",
+    "nested-receipt-tamper"
+  ],
+  "commands": [
+    [
+      "bun",
+      "test",
+      "tests/skills/repo-evidence-cost-collector.production.test.ts",
+      "tests/skills/repo-evidence-cost-measured-owned-command.production.test.ts"
+    ]
+  ]
+}

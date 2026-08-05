@@ -1,0 +1,43 @@
+{
+  "datasets": [
+    {
+      "case_count": 4,
+      "dataset_version": "autoresearch-pr-golden@2026-07-23",
+      "format": "json",
+      "path": "data/autoresearch_golden/pr_golden_set.json",
+      "promotion_use": "pull-request gate",
+      "required_fields": [
+        "id",
+        "prompt",
+        "expected_route",
+        "must_include",
+        "must_not_include",
+        "judge_rubric",
+        "trace_tags",
+        "risk_level"
+      ],
+      "rollback_rule": "revert dataset version if local eval pass rate drops below 1.0",
+      "skill_id": "autoresearch_composer"
+    },
+    {
+      "case_count": 3,
+      "dataset_version": "autoresearch-nightly-golden@2026-07-23",
+      "format": "jsonl",
+      "path": "data/autoresearch_golden/nightly_golden_set.jsonl",
+      "promotion_use": "nightly local holdout",
+      "required_fields": [
+        "id",
+        "prompt",
+        "expected_route",
+        "must_include",
+        "must_not_include",
+        "judge_rubric",
+        "trace_tags",
+        "risk_level"
+      ],
+      "rollback_rule": "open human-required promotion block if nightly pass rate drops below 1.0",
+      "skill_id": "autoresearch_composer"
+    }
+  ],
+  "schema_version": "golden-dataset-versions@0.1.0"
+}

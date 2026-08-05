@@ -1,0 +1,104 @@
+---
+type: Reference
+title: Production Bottlenecks
+description: The known limits of this repository's evidence — what the green gates do not prove, where the runtime is pinned to one machine, and the documentation debt that is tracked rather than hidden.
+tags: [limits, debt]
+node_kind: RepoDoc
+ingest_lane: concept
+repo: local/agent-skills-repo
+covers: [evidence-limits, runtime-portability, documentation-debt]
+libraries: []
+generated_by: claude-code+opus (skill-bettor openwiki port)
+generated_at: null
+---
+
+# Production Bottlenecks
+
+Every gate in this repository can be green while the claims it is supposed to support remain weak. This
+page names each gap so a reader does not mistake a passing run for a stronger claim than it makes.
+`PROJECT-SSOT.md` states the general form: *"External claims remain candidate until verified or
+human-admitted."*
+
+## Evidence is local-zero-LLM-regex-canary, not behavior
+
+The headline telemetry — `total_cases_evaluated=117 passed_cases=117 zero_llm_api_calls=0` from
+`scripts/interactions_patch_assert_runner.py` — is a **local-zero-LLM-regex-canary**. It proves that
+117 generated fixtures still match their expected patterns with zero API calls. It does not prove that
+an agent writes better code with the skill loaded.
+
+`plan-package.compat.yaml` records the same limit twice, deliberately:
+`p11_current_scope: local-zero-llm-regex-canary` and `synthetic_case_quality_status: insufficient`.
+`scripts/synthetic_case_quality_report.py` measures why — 117 cases across 10 unique scenarios, 2 unique
+expected-check sets, 0 negative cases, and a maximum template similarity ratio of `0.9969`. A corpus
+that near-identical measures template fidelity, not capability.
+
+The only real-agent measurement this repository holds is a failure:
+`data/verification_runs/gemini_interactions_real_driver_2026-07-27.json`, `A2_FAIL_DO_NOT_PROMOTE`,
+which is why `skills/gemini_interactions/status.json` is `quarantined`. See
+[gemini_interactions](../skill-assets/gemini-interactions.md).
+
+## root-local-runtime: the toolchain is pinned to one machine
+
+Several contracts are written as absolute paths on a single workstation rather than as portable
+references. This is a **root-local-runtime** dependency:
+
+- `scripts/validate_commit_message.py` requires `Plan-Package:`, `Small-Loop:` and `Final-Repo:` to
+  equal paths derived from `workspace_root()`, whose final fallback is a literal
+  `<host-repo>`.
+- `data/prompt_trace/prompt_trace_dataset.json` and `data/commit_lineage/gcr_molecular_commits.json`
+  carry absolute `*_abs` paths outside this directory.
+- `scripts/check_autoresearch_lifecycle.py` reaches two levels above the repository for
+  `.claude/skills/autoresearch-composer/`, so the gate's cross-check silently reduces in scope when
+  that tree is absent.
+- This directory is not its own Git repository. `scripts/validate_molecular_commit_lineage.py
+  --require-current-history` therefore audits whichever enclosing repository contains it, and fails in a
+  detached copy with `--audit-protected-history requires --repo-root or a discoverable Git root`.
+
+Consequence: a clean-room clone cannot reproduce the commit-governance and prompt-trace claims without
+being handed those roots explicitly.
+
+## The vendored operator cannot run here
+
+`.agents/skills/repo-terminal-operator/` is ~9.7k lines of Bun TypeScript with no `package.json`, no
+`tsconfig.json`, and no local test suite. It references `runtime/`, `skills/repo-neural-perception/`,
+adapter configuration and Bun test suites that do not exist in this checkout. It is vendored source, not
+runnable evidence. See [Terminal operator overview](../terminal-operator/overview.md).
+
+## Gates that do less than their name suggests
+
+- `scripts/validate_goal_constraints.py` and `scripts/validate_commit_message.py` run **argument-less**
+  inside `scripts/git_gate.py`, which exercises only their selftest path. A green git_gate does not mean
+  a real commit message or skill file was validated.
+- `scripts/git_gate.py::GATES` has 23 entries and does not include
+  `scripts/check_plan_package_compat.py`, `scripts/check_prompt_trace_assets.py`,
+  `scripts/sync_wiki_to_graph.py`, or `scripts/real_driver_ablation.py`.
+- `.github/workflows/weekly_audit.yml` runs only the deterministic `scripts/ablation_engine.py`, never
+  the real-driver ablation.
+- `skills/*/status.json` is not read by any gate. Quarantine is a recorded decision, not an enforced
+  control.
+
+Full table in [Entrypoint matrix](../operations/entrypoint-matrix.md).
+
+## Adversarial review is pending, not absent-therefore-fine
+
+`scripts/semantic_arbitration_report.py` reports `executed_adversarial_reviews=3` and
+`pending_adversarial_reviews=3` with `semantic_arbitration_status=candidate_until_human_admit`. The
+repository's own rule is that an actor that did not run is surfaced as a gate rather than inferred as
+success. See [Semantic arbitration](../validation/semantic-arbitration.md).
+
+## documentation debt
+
+This wiki was regenerated by the **skill-bettor repo-wiki control plane** — the host-native port of the
+OpenWiki official procedure — replacing a previous hand-maintained set. Two items of documentation debt
+are outstanding:
+
+1. **`scripts/check_openwiki.py:73` carries a stale expected value.** It requires
+   `code-call-lifecycle.md` to contain `protected_history=157 compensated=157`, while the authoritative
+   evidence reports 235. That page quotes the stale expectation explicitly and states the true counts;
+   the one-value correction to the gate has not been made because a documentation run does not modify
+   source. See [Code call lifecycle](code-call-lifecycle.md).
+2. **Depth is uneven.** `scripts/real_driver_ablation.py` (426 lines),
+   `scripts/validate_molecular_commit_lineage.py` (585 lines) and the TypeScript module bodies were read
+   at CLI, structure and exported-surface level rather than in full. Pages derived from them state
+   contracts and invariants, not line-level behavior. The full list is in the Backlog of
+   [Quickstart](../quickstart.md).
