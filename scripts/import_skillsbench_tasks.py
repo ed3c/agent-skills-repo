@@ -27,6 +27,7 @@ from arena_adapters.skillsbench.common import read_json_object  # noqa: E402
 DEFAULT_POLICY = ROOT / "data/skillsbench/import-policy.json"
 DEFAULT_BUNDLE_SCHEMA = ROOT / "contracts/skillsbench-task-bundle.schema.json"
 DEFAULT_INDEX_SCHEMA = ROOT / "contracts/skillsbench-task-index.schema.json"
+DEFAULT_EXECUTION_SCHEMA = ROOT / "contracts/skillsbench-execution-evidence.schema.json"
 DEFAULT_PARITY_SCHEMA = ROOT / "contracts/skillsbench-parity-report.schema.json"
 
 
@@ -112,6 +113,14 @@ def command_bind_execution(args: argparse.Namespace) -> int:
     report = read_json_object(args.parity_report)
     upstream = read_json_object(args.upstream_evidence)
     normalized = read_json_object(args.normalized_evidence)
+    errors = [
+        *_schema_errors(upstream, DEFAULT_EXECUTION_SCHEMA, str(args.upstream_evidence)),
+        *_schema_errors(
+            normalized, DEFAULT_EXECUTION_SCHEMA, str(args.normalized_evidence)
+        ),
+    ]
+    if errors:
+        raise SkillsBenchAdapterError("; ".join(errors))
     result = bind_execution_parity(report, upstream, normalized)
     errors = _schema_errors(result, DEFAULT_PARITY_SCHEMA, str(args.output))
     if errors:
