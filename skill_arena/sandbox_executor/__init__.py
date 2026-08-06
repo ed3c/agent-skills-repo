@@ -9,6 +9,12 @@ from skill_arena.sandbox_executor.evidence_pair import (
     verify_evidence_pair,
     write_pair_index,
 )
+from skill_arena.sandbox_executor.key_audit import (
+    AUDIT_SCHEMA,
+    KeyAuditError,
+    audit_development_private_key,
+    write_key_audit,
+)
 from skill_arena.sandbox_executor.model import (
     ATTESTATION_SCHEMA,
     BUNDLE_SCHEMA,
@@ -42,6 +48,7 @@ from skill_arena.sandbox_executor.signing import (
 
 __all__ = [
     "ATTESTATION_SCHEMA",
+    "AUDIT_SCHEMA",
     "BUNDLE_SCHEMA",
     "CASE_SCHEMA",
     "PAIR_SCHEMA",
@@ -54,6 +61,7 @@ __all__ = [
     "EvidencePairError",
     "ExecutionRequest",
     "ExitCode",
+    "KeyAuditError",
     "OpenShell059Driver",
     "ResourceLimits",
     "SandboxCase",
@@ -61,6 +69,7 @@ __all__ = [
     "SandboxExecutorError",
     "SandboxProfile",
     "SubprocessCommandRunner",
+    "audit_development_private_key",
     "audit_private_key_absent",
     "command_digest",
     "execute_case_to_bundle",
@@ -72,5 +81,6 @@ __all__ = [
     "task_evidence",
     "task_evidence_digest",
     "verify_evidence_pair",
+    "write_key_audit",
     "write_pair_index",
 ]
