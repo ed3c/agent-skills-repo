@@ -9,7 +9,7 @@ on:
       - 'data/skillsbench/execution-probe-policy.json'
       - 'scripts/import_skillsbench_tasks.py'
       - 'scripts/run_skillsbench_execution_parity.sh'
-      - 'tests/test_skillsbench_execution.py'
+      - 'tests/test_skillsbench_execution*.py'
       - '.github/workflows/skillsbench-execution-parity.yml'
   workflow_dispatch:
 
@@ -46,7 +46,7 @@ jobs:
           "$RUNNER_TEMP/benchflow-venv/bin/python" -m pip freeze --all | LC_ALL=C sort \
             > "$RUNNER_TEMP/benchflow-environment.txt"
       - name: Run focused execution evidence controls
-        run: python -m pytest -q tests/test_skillsbench_execution.py
+        run: python -m pytest -q tests/test_skillsbench_execution.py tests/test_skillsbench_execution_benchflow_shape.py
       - name: Fetch exact sparse SkillsBench snapshot
         env:
           SKILLSBENCH_SHA: 9a1f4dd5f7659f75707435da3ce854b6e48321d1
