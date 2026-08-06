@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/landing-evidence.schema.json",
+  "title": "Repository landing evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repository", "authority", "work_items"],
+  "properties": {
+    "schema_version": {"const": "landing-evidence@1"},
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_branch", "completion_rule"],
+      "properties": {
+        "default_branch": {"type": "string", "minLength": 1},
+        "completion_rule": {"const": "reachable-commit-plus-digested-paths-and-tests"}
+      }
+    },
+    "work_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/work_item"}
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "repository_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "test_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "commands", "result_summary", "independently_verified", "digest"],
+      "properties": {
+        "source": {
+          "enum": ["pull_request", "workflow", "local_reproduction", "issue_comment"]
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "result_summary": {"type": "string", "minLength": 1},
+        "independently_verified": {"type": "boolean"},
+        "digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "landing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit_sha",
+        "pull_request",
+        "changed_paths",
+        "changed_paths_digest",
+        "test_evidence"
+      ],
+      "properties": {
+        "commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "pull_request": {"type": "integer", "minimum": 1},
+        "changed_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repository_path"}
+        },
+        "changed_paths_digest": {"$ref": "#/$defs/sha256"},
+        "test_evidence": {"$ref": "#/$defs/test_evidence"}
+      }
+    },
+    "work_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issue_number", "title", "status", "evidence_level", "notes"],
+      "properties": {
+        "issue_number": {"type": "integer", "minimum": 1},
+        "title": {"type": "string", "minLength": 1},
+        "status": {
+          "enum": ["pending", "blocked", "in_review", "completed", "retracted"]
+        },
+        "evidence_level": {
+          "enum": ["missing", "local_only", "pull_request", "reachable_on_main", "independently_verified"]
+        },
+        "notes": {"type": "string"},
+        "landing": {"$ref": "#/$defs/landing"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "completed"}}},
+          "then": {
+            "required": ["landing"],
+            "properties": {
+              "evidence_level": {
+                "enum": ["reachable_on_main", "independently_verified"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {"enum": ["pending", "blocked", "retracted"]}
+            }
+          },
+          "then": {"not": {"required": ["landing"]}}
+        }
+      ]
+    }
+  }
+}
