@@ -17,17 +17,22 @@ anchor oracle it documents.
 agent-skills-repo/
 ├── anchor_oracle/            # deterministic anchoring oracle (slice 1)
 ├── scripts/
-│   └── anchor_oracle.py      # thin CLI over the oracle
+│   ├── anchor_oracle.py      # thin CLI over the oracle
+│   └── check_landing_evidence.py
 ├── skill_arena/
 │   ├── core.py               # admission, hard gates, receipts (dependency)
-│   └── skill_assets.py       # artifact digests + corpus guards (slice 2)
-├── contracts/                # receipt JSON schemas loaded by skill_arena
+│   ├── skill_assets.py       # artifact digests + corpus guards (slice 2)
+│   └── landing_evidence.py   # completion-evidence validator
+├── contracts/                # receipt and governance JSON schemas
+├── data/project/
+│   └── landing-evidence.json # repository-local completion authority
 ├── skills/repo_wiki_verified/
 │   ├── skills.md             # the discipline (WHY/HOW/WHEN/WHEN NOT)
 │   ├── manifest.json         # recomputable digests, pending-qualification
 │   └── corpus.json           # exportable PUBLIC cases only
 └── tests/
     ├── test_anchor_oracle.py
+    ├── test_landing_evidence.py
     ├── test_repo_wiki_verified_corpus.py
     └── fixtures/             # public fixtures; blind pool is NOT published
 ```
@@ -60,12 +65,22 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
   (src: skills/repo_wiki_verified/corpus.json `"cases_file": "tests/fixtures/blind_seed/blind_cases.json",`).
 - A mechanical guard fails closed if blind seed content ever reaches the
   exportable corpus (src: skill_arena/skill_assets.py `def assert_corpus_exportable(`).
+- Completion requires a reachable commit plus digested paths and tests
+  (src: data/project/landing-evidence.json `"completion_rule": "reachable-commit-plus-digested-paths-and-tests"`).
+- The sandbox executor remains pending in the repository authority
+  (src: data/project/landing-evidence.json `"title": "Sandbox executor walking skeleton",`).
+  Its evidence level is missing (src: data/project/landing-evidence.json `"evidence_level": "missing",`).
+- An unreachable commit can never satisfy a completed item
+  (src: skill_arena/landing_evidence.py `completed commit is not reachable from`).
 
 ## Tracking contract
 
+- `data/project/landing-evidence.json` is the completion authority. Issue state,
+  comments, checkboxes, and future GitHub Project fields are projections.
 - **This page** tracks product-side structure and dataflow; update it in the
   same PR as any change to the boundary between executed and pending stages.
-- The factory-side execution account (which plan steps ran, with receipts)
-  travels in commit trailers of the landing commits, not in this repository.
-- The pending stages above are tracked as issues #3, #5, #6 (executor,
-  calibration, qualification) and #8 (oracle hardening).
+- A `completed` item requires a full commit reachable from `main`, exact
+  changed paths, and digested test evidence; the validator checks all three.
+- The sandbox executor remains tracked by open issue #3. Calibration (#5) and
+  qualification (#6) cannot claim executor-backed evidence until that landing
+  exists and passes the repository-local authority gate.
