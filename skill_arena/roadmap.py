@@ -2,8 +2,9 @@
 
 JSON Schema validates the shape and the evidence required for completed items.
 This module adds graph invariants that JSON Schema cannot express: issue IDs are
-unique, dependencies exist, dependency cycles are rejected, and an item's
-coordination status agrees with the completion state of its dependencies.
+unique, dependencies exist, dependency cycles are rejected, coordination state
+matches dependency state, and every completed roadmap row is an exact projection
+of repository-local landing evidence.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ _ACTIVE_STATES = frozenset({"ready", "in_progress", "in_review", "human_gate", "
 
 
 class RoadmapReadError(ValueError):
-    """The roadmap or schema could not be read as a JSON object."""
+    """The roadmap, schema, or delivery authority could not be read."""
 
 
 def load_json_object(path: Path | str) -> dict[str, Any]:
@@ -68,6 +69,30 @@ def _dependency_cycles(dependencies: Mapping[int, tuple[int, ...]]) -> list[str]
     return errors
 
 
+def _issue_rows(
+    raw_rows: object,
+    *,
+    id_field: str,
+    label: str,
+) -> tuple[dict[int, Mapping[str, Any]], list[str]]:
+    if not isinstance(raw_rows, list):
+        return {}, [f"{label}: rows must be an array"]
+
+    rows: dict[int, Mapping[str, Any]] = {}
+    errors: list[str] = []
+    for index, raw_row in enumerate(raw_rows):
+        if not isinstance(raw_row, Mapping):
+            continue
+        issue = raw_row.get(id_field)
+        if not isinstance(issue, int) or isinstance(issue, bool):
+            continue
+        if issue in rows:
+            errors.append(f"{label}[{index}]: duplicate issue #{issue}")
+            continue
+        rows[issue] = raw_row
+    return rows, errors
+
+
 def validate_roadmap(
     document: Mapping[str, Any],
     schema: Mapping[str, Any],
@@ -84,23 +109,12 @@ def validate_roadmap(
         )
     ]
 
-    raw_items = document.get("items")
-    if not isinstance(raw_items, list):
+    items, row_errors = _issue_rows(
+        document.get("items"), id_field="issue", label="items"
+    )
+    errors.extend(row_errors)
+    if not items:
         return sorted(set(errors))
-
-    items: dict[int, Mapping[str, Any]] = {}
-    duplicate_issues: set[int] = set()
-    for index, raw_item in enumerate(raw_items):
-        if not isinstance(raw_item, Mapping):
-            continue
-        issue = raw_item.get("issue")
-        if not isinstance(issue, int) or isinstance(issue, bool):
-            continue
-        if issue in items:
-            duplicate_issues.add(issue)
-            errors.append(f"items[{index}]: duplicate issue #{issue}")
-            continue
-        items[issue] = raw_item
 
     dependencies: dict[int, tuple[int, ...]] = {}
     for issue, item in sorted(items.items()):
@@ -120,7 +134,7 @@ def validate_roadmap(
             elif dependency not in items:
                 errors.append(f"issue #{issue}: unknown dependency #{dependency}")
 
-    if not duplicate_issues:
+    if not row_errors:
         errors.extend(_dependency_cycles(dependencies))
 
     statuses = {
@@ -142,7 +156,87 @@ def validate_roadmap(
         elif status in _ACTIVE_STATES and unresolved:
             blocked_by = ", ".join(f"#{dependency}" for dependency in unresolved)
             errors.append(
-                f"issue #{issue}: status {status!r} while dependencies are unresolved: {blocked_by}"
+                f"issue #{issue}: status {status!r} while dependencies are unresolved:"
+                f" {blocked_by}"
+            )
+
+    return sorted(set(errors))
+
+
+def validate_delivery_projection(
+    roadmap: Mapping[str, Any],
+    landing_authority: Mapping[str, Any],
+) -> list[str]:
+    """Require roadmap completion to exactly project landing-evidence authority."""
+    roadmap_rows, roadmap_errors = _issue_rows(
+        roadmap.get("items"), id_field="issue", label="roadmap items"
+    )
+    authority_rows, authority_errors = _issue_rows(
+        landing_authority.get("work_items"),
+        id_field="issue_number",
+        label="landing work_items",
+    )
+    errors = [*roadmap_errors, *authority_errors]
+
+    for issue, row in sorted(roadmap_rows.items()):
+        status = row.get("status")
+        authority = authority_rows.get(issue)
+        authority_completed = (
+            authority is not None and authority.get("status") == "completed"
+        )
+
+        if status != "done":
+            if authority_completed:
+                errors.append(
+                    f"issue #{issue}: landing authority is completed but roadmap"
+                    f" status is {status!r}"
+                )
+            continue
+
+        if authority is None:
+            errors.append(
+                f"issue #{issue}: roadmap is done but landing authority has no row"
+            )
+            continue
+        if not authority_completed:
+            errors.append(
+                f"issue #{issue}: roadmap is done but landing authority status is"
+                f" {authority.get('status')!r}"
+            )
+            continue
+
+        roadmap_landing = row.get("landing")
+        authority_landing = authority.get("landing")
+        if not isinstance(roadmap_landing, Mapping) or not isinstance(
+            authority_landing, Mapping
+        ):
+            errors.append(f"issue #{issue}: completed projection lacks landing data")
+            continue
+
+        authority_test = authority_landing.get("test_evidence")
+        authority_test_digest = (
+            authority_test.get("digest")
+            if isinstance(authority_test, Mapping)
+            else None
+        )
+        expected = {
+            "commit_sha": authority_landing.get("commit_sha"),
+            "paths_digest": authority_landing.get("changed_paths_digest"),
+            "test_evidence_digest": authority_test_digest,
+        }
+        for field, expected_value in expected.items():
+            actual_value = roadmap_landing.get(field)
+            if actual_value != expected_value:
+                errors.append(
+                    f"issue #{issue}: roadmap landing {field} does not match"
+                    f" authority: {actual_value!r} != {expected_value!r}"
+                )
+
+        authority_level = authority.get("evidence_level")
+        if row.get("evidence") != authority_level:
+            errors.append(
+                f"issue #{issue}: roadmap evidence does not match authority:"
+                f" {row.get('evidence')!r} != {authority_level!r}"
             )
 
     return sorted(set(errors))
@@ -151,8 +245,13 @@ def validate_roadmap(
 def validate_roadmap_files(
     roadmap_path: Path | str,
     schema_path: Path | str,
+    landing_evidence_path: Path | str | None = None,
 ) -> list[str]:
-    """Load and validate a roadmap and its JSON Schema from disk."""
+    """Load and validate roadmap shape, graph state, and delivery projection."""
     document = load_json_object(roadmap_path)
     schema = load_json_object(schema_path)
-    return validate_roadmap(document, schema)
+    errors = validate_roadmap(document, schema)
+    if landing_evidence_path is not None:
+        authority = load_json_object(landing_evidence_path)
+        errors.extend(validate_delivery_projection(document, authority))
+    return sorted(set(errors))
