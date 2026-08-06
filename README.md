@@ -12,7 +12,9 @@ What exists on reachable `main` after this change:
 - deterministic source-anchor verification under `anchor_oracle/`;
 - signed evidence, admission, hard-gate, lifecycle, and economics contracts under `skill_arena/`;
 - a repository-local landing-evidence authority that binds completion to Git history, paths, and test evidence;
+- deterministic canonical Agent Skills exports under `dist/agent-skills/`;
 - a quarantined legacy asset at `skills/gemini_interactions/`;
+- a production-seed candidate at `skills/autoresearch_composer/`, still non-routable pending human admission;
 - a native source-verified repo-wiki candidate at `skills/repo_wiki_verified/`, still marked `pending-qualification`;
 - public corpus and blind-pool leakage guards;
 - generated and hand-authored OpenWiki documentation.
@@ -20,7 +22,6 @@ What exists on reachable `main` after this change:
 What is being built next:
 
 - a real sandbox executor landing that is reachable from `main` (#3);
-- canonical Agent Skills `SKILL.md` export and upstream conformance (#13);
 - SkillsBench/BenchFlow task and execution adapters (#14–#15);
 - sealed benchmark governance, statistical eligibility, supply-chain trust, and leaderboard publication (#16–#19).
 
@@ -31,6 +32,8 @@ The comparative Arena roadmap and interim dashboard are tracked in [issue #11](h
 - Human/agent operating guide: [`openwiki/quickstart.md`](openwiki/quickstart.md)
 - Qualification pipeline: [`openwiki/qualification-pipeline.md`](openwiki/qualification-pipeline.md)
 - Arena feasibility study and architecture: [`docs/research/skill-arena-feasibility-and-roadmap.md`](docs/research/skill-arena-feasibility-and-roadmap.md)
+- Agent Skills portability contract: [`docs/agent-skills-portability.md`](docs/agent-skills-portability.md)
+- Portable skill registry: [`dist/agent-skills/registry.json`](dist/agent-skills/registry.json)
 - Machine-readable roadmap: [`data/project/skill-arena-roadmap.json`](data/project/skill-arena-roadmap.json)
 - Arena roadmap contract: [`contracts/skill-arena-roadmap.schema.json`](contracts/skill-arena-roadmap.schema.json)
 - Delivery evidence authority: [`data/project/landing-evidence.json`](data/project/landing-evidence.json)
@@ -38,7 +41,7 @@ The comparative Arena roadmap and interim dashboard are tracked in [issue #11](h
 
 ## Usage Entry
 
-Run the local governance, roadmap, and delivery-evidence checks from the repository root:
+Run the local governance, roadmap, delivery-evidence, and portability checks from the repository root:
 
 ```sh
 git config core.hooksPath .githooks
@@ -48,6 +51,7 @@ python3 scripts/validate_molecular_commit_lineage.py --require-current-history
 python3 scripts/git_gate.py
 python3 scripts/check_skill_arena_roadmap.py
 python3 scripts/check_landing_evidence.py --main-ref origin/main
+python3 scripts/export_agent_skills.py --check
 
 python3 scripts/eval_autoresearch_composer.py \
   --dataset data/autoresearch_golden/pr_golden_set.json
@@ -58,9 +62,21 @@ python3 scripts/check_plan_package_compat.py
 
 python3 -m pytest -q tests/test_skill_arena_roadmap.py
 python3 -m pytest -q tests/test_landing_evidence.py
+python3 -m pytest -q tests/test_agent_skills_export.py
 ```
 
 The roadmap checker remains separate from `scripts/git_gate.py` so the historical production-gate receipt contract is not silently changed. Delivery completion is governed by the full-history landing-evidence workflow and repository-local authority.
+
+## Portable Agent Skills exports
+
+Repository-native skill sources remain under `skills/<source_id>/skills.md`. Canonical external artifacts are generated under `dist/agent-skills/<hyphenated-name>/SKILL.md` with Agent Skills YAML frontmatter, byte-preserved behavior content, lifecycle metadata, and reproducible digests.
+
+```sh
+python3 scripts/export_agent_skills.py --write  # intentional regeneration
+python3 scripts/export_agent_skills.py --check  # CI/staleness/conformance gate
+```
+
+The upstream Apache-2.0 `skills-ref` validator is pinned by full commit SHA in `data/agent-skills/export-policy.json`. Format conformance never changes qualification state: production-seed candidates, quarantined skills, and pending-qualification skills remain non-routable until their independent lifecycle authority permits routing.
 
 ## Product boundaries
 
@@ -78,7 +94,9 @@ The Arena epic is [#11](https://github.com/ed3c/agent-skills-repo/issues/11).
 
 ## What this repository owns
 
-- skill sources and lifecycle state under `skills/`;
+- repository-native skill sources and lifecycle state under `skills/`;
+- canonical portable Agent Skills exports and registry under `dist/agent-skills/`;
+- deterministic export logic under `skill_arena/agent_skills_export.py` and `scripts/export_agent_skills.py`;
 - deterministic skill-asset and corpus guards under `skill_arena/skill_assets.py`;
 - admission, evidence, signature, gate, and qualification contracts under `skill_arena/` and `contracts/`;
 - deterministic source-anchor verification under `anchor_oracle/`;

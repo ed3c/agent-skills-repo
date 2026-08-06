@@ -1,0 +1,110 @@
+[
+  {
+    "id": "happy-client-create",
+    "prompt": "Create a Gemini Interactions request using the current Python client.",
+    "should_trigger": true,
+    "language": "python",
+    "expected_checks": [
+      "from\\s+google\\s+import\\s+genai",
+      "genai\\.Client\\(",
+      "\\.interactions\\.create\\(",
+      "FORBID:\\.start_chat\\(",
+      "FORBID:gemini\\.interactions\\.create_session\\("
+    ]
+  },
+  {
+    "id": "happy-streaming",
+    "prompt": "Audit streaming Interactions code for Gemini in TypeScript and keep the modern client path.",
+    "should_trigger": true,
+    "language": "typescript",
+    "expected_checks": [
+      "import\\s+\\{\\s*GoogleGenAI\\s*\\}\\s+from\\s+['\\\"]@google/genai['\\\"]",
+      "\\.interactions\\.create\\(",
+      "FORBID:\\.startChat\\(",
+      "FORBID:Interactions\\.createSession\\("
+    ]
+  },
+  {
+    "id": "happy-migration",
+    "prompt": "Migrate legacy Gemini API code to the Interactions-style client entry.",
+    "should_trigger": true,
+    "language": "python",
+    "expected_checks": [
+      "from\\s+google\\s+import\\s+genai",
+      "genai\\.Client\\(",
+      "\\.interactions\\.create\\(",
+      "FORBID:\\.start_chat\\(",
+      "FORBID:gemini\\.interactions\\.create_session\\("
+    ]
+  },
+  {
+    "id": "happy-tool-call",
+    "prompt": "Implement a Gemini TypeScript tool calling interaction with explicit schema checks.",
+    "should_trigger": true,
+    "language": "typescript",
+    "expected_checks": [
+      "import\\s+\\{\\s*GoogleGenAI\\s*\\}\\s+from\\s+['\\\"]@google/genai['\\\"]",
+      "\\.interactions\\.create\\(",
+      "FORBID:new\\s+GeminiChat\\(",
+      "FORBID:Interactions\\.createSession\\("
+    ]
+  },
+  {
+    "id": "happy-compliance-review",
+    "prompt": "Review a Gemini Interactions snippet for SDK naming compliance.",
+    "should_trigger": true,
+    "language": "python",
+    "expected_checks": [
+      "from\\s+google\\s+import\\s+genai",
+      "genai\\.Client\\(",
+      "\\.interactions\\.create\\(",
+      "FORBID:\\.start_chat\\(",
+      "FORBID:gemini\\.interactions\\.create_session\\("
+    ]
+  },
+  {
+    "id": "negative-angular-ui",
+    "prompt": "Build an Angular component library with route animations.",
+    "should_trigger": false,
+    "language": "typescript",
+    "expected_checks": [
+      "FORBID:Angular"
+    ]
+  },
+  {
+    "id": "negative-vue-widget",
+    "prompt": "Create a Vue dashboard widget with CSS transitions.",
+    "should_trigger": false,
+    "language": "typescript",
+    "expected_checks": [
+      "FORBID:Vue"
+    ]
+  },
+  {
+    "id": "negative-static-extract",
+    "prompt": "Extract addresses from this static CSV file.",
+    "should_trigger": false,
+    "language": "python",
+    "expected_checks": [
+      "FORBID:static extraction"
+    ]
+  },
+  {
+    "id": "negative-cloud-deploy",
+    "prompt": "Write a Terraform module for unrelated cloud deployment.",
+    "should_trigger": false,
+    "language": "python",
+    "expected_checks": [
+      "FORBID:Terraform"
+    ]
+  },
+  {
+    "id": "negative-general-python",
+    "prompt": "Refactor a generic Python sorting helper.",
+    "should_trigger": false,
+    "language": "python",
+    "expected_checks": [
+      "FORBID:generic sorting"
+    ]
+  }
+]

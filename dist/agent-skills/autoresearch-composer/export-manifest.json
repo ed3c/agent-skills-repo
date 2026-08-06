@@ -1,0 +1,67 @@
+{
+  "losses": [],
+  "portable": {
+    "artifact_digest": "sha256:2beee1bfbc4480d820b48fbcfe512c4a37cb879cdf83fe6d0df77fc44fcde47d",
+    "directory": "dist/agent-skills/autoresearch-composer",
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "7f8c819f52a65d13ff43d44ba5d9faa7da92e7c4aa480cc81b46e5d9b580db7b"
+      },
+      {
+        "path": "cases.json",
+        "sha256": "c03e690d95782d849c796fe7dd5ca34c18b784c0d3cefbc3c54f0095715b5c04"
+      },
+      {
+        "path": "references/state_graph.md",
+        "sha256": "21494bc76e0818a05aca809ad050de1c59c5684eb7f7eea7545e609d257c7f6d"
+      }
+    ],
+    "name": "autoresearch-composer"
+  },
+  "schema_version": "agent-skills-export@1",
+  "source": {
+    "artifact_digest": "sha256:7178c399a57b93dca08d63e7d71047ff92033763466a4d0c79900bb0a0d3e5be",
+    "directory": "skills/autoresearch_composer",
+    "lifecycle_source": "data/lifecycle/skill_optimization_registry.json+data/lifecycle/promotion_records.json",
+    "lifecycle_status": "production-seed-candidate",
+    "production_routable": false,
+    "skill_id": "autoresearch_composer",
+    "version": "unversioned"
+  },
+  "transformations": [
+    {
+      "detail": "autoresearch_composer -> autoresearch-composer; underscores map to hyphens",
+      "field": "directory-name",
+      "kind": "deterministic-lossless"
+    },
+    {
+      "detail": "Generated from WHY and WHEN plus license, compatibility, digest, and lifecycle metadata",
+      "field": "SKILL.md-frontmatter",
+      "kind": "additive"
+    },
+    {
+      "detail": "Body bytes after frontmatter are identical to source skills.md",
+      "field": "SKILL.md-body",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Copied without rewriting: cases.json, references/state_graph.md",
+      "field": "behavior-resources",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Conformance never promotes, qualifies, or unquarantines a skill",
+      "field": "lifecycle",
+      "kind": "metadata-only"
+    }
+  ],
+  "upstream_conformance": {
+    "commit": "217be548739f21d6008915c29aefe320ea1a90af",
+    "license": "Apache-2.0",
+    "repository": "agentskills/agentskills",
+    "required_in_ci": true,
+    "validator": "skills-ref validate",
+    "validator_subdirectory": "skills-ref"
+  }
+}

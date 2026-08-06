@@ -1,0 +1,63 @@
+{
+  "losses": [],
+  "portable": {
+    "artifact_digest": "sha256:8019007c5eb01a1a7c15adc6a2c6afbeae12ba0df3e16d0c370b58120dbb2abb",
+    "directory": "dist/agent-skills/repo-wiki-verified",
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "50f504407c50631840b979afa17a04f3e881cfcfb21cc02876f8746427ea8ffd"
+      },
+      {
+        "path": "references/procedure.md",
+        "sha256": "378140af65ac36506f16a2a7e9b0664c4ffa1d4902aca5db38bd6b44373b60cb"
+      }
+    ],
+    "name": "repo-wiki-verified"
+  },
+  "schema_version": "agent-skills-export@1",
+  "source": {
+    "artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+    "directory": "skills/repo_wiki_verified",
+    "lifecycle_source": "manifest.json",
+    "lifecycle_status": "pending-qualification",
+    "production_routable": false,
+    "skill_id": "repo_wiki_verified",
+    "version": "0.1.0"
+  },
+  "transformations": [
+    {
+      "detail": "repo_wiki_verified -> repo-wiki-verified; underscores map to hyphens",
+      "field": "directory-name",
+      "kind": "deterministic-lossless"
+    },
+    {
+      "detail": "Generated from WHY and WHEN plus license, compatibility, digest, and lifecycle metadata",
+      "field": "SKILL.md-frontmatter",
+      "kind": "additive"
+    },
+    {
+      "detail": "Body bytes after frontmatter are identical to source skills.md",
+      "field": "SKILL.md-body",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Copied without rewriting: references/procedure.md",
+      "field": "behavior-resources",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Conformance never promotes, qualifies, or unquarantines a skill",
+      "field": "lifecycle",
+      "kind": "metadata-only"
+    }
+  ],
+  "upstream_conformance": {
+    "commit": "217be548739f21d6008915c29aefe320ea1a90af",
+    "license": "Apache-2.0",
+    "repository": "agentskills/agentskills",
+    "required_in_ci": true,
+    "validator": "skills-ref validate",
+    "validator_subdirectory": "skills-ref"
+  }
+}
