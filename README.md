@@ -9,15 +9,35 @@ repository-local authority is `data/project/landing-evidence.json`. A work item 
 `completed` only when `scripts/check_landing_evidence.py` verifies a full commit SHA reachable from
 `main`, the exact changed-path digest, and the test-evidence digest.
 
-The sandbox executor is **not currently reachable from `main`**. Issue #3 remains pending until a
-reviewable implementation and its evidence are landed. Therefore calibration and qualification must
-not claim executor-backed evidence yet.
+The sandbox executor is **not currently reachable from `main`**. Its contract implementation and
+OpenShell 0.0.59 adapter are under review, but the required real gateway-backed run has not been
+executed. Issue #3 therefore remains open, and calibration or qualification must not claim
+executor-backed evidence yet.
 
 Validate the authority from a full-history checkout:
 
 ```sh
 python3 scripts/check_landing_evidence.py --main-ref origin/main
 ```
+
+## Sandbox executor contract
+
+The in-review executor separates substrate execution from receipt production. It runs one
+preregistered deterministic case in a fresh OpenShell sandbox, collects effective policy and Docker
+image evidence, verifies sandbox/container destruction, and only then signs an existing
+`sandbox-case-receipt@1` envelope.
+
+Contract validation is local and credential-free:
+
+```sh
+python -m pytest -q tests/test_sandbox_executor.py
+python -m compileall -q skill_arena scripts
+```
+
+A real run additionally requires OpenShell `0.0.59`, a reachable Docker-backed gateway, and an
+owner-only development Ed25519 key outside this repository. See
+[`docs/sandbox-executor.md`](docs/sandbox-executor.md). The status authority explicitly remains
+`real_integration: not_executed` until physical evidence is landed.
 
 ## Usage Entry
 
@@ -34,6 +54,7 @@ python3 scripts/check_wiki_graph_sync.py
 python3 scripts/check_openwiki.py
 python3 scripts/check_plan_package_compat.py
 python3 scripts/check_landing_evidence.py --main-ref origin/main
+python3 -m pytest -q tests/test_sandbox_executor.py
 ```
 
 The primary human/agent guide is `openwiki/quickstart.md`, the wiki's single declared entry
@@ -50,6 +71,11 @@ runtime assets and validation scripts only. Small-loop control assets stay in
 - production gate entry: `scripts/git_gate.py`
 - landing-evidence authority: `data/project/landing-evidence.json`
 - landing-evidence validator: `scripts/check_landing_evidence.py`
+- sandbox executor package: `skill_arena/sandbox_executor/`
+- OpenShell execution entry: `scripts/run_sandbox_case.py`
+- in-sandbox runner: `scripts/sandbox_case_runner.py`
+- executor profile and policy: `data/sandbox_profiles/`
+- executor implementation status: `data/verification_runs/openshell_executor_status.json`
 - compensated molecular commit lineage: `data/commit_lineage/gcr_molecular_commits.json`
   (the ledger and its validator live here; the commits it describes do not. It is therefore
   **not** in `git_gate.py`'s gate list — validate it from the workspace that holds those
@@ -65,4 +91,6 @@ runtime assets and validation scripts only. Small-loop control assets stay in
 - plan packets;
 - small-loop routes;
 - template drafts;
-- antigravity `kb-ingest` or KG ingestion.
+- antigravity `kb-ingest` or KG ingestion;
+- a production signing key or production trust root;
+- a completed real OpenShell executor receipt until issue #3's physical integration gate passes.
