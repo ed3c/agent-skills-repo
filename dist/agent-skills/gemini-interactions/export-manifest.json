@@ -1,0 +1,67 @@
+{
+  "losses": [],
+  "portable": {
+    "artifact_digest": "sha256:2f402ca811fe616ead08cabdcddbde33fc51b596ad203d989dcdba932a3ca730",
+    "directory": "dist/agent-skills/gemini-interactions",
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "82c63be2efa3f8f5372911ba98137a44b74577aa4392ba8e450a22d2314ba77f"
+      },
+      {
+        "path": "cases.json",
+        "sha256": "31dda969947482b0d1a2ae429098e3372ec6211210b4d06aa25fc24c97c23c5e"
+      },
+      {
+        "path": "references/deploy_guide.md",
+        "sha256": "785b5c53f172f5e7b2f17dd693f18c633daff7d9e3e1317ab06f3cb452999438"
+      }
+    ],
+    "name": "gemini-interactions"
+  },
+  "schema_version": "agent-skills-export@1",
+  "source": {
+    "artifact_digest": "sha256:848b8570b2ddcef4657a872bd83f0b644676b02f0d81b769893e5b97f3a2d963",
+    "directory": "skills/gemini_interactions",
+    "lifecycle_source": "status.json",
+    "lifecycle_status": "quarantined",
+    "production_routable": false,
+    "skill_id": "gemini_interactions",
+    "version": "unversioned"
+  },
+  "transformations": [
+    {
+      "detail": "gemini_interactions -> gemini-interactions; underscores map to hyphens",
+      "field": "directory-name",
+      "kind": "deterministic-lossless"
+    },
+    {
+      "detail": "Generated from WHY and WHEN plus license, compatibility, digest, and lifecycle metadata",
+      "field": "SKILL.md-frontmatter",
+      "kind": "additive"
+    },
+    {
+      "detail": "Body bytes after frontmatter are identical to source skills.md",
+      "field": "SKILL.md-body",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Copied without rewriting: cases.json, references/deploy_guide.md",
+      "field": "behavior-resources",
+      "kind": "byte-preserving"
+    },
+    {
+      "detail": "Conformance never promotes, qualifies, or unquarantines a skill",
+      "field": "lifecycle",
+      "kind": "metadata-only"
+    }
+  ],
+  "upstream_conformance": {
+    "commit": "217be548739f21d6008915c29aefe320ea1a90af",
+    "license": "Apache-2.0",
+    "repository": "agentskills/agentskills",
+    "required_in_ci": true,
+    "validator": "skills-ref validate",
+    "validator_subdirectory": "skills-ref"
+  }
+}

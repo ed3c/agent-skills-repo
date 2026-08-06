@@ -1,0 +1,137 @@
+[
+  {
+    "id": "positive-metric-loop-plan",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Plan a bounded optimization loop that improves lint pass rate with a numeric verifier and a guard.",
+    "should_trigger": true,
+    "expected_checks": [
+      "state_graph",
+      "conditional_edge",
+      "Iteration-Loop Contract",
+      "verify",
+      "guard",
+      "ablation_gate"
+    ]
+  },
+  {
+    "id": "positive-compressed-context-recovery",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "The plan context is too compressed; recover enough semantic truth before routing autoresearch.",
+    "should_trigger": true,
+    "expected_checks": [
+      "low_compression_context",
+      "judge-loop-chooser",
+      "conditional_edge.S3.compressed_context",
+      "human_required"
+    ]
+  },
+  {
+    "id": "positive-missing-domain-terms",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Create an optimization contract but preserve missing Domain terms and unresolved known-unknowns.",
+    "should_trigger": true,
+    "expected_checks": [
+      "domain_terms",
+      "known_unknowns",
+      "candidate",
+      "unknown",
+      "conditional_edge.S3.missing_domain_term"
+    ]
+  },
+  {
+    "id": "positive-autoresearch-plan-route",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Use /autoresearch:plan to produce Goal Scope Metric Direction Verify, then add Guard and Iterations.",
+    "should_trigger": true,
+    "expected_checks": [
+      "/autoresearch:plan",
+      "Goal",
+      "Scope",
+      "Metric",
+      "Direction",
+      "Guard",
+      "Iterations"
+    ]
+  },
+  {
+    "id": "positive-ablation-hard-gate",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Require cases and A/B ablation before promoting an autoresearch-composer change.",
+    "should_trigger": true,
+    "expected_checks": [
+      "cases.json",
+      "10-20",
+      "A/B",
+      "delta",
+      "hard_gate",
+      "FAIL"
+    ]
+  },
+  {
+    "id": "positive-stateful-slice-output",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Generate a plan slice with separate match, generate, and validate nodes for a metric-driven loop.",
+    "should_trigger": true,
+    "expected_checks": [
+      "S1 match",
+      "S3 generate",
+      "S4 validate",
+      "conditional_edge",
+      "state_graph"
+    ]
+  },
+  {
+    "id": "negative-bug-diagnosis",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Debug an intermittent production failure with logs and a reproduction.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:/autoresearch:debug"
+    ]
+  },
+  {
+    "id": "negative-tdd-code-fix",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Write a failing unit test and implement the bug fix.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:/autoresearch:fix"
+    ]
+  },
+  {
+    "id": "negative-security-review",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Perform a STRIDE and OWASP security review.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:/autoresearch:security"
+    ]
+  },
+  {
+    "id": "negative-no-numeric-verifier",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Make this generally better but I have no metric or verifier.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:Iteration-Loop Contract"
+    ]
+  },
+  {
+    "id": "negative-family-eval-case",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Add evaluation holdout cases for an existing families/* skill asset.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:/autoresearch:scenario"
+    ]
+  },
+  {
+    "id": "negative-linear-sdlc-plan",
+    "skill_slug": "autoresearch_composer",
+    "prompt": "Create a normal multi-stage implementation plan without metric-driven keep/discard iterations.",
+    "should_trigger": false,
+    "expected_checks": [
+      "FORBID:/autoresearch"
+    ]
+  }
+]

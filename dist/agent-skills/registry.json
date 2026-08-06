@@ -1,0 +1,39 @@
+{
+  "registry_digest": "sha256:11c8deceffbc26836f56df7d8547422de69ae17562003228bf05e57d071859c0",
+  "schema_version": "agent-skills-registry@1",
+  "skills": [
+    {
+      "export_manifest": "dist/agent-skills/autoresearch-composer/export-manifest.json",
+      "lifecycle_status": "production-seed-candidate",
+      "portable_artifact_digest": "sha256:2beee1bfbc4480d820b48fbcfe512c4a37cb879cdf83fe6d0df77fc44fcde47d",
+      "portable_name": "autoresearch-composer",
+      "production_routable": false,
+      "source_artifact_digest": "sha256:7178c399a57b93dca08d63e7d71047ff92033763466a4d0c79900bb0a0d3e5be",
+      "source_skill_id": "autoresearch_composer"
+    },
+    {
+      "export_manifest": "dist/agent-skills/gemini-interactions/export-manifest.json",
+      "lifecycle_status": "quarantined",
+      "portable_artifact_digest": "sha256:2f402ca811fe616ead08cabdcddbde33fc51b596ad203d989dcdba932a3ca730",
+      "portable_name": "gemini-interactions",
+      "production_routable": false,
+      "source_artifact_digest": "sha256:848b8570b2ddcef4657a872bd83f0b644676b02f0d81b769893e5b97f3a2d963",
+      "source_skill_id": "gemini_interactions"
+    },
+    {
+      "export_manifest": "dist/agent-skills/repo-wiki-verified/export-manifest.json",
+      "lifecycle_status": "pending-qualification",
+      "portable_artifact_digest": "sha256:8019007c5eb01a1a7c15adc6a2c6afbeae12ba0df3e16d0c370b58120dbb2abb",
+      "portable_name": "repo-wiki-verified",
+      "production_routable": false,
+      "source_artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+      "source_skill_id": "repo_wiki_verified"
+    }
+  ],
+  "upstream_agent_skills": {
+    "commit": "217be548739f21d6008915c29aefe320ea1a90af",
+    "license": "Apache-2.0",
+    "repository": "agentskills/agentskills",
+    "validator": "skills-ref validate"
+  }
+}

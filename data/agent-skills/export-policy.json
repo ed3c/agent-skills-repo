@@ -1,0 +1,12 @@
+{
+  "schema_version": "agent-skills-export-policy@1",
+  "source_license": "MIT",
+  "compatibility": "Portable Agent Skills export from agent-skills-repo. Host access is limited to the bundled instructions and resources; conformance does not imply qualification.",
+  "upstream_agent_skills": {
+    "repository": "agentskills/agentskills",
+    "commit": "217be548739f21d6008915c29aefe320ea1a90af",
+    "license": "Apache-2.0",
+    "validator": "skills-ref validate",
+    "validator_subdirectory": "skills-ref"
+  }
+}
