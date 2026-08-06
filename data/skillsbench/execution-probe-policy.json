@@ -5,8 +5,7 @@
       "task_id": "dialogue-parser",
       "output_paths": [
         "/app/dialogue.dot",
-        "/app/dialogue.json",
-        "/app/solution.py"
+        "/app/dialogue.json"
       ]
     },
     {
