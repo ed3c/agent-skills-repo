@@ -1,0 +1,15 @@
+{
+  "schema_version": "skill-promotion-status@0.1.0",
+  "skill_slug": "gemini_interactions",
+  "status": "quarantined",
+  "production_routable": false,
+  "decision_date": "2026-07-27",
+  "verification_receipt": "data/verification_runs/gemini_interactions_real_driver_2026-07-27.json",
+  "reasons": [
+    "The normalized real-driver delta was 0.10, below the preregistered 0.20 threshold.",
+    "Four of sixty case runs timed out, so runtime metadata was incomplete.",
+    "Negative cases forbid their own requested domain words, confounding correct skill non-activation with refusal to perform the user task.",
+    "The completed run shared a repository cwd across samples; agent-created files were visible to later cases, so independence was contaminated."
+  ],
+  "next_action": "Repair the case corpus in a new bounded plan and use the driver's ephemeral per-invocation cwd with codex --skip-git-repo-check, then run a newly preregistered ablation; do not rerun this plan a fourth time."
+}

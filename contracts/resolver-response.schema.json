@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "resolver-response@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision"],
+  "properties": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "selected_skill", "margin", "score", "calibration_band", "snapshot_hash", "input_fingerprint", "ranking_policy_id", "resolver_build", "receipt_references", "decision_hash"],
+      "properties": {
+        "outcome": {"enum": ["resolved", "unsupported", "ambiguous", "human_required", "retryable", "invalid_request"]},
+        "selected_skill": {"type": ["string", "null"]},
+        "skill_artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "qualification_receipt_id": {"type": "string", "minLength": 1},
+        "margin": {"type": ["integer", "null"]},
+        "score": {"type": ["integer", "null"]},
+        "calibration_band": {"enum": ["invalid", "human", "abstain", "review", "qualified", "retry"]},
+        "snapshot_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "input_fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "ranking_policy_id": {"const": "lexical-fixed-point@1"},
+        "resolver_build": {"type": "string", "minLength": 1},
+        "receipt_references": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "reason": {"enum": ["snapshot_expired", "workload_identity_expired"]},
+        "decision_hash": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"outcome": {"const": "resolved"}}, "required": ["outcome"]},
+          "then": {
+            "required": ["skill_artifact_digest", "qualification_receipt_id"],
+            "properties": {"selected_skill": {"type": "string"}, "receipt_references": {"minItems": 1}}
+          }
+        },
+        {
+          "if": {"properties": {"outcome": {"const": "retryable"}}, "required": ["outcome"]},
+          "then": {"required": ["reason"], "properties": {"selected_skill": {"type": "null"}}}
+        }
+      ]
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_id", "transport_profile", "served_at"],
+      "properties": {
+        "request_id": {"type": ["string", "null"]},
+        "transport_profile": {"type": "string", "minLength": 1},
+        "served_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

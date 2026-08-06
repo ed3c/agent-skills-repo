@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "design-partner-commercial-evidence@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "receipt_id",
+        "pilot_id",
+        "design_partner_subject_hash",
+        "pricing_policy_digest",
+        "terms_evidence_digest",
+        "cost_unit",
+        "offered_price_per_qualification_microunits",
+        "minimum_committed_qualifications",
+        "admission_enforcement_accepted",
+        "audience",
+        "issued_at",
+        "expires_at"
+      ],
+      "properties": {
+        "schema_version": {"const": "design-partner-commercial-evidence@1"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "pilot_id": {"type": "string", "minLength": 1},
+        "design_partner_subject_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "pricing_policy_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "terms_evidence_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "cost_unit": {"const": "usd_microunit@1"},
+        "offered_price_per_qualification_microunits": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_committed_qualifications": {"type": "integer", "minimum": 1},
+        "admission_enforcement_accepted": {"const": true},
+        "audience": {"const": "unit-economics-gate"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "receipt_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}

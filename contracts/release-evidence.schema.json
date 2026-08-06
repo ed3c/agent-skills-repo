@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/contracts/release-evidence.schema.json",
+  "title": "Verified local release evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "image_digest",
+    "source_digest",
+    "verified_blob_count",
+    "sbom",
+    "signature",
+    "deployment"
+  ],
+  "properties": {
+    "schema_version": {"const": "release-evidence@1"},
+    "status": {"const": "verified_local"},
+    "image_digest": {"$ref": "#/$defs/digest"},
+    "source_digest": {"$ref": "#/$defs/digest"},
+    "verified_blob_count": {"type": "integer", "minimum": 3},
+    "sbom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "digest", "component_count", "mcp_version"],
+      "properties": {
+        "format": {"const": "CycloneDX-1.5"},
+        "digest": {"$ref": "#/$defs/digest"},
+        "component_count": {"type": "integer", "minimum": 1},
+        "mcp_version": {"const": "2.0.0"}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "public_key_fingerprint", "value"],
+      "properties": {
+        "algorithm": {"const": "Ed25519"},
+        "public_key_fingerprint": {"$ref": "#/$defs/digest"},
+        "value": {"type": "string", "minLength": 1}
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "runtime_admission"],
+      "properties": {
+        "mode": {"const": "local_oci"},
+        "runtime_admission": {"const": "required"},
+        "rollback_image_digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}
