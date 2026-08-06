@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from arena_adapters.skillsbench.models import SkillsBenchAdapterError
 from arena_adapters.skillsbench.normalizer import (
     import_selected_tasks,
     validate_bundle_directory,
+    validate_bundle_index,
 )
 from arena_adapters.skillsbench.parity import bind_execution_parity
 from arena_adapters.skillsbench.policy import load_policy
@@ -169,6 +171,12 @@ def test_imports_content_addressed_byte_preserving_bundles(tmp_path: Path) -> No
         "data-task",
     ]
     assert {bundle.parity_status for bundle in bundles} == {"known_loss"}
+    rows = validate_bundle_index(output)
+    assert [row["task_id"] for row in rows] == [
+        "code-task",
+        "composition-task",
+        "data-task",
+    ]
     for bundle in bundles:
         validate_bundle_directory(bundle.bundle_dir)
         assert bundle.bundle_dir.name == (
@@ -258,6 +266,31 @@ def test_bundle_tamper_is_rejected(tmp_path: Path) -> None:
     (bundle.bundle_dir / "package/task.md").write_text("tampered\n")
     with pytest.raises(SkillsBenchAdapterError, match="drifted"):
         validate_bundle_directory(bundle.bundle_dir)
+
+
+def test_index_digest_and_bundle_bindings_are_enforced(tmp_path: Path) -> None:
+    upstream, commit = fixture_checkout(tmp_path)
+    policy = load_policy(write_policy(tmp_path / "policy.json", commit))
+    output = tmp_path / "bundles"
+    import_selected_tasks(upstream_root=upstream, output_root=output, policy=policy)
+    index_path = output / "index.json"
+    index = json.loads(index_path.read_text())
+    index["index_digest"] = "sha256:" + "0" * 64
+    index_path.write_text(json.dumps(index))
+    with pytest.raises(SkillsBenchAdapterError, match="index digest mismatch"):
+        validate_bundle_index(output)
+
+    shutil.rmtree(output)
+    import_selected_tasks(upstream_root=upstream, output_root=output, policy=policy)
+    index = json.loads(index_path.read_text())
+    index["bundles"][0]["parity_status"] = "equivalent"
+    index["bundles"][0]["ranking_eligible"] = True
+    index["index_digest"] = sha256_bytes(
+        canonical_bytes({key: value for key, value in index.items() if key != "index_digest"})
+    )
+    index_path.write_text(json.dumps(index))
+    with pytest.raises(SkillsBenchAdapterError, match="binding mismatch"):
+        validate_bundle_index(output)
 
 
 def evidence(
