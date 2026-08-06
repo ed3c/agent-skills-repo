@@ -242,6 +242,69 @@ def _diagnostics(
     )
 
 
+def _require_docker_execution(
+    result: Mapping[str, object],
+    rollout_root: Path,
+) -> None:
+    """Require every available BenchFlow environment signal to say Docker.
+
+    BenchFlow 0.6.3 records the sandbox in ``config.json`` and in
+    ``result.json.usage_tracking.environment``. Older fixtures exposed a legacy
+    ``result.json.environment_name`` field. Accept either representation, but
+    fail closed when the signals are absent or disagree.
+    """
+
+    signals: list[tuple[str, str]] = []
+
+    legacy = result.get("environment_name")
+    if legacy is not None:
+        if not isinstance(legacy, str) or not legacy:
+            raise SkillsBenchAdapterError(
+                "BenchFlow result environment_name is invalid"
+            )
+        signals.append(("result.environment_name", legacy))
+
+    usage_tracking = result.get("usage_tracking")
+    if usage_tracking is not None:
+        if not isinstance(usage_tracking, Mapping):
+            raise SkillsBenchAdapterError(
+                "BenchFlow result usage_tracking is not an object"
+            )
+        usage_environment = usage_tracking.get("environment")
+        if usage_environment is not None:
+            if not isinstance(usage_environment, str) or not usage_environment:
+                raise SkillsBenchAdapterError(
+                    "BenchFlow result usage_tracking.environment is invalid"
+                )
+            signals.append(
+                ("result.usage_tracking.environment", usage_environment)
+            )
+
+    config_path = rollout_root / "config.json"
+    if config_path.exists():
+        _regular_file(config_path, "BenchFlow config")
+        config = read_json_object(config_path)
+        config_environment = config.get("environment")
+        if not isinstance(config_environment, str) or not config_environment:
+            raise SkillsBenchAdapterError(
+                "BenchFlow config environment is absent or invalid"
+            )
+        signals.append(("config.environment", config_environment))
+
+    if not signals:
+        raise SkillsBenchAdapterError(
+            "BenchFlow Docker execution evidence is absent"
+        )
+    non_docker = [
+        f"{source}={value!r}" for source, value in signals if value != "docker"
+    ]
+    if non_docker:
+        raise SkillsBenchAdapterError(
+            "BenchFlow execution environment is not docker: "
+            + ", ".join(non_docker)
+        )
+
+
 def parse_benchflow_oracle_job(jobs_root: Path | str) -> dict[str, object]:
     root = Path(jobs_root)
     result_path = _unique_file(root, "result.json", "BenchFlow jobs")
@@ -252,8 +315,7 @@ def parse_benchflow_oracle_job(jobs_root: Path | str) -> dict[str, object]:
     result = read_json_object(result_path)
     if result.get("agent_name") != "oracle":
         raise SkillsBenchAdapterError("BenchFlow result agent_name is not oracle")
-    if result.get("environment_name") != "docker":
-        raise SkillsBenchAdapterError("BenchFlow result environment_name is not docker")
+    _require_docker_execution(result, rollout_root)
     rewards = result.get("rewards")
     if not isinstance(rewards, dict):
         raise SkillsBenchAdapterError("BenchFlow result rewards are absent")
