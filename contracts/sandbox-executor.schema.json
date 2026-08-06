@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/sandbox-executor.schema.json",
+  "title": "Sandbox executor profiles, cases, attestations, and bundles",
+  "oneOf": [
+    {"$ref": "#/$defs/profile"},
+    {"$ref": "#/$defs/case"},
+    {"$ref": "#/$defs/attestation"},
+    {"$ref": "#/$defs/bundle"}
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "resource_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu_time_ms", "wall_time_ms", "memory_bytes", "process_count_max", "network_policy"],
+      "properties": {
+        "cpu_time_ms": {"type": "integer", "minimum": 1},
+        "wall_time_ms": {"type": "integer", "minimum": 1},
+        "memory_bytes": {"type": "integer", "minimum": 1},
+        "process_count_max": {"type": "integer", "minimum": 1},
+        "network_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "sandbox_profile_id", "openshell_version", "openshell_source_ref",
+        "substrate", "target_host_profile_id", "target_host_version",
+        "target_transport_profile", "target_policy_profile", "artifact_access_policy",
+        "workspace_disposition", "secret_policy", "allowed_tools", "resource_limits",
+        "evidence_ttl_seconds"
+      ],
+      "properties": {
+        "schema_version": {"const": "sandbox-profile@1"},
+        "sandbox_profile_id": {"type": "string", "minLength": 1},
+        "openshell_version": {"const": "0.0.59"},
+        "openshell_source_ref": {"const": "NVIDIA/OpenShell@v0.0.59"},
+        "substrate": {"const": "docker"},
+        "target_host_profile_id": {"type": "string", "minLength": 1},
+        "target_host_version": {"type": "string", "minLength": 1},
+        "target_transport_profile": {"const": "openshell-cli-create-command@0.0.59"},
+        "target_policy_profile": {"type": "string", "minLength": 1},
+        "artifact_access_policy": {"const": "read-only@1"},
+        "workspace_disposition": {"const": "disposable@1"},
+        "secret_policy": {"const": "no-production-secrets@1"},
+        "allowed_tools": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^/"}
+        },
+        "resource_limits": {"$ref": "#/$defs/resource_limits"},
+        "evidence_ttl_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}
+      }
+    },
+    "arena_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "group", "passed", "evidence_digest"],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "group": {"enum": ["critical", "anchor", "target"]},
+        "passed": {"const": true},
+        "evidence_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "case_id", "group", "command", "expected_exit_code",
+        "expected_stdout_utf8", "expected_stderr_utf8", "expected_timed_out",
+        "expected_evidence_digest", "arena_case"
+      ],
+      "properties": {
+        "schema_version": {"const": "sandbox-executor-case@1"},
+        "case_id": {"type": "string", "minLength": 1},
+        "group": {"enum": ["critical", "anchor", "target"]},
+        "command": {
+          "type": "array", "minItems": 1,
+          "prefixItems": [{"type": "string", "pattern": "^/"}],
+          "items": {"type": "string", "minLength": 1}
+        },
+        "expected_exit_code": {"type": "integer"},
+        "expected_stdout_utf8": {"type": "string"},
+        "expected_stderr_utf8": {"type": "string"},
+        "expected_timed_out": {"type": "boolean"},
+        "expected_evidence_digest": {"$ref": "#/$defs/sha256"},
+        "arena_case": {"$ref": "#/$defs/arena_case"}
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "sandbox_name", "workspace_nonce", "openshell_version",
+        "openshell_source_ref", "substrate", "transport", "sandbox_image_digest",
+        "sandbox_policy_digest", "resource_limits", "cleanup_verified",
+        "workspace_destroyed", "started_at", "completed_at", "control_evidence"
+      ],
+      "properties": {
+        "schema_version": {"const": "sandbox-attestation@1"},
+        "sandbox_name": {"type": "string", "minLength": 1},
+        "workspace_nonce": {"type": "string", "minLength": 1},
+        "openshell_version": {"const": "0.0.59"},
+        "openshell_source_ref": {"const": "NVIDIA/OpenShell@v0.0.59"},
+        "substrate": {"const": "docker"},
+        "transport": {"const": "openshell-cli-create-command@0.0.59"},
+        "sandbox_image_digest": {"$ref": "#/$defs/sha256"},
+        "sandbox_policy_digest": {"$ref": "#/$defs/sha256"},
+        "resource_limits": {"$ref": "#/$defs/resource_limits"},
+        "cleanup_verified": {"const": true},
+        "workspace_destroyed": {"const": true},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "control_evidence": {"type": "object", "minProperties": 1}
+      }
+    },
+    "bundle_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"enum": ["attestation.json", "receipt.json", "result.json"]},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "files", "bundle_digest"],
+      "properties": {
+        "schema_version": {"const": "sandbox-evidence-bundle@1"},
+        "files": {
+          "type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true,
+          "items": {"$ref": "#/$defs/bundle_file"}
+        },
+        "bundle_digest": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

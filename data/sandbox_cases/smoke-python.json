@@ -1,0 +1,21 @@
+{
+  "schema_version": "sandbox-executor-case@1",
+  "case_id": "smoke-python",
+  "group": "critical",
+  "command": [
+    "/usr/bin/python3",
+    "-c",
+    "print('arena-smoke-v1')"
+  ],
+  "expected_exit_code": 0,
+  "expected_stdout_utf8": "arena-smoke-v1\n",
+  "expected_stderr_utf8": "",
+  "expected_timed_out": false,
+  "expected_evidence_digest": "sha256:47906e0354321e549d8da2d38e33d32a2988c4ca25ecb8acf13ef4bacf7e5feb",
+  "arena_case": {
+    "case_id": "smoke-python",
+    "group": "critical",
+    "passed": true,
+    "evidence_digest": "sha256:47906e0354321e549d8da2d38e33d32a2988c4ca25ecb8acf13ef4bacf7e5feb"
+  }
+}
