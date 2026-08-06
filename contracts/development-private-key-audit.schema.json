@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/development-private-key-audit.schema.json",
+  "title": "Development private-key absence audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository_head",
+    "refs_digest",
+    "refs_count",
+    "reflog_digest",
+    "reflog_entry_count",
+    "scanned_git_objects",
+    "git_object_type_counts",
+    "scanned_worktree_files",
+    "representations_checked",
+    "private_key_absent",
+    "audit_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "development-private-key-audit@1"},
+    "repository_head": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "refs_digest": {"$ref": "#/$defs/sha256"},
+    "refs_count": {"type": "integer", "minimum": 1},
+    "reflog_digest": {"$ref": "#/$defs/sha256"},
+    "reflog_entry_count": {"type": "integer", "minimum": 0},
+    "scanned_git_objects": {"type": "integer", "minimum": 3},
+    "git_object_type_counts": {
+      "type": "object",
+      "minProperties": 3,
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "propertyNames": {
+        "enum": ["blob", "commit", "tag", "tree"]
+      }
+    },
+    "scanned_worktree_files": {"type": "integer", "minimum": 1},
+    "representations_checked": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "source-bytes",
+          "raw-ed25519",
+          "pkcs8-der",
+          "pkcs8-pem",
+          "lower-hex",
+          "upper-hex",
+          "base64",
+          "base64-unpadded",
+          "base64url",
+          "base64url-unpadded"
+        ]
+      }
+    },
+    "private_key_absent": {"const": true},
+    "audit_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
