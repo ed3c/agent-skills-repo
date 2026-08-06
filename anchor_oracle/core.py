@@ -9,6 +9,12 @@ semantic entailment: every verdict carries ``scope: "lexical-only"`` and
 Every absence (missing wiki dir, empty wiki, missing fixture repo, unverifiable
 fixture HEAD, unparseable anchor, undecodable page) is its own explicit failure
 state and is never conflated with a genuine "checked and failed".
+
+An explicit ``circular_denylist`` of generated-output path prefixes (empty by
+default: no silent built-ins) turns anchors that resolve — after symlink
+resolution — into generated wiki output stored inside the fixture into the
+failing status ``circular_evidence``: documentation citing documentation is
+not source evidence.
 """
 
 from __future__ import annotations
@@ -18,6 +24,7 @@ import json
 import os.path
 import re
 import subprocess
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, NotRequired, TypedDict
@@ -38,10 +45,17 @@ ANCHOR_FRAGMENT_RE = re.compile(r"\(src:[^)]*\)?")
 MISSING_PAREN_RE = re.compile(r"(?:^|[^(])src:\s*[^\s`]+\s+`[^`]+`")
 LINE_REF_RE = re.compile(r":L?(\d+)(?:-L?(\d+))?$")
 
+# Verdict schema note: "circular_evidence" is reported only when a non-empty
+# ``circular_denylist`` of generated-output path prefixes is supplied. It marks
+# an anchor whose symlink-resolved target lies inside a denied prefix —
+# documentation citing generated wiki output, not source — and it fails the
+# page like any other non-"resolved" status. An empty denylist (the default)
+# never produces it, preserving pre-denylist behavior exactly.
 AnchorStatus = Literal[
     "resolved",
     "path_escapes_fixture",
     "symlink_escapes_fixture",
+    "circular_evidence",
     "file_missing",
     "not_a_regular_file",
     "quote_not_found",
@@ -53,6 +67,12 @@ AnchorStatus = Literal[
 
 class AnchorOracleError(ValueError):
     """Base class: the oracle could not produce a verdict at all."""
+
+
+class CircularDenylistInvalid(AnchorOracleError):
+    """A circular-evidence denylist entry is unusable (empty, absolute, or
+    containing ``.``/``..`` segments): a configuration error fails closed
+    instead of silently denying nothing."""
 
 
 class WikiMissing(AnchorOracleError):
@@ -355,39 +375,23 @@ def extract_anchors(text: str) -> tuple[list[Anchor], list[MalformedAnchor]]:
     explicitly; it is never silently dropped. A ``(src:`` token or ``)``
     inside a well-formed anchor's backtick quote is legal quote text
     (the quote grammar is ``[^`]+``) and is never reported as malformed.
+    One authoring mistake yields exactly one entry: a bare-attempt-shaped
+    region that sits inside an already-reported malformed ``(src:``
+    fragment is that fragment's interior, not a second defect.
     """
     parsed = list(ANCHOR_RE.finditer(text))
     spans = [match.span() for match in parsed]
 
-    malformed: list[MalformedAnchor] = []
-    pos = 0
-    while (match := MISSING_PAREN_RE.search(text, pos)) is not None:
-        # The leading (?:^|[^(]) may consume one char before the `src:` token;
-        # a token inside a well-formed anchor's quote is legal quote text.
-        src_position = match.start() + match.group(0).index("src:")
-        if any(start <= src_position < end for start, end in spans):
-            # Advance past the `src:` token only: the skipped match may span
-            # beyond the anchor, and consuming it whole would swallow a later
-            # genuine bare attempt starting inside that span.
-            pos = src_position + len("src:")
-            continue
-        malformed.append(
-            {
-                "fragment": match.group(0).strip()[:120],
-                "reason": (
-                    "anchor missing its opening parenthesis: must start with"
-                    " `(src:`"
-                ),
-            }
-        )
-        pos = match.end()
+    fragment_entries: list[MalformedAnchor] = []
+    fragment_spans: list[tuple[int, int]] = []
     for token in ANCHOR_TOKEN_RE.finditer(text):
         position = token.start()
         if any(start <= position < end for start, end in spans):
             continue
         fragment = ANCHOR_FRAGMENT_RE.match(text, position)
         assert fragment is not None  # ANCHOR_FRAGMENT_RE starts with `(src:`
-        malformed.append(
+        fragment_spans.append(fragment.span())
+        fragment_entries.append(
             {
                 "fragment": fragment.group(0)[:120],
                 "reason": (
@@ -395,6 +399,39 @@ def extract_anchors(text: str) -> tuple[list[Anchor], list[MalformedAnchor]]:
                 ),
             }
         )
+
+    malformed: list[MalformedAnchor] = []
+    pos = 0
+    while (match := MISSING_PAREN_RE.search(text, pos)) is not None:
+        # The leading (?:^|[^(]) may consume one char before the `src:` token;
+        # a token inside a well-formed anchor's quote is legal quote text.
+        src_position = match.start() + match.group(0).index("src:")
+        if any(
+            start <= src_position < end for start, end in spans
+        ) or any(
+            start <= src_position < end for start, end in fragment_spans
+        ):
+            # Inside a well-formed anchor: legal quote text. Inside a
+            # malformed `(src:` fragment: the same authoring mistake the
+            # fragment scan already reports — one defect, one diagnostic.
+            # Advance past the `src:` token only: the skipped match may span
+            # beyond the region, and consuming it whole would swallow a later
+            # genuine bare attempt starting inside that span.
+            pos = src_position + len("src:")
+            continue
+        malformed.append(
+            {
+                # Display-only excerpt starting at `src:`: the one char the
+                # pattern's (?:^|[^(]) consumed is not part of the attempt.
+                "fragment": text[src_position : match.end()][:120],
+                "reason": (
+                    "anchor missing its opening parenthesis: must start with"
+                    " `(src:`"
+                ),
+            }
+        )
+        pos = match.end()
+    malformed.extend(fragment_entries)
 
     anchors: list[Anchor] = []
     for index, match in enumerate(parsed):
@@ -412,6 +449,44 @@ def extract_anchors(text: str) -> tuple[list[Anchor], list[MalformedAnchor]]:
     return anchors, malformed
 
 
+def _normalize_denylist(circular_denylist: Sequence[str]) -> tuple[str, ...]:
+    """Validate generated-output path prefixes, fail-closed.
+
+    Each entry must be a non-empty fixture-relative POSIX path prefix
+    (a trailing ``/`` is tolerated and stripped). Absolute entries or
+    entries with empty, ``.`` or ``..`` segments raise
+    ``CircularDenylistInvalid``: a misconfigured denylist must never
+    silently deny nothing.
+    """
+    if isinstance(circular_denylist, str):
+        raise CircularDenylistInvalid(
+            "circular_denylist must be a sequence of path prefixes,"
+            f" not a bare string: {circular_denylist!r}"
+        )
+    normalized: list[str] = []
+    for entry in circular_denylist:
+        if not isinstance(entry, str) or not entry.strip():
+            raise CircularDenylistInvalid(
+                f"circular_denylist entry must be a non-empty string: {entry!r}"
+            )
+        candidate = entry.strip()
+        if candidate.startswith("/"):
+            raise CircularDenylistInvalid(
+                "circular_denylist entry must be fixture-relative,"
+                f" not absolute: {candidate!r}"
+            )
+        candidate = candidate.rstrip("/")
+        if not candidate or any(
+            segment in ("", ".", "..") for segment in candidate.split("/")
+        ):
+            raise CircularDenylistInvalid(
+                "circular_denylist entry must be a plain relative path prefix"
+                f" without empty, `.` or `..` segments: {entry!r}"
+            )
+        normalized.append(candidate)
+    return tuple(normalized)
+
+
 def _is_inside(root: Path, candidate: Path) -> bool:
     try:
         relative = candidate.relative_to(root)
@@ -420,13 +495,27 @@ def _is_inside(root: Path, candidate: Path) -> bool:
     return str(relative) != "."
 
 
-def check_anchor(fixture_repo: Path | str, anchor: Anchor) -> AnchorCheck:
+def check_anchor(
+    fixture_repo: Path | str,
+    anchor: Anchor,
+    *,
+    circular_denylist: Sequence[str] = (),
+) -> AnchorCheck:
     """Resolve one anchor against the fixture repository, fail-closed.
 
     Check order: lexical containment (traversal / absolute paths rejected
-    before touching the filesystem), existence, symlink containment, regular
-    file, verbatim quote in the file's bytes, then the optional line ref.
+    before touching the filesystem), existence, symlink containment,
+    circular-evidence denylist, regular file, verbatim quote in the file's
+    bytes, then the optional line ref.
+
+    ``circular_denylist`` is an explicit list of fixture-relative path
+    prefixes holding generated wiki output. It is applied AFTER symlink
+    resolution, so a symlink alias whose lexical path dodges a denied
+    prefix but whose real target lands inside one is still reported as
+    ``circular_evidence``. The default empty denylist disables the check
+    entirely — no silent built-in prefixes.
     """
+    denied = _normalize_denylist(circular_denylist)
     fixture = Path(fixture_repo)
     check: AnchorCheck = {
         "index": anchor.index,
@@ -453,6 +542,13 @@ def check_anchor(fixture_repo: Path | str, anchor: Anchor) -> AnchorCheck:
     target_real = Path(os.path.realpath(str(normalized)))
     if not _is_inside(fixture_real, target_real):
         return failed("symlink_escapes_fixture")
+    if denied:
+        target_rel = target_real.relative_to(fixture_real).as_posix()
+        if any(
+            target_rel == prefix or target_rel.startswith(prefix + "/")
+            for prefix in denied
+        ):
+            return failed("circular_evidence")
     if not target_real.is_file():
         return failed("not_a_regular_file")
 
@@ -483,14 +579,22 @@ def check_anchor(fixture_repo: Path | str, anchor: Anchor) -> AnchorCheck:
 
 
 def evaluate_page(
-    fixture_repo: Path | str, case_id: str, page_bytes: bytes
+    fixture_repo: Path | str,
+    case_id: str,
+    page_bytes: bytes,
+    *,
+    circular_denylist: Sequence[str] = (),
 ) -> dict[str, object]:
     """Produce one case record: front matter + every anchor, with diagnostics.
 
     ``passed`` requires valid OKF front matter, no malformed anchor attempts,
     at least one anchor, and every anchor resolved. Every failure is named in
     ``failures`` with the anchor index, path, and failing check.
+    ``circular_denylist`` (default empty: check disabled) is forwarded to
+    ``check_anchor``; an anchor into a denied generated-output prefix gets
+    status ``circular_evidence`` and fails the page.
     """
+    denied = _normalize_denylist(circular_denylist)
     failures: list[str] = []
     checks: dict[str, object]
     try:
@@ -502,7 +606,8 @@ def evaluate_page(
         frontmatter = validate_okf_frontmatter(text)
         anchors, malformed = extract_anchors(text)
         anchor_checks = [
-            check_anchor(fixture_repo, anchor) for anchor in anchors
+            check_anchor(fixture_repo, anchor, circular_denylist=denied)
+            for anchor in anchors
         ]
         checks = {
             "page_sha256": _sha256(page_bytes),
@@ -540,14 +645,22 @@ def evaluate_page(
 
 
 def evaluate_wiki(
-    wiki_dir: Path | str, fixture_repo: Path | str, *, fixture_sha: str
+    wiki_dir: Path | str,
+    fixture_repo: Path | str,
+    *,
+    fixture_sha: str,
+    circular_denylist: Sequence[str] = (),
 ) -> dict[str, object]:
     """Evaluate every Markdown page under ``wiki_dir`` against the fixture repo.
 
     Raises ``WikiMissing`` / ``FixtureMissing`` when an input directory is
     absent and ``EmptyWiki`` when the wiki has no pages: an absent input is
-    never reported as a verdict.
+    never reported as a verdict. ``circular_denylist`` (explicit
+    generated-output path prefixes; default empty: check disabled and the
+    verdict is byte-identical to pre-denylist behavior) is validated
+    fail-closed up front and forwarded to every page's anchor checks.
     """
+    denied = _normalize_denylist(circular_denylist)
     wiki = Path(wiki_dir)
     fixture = Path(fixture_repo)
     if not wiki.is_dir():
@@ -572,7 +685,12 @@ def evaluate_wiki(
                 f"wiki page cannot be read: {page}: {exc}"
             ) from exc
         cases.append(
-            evaluate_page(fixture, page.relative_to(wiki).as_posix(), raw)
+            evaluate_page(
+                fixture,
+                page.relative_to(wiki).as_posix(),
+                raw,
+                circular_denylist=denied,
+            )
         )
     return {
         "schema_version": SCHEMA_VERSION,

@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from anchor_oracle import (
+    CircularDenylistInvalid,
     EmptyWiki,
     FixtureDirty,
     FixtureHeadUnverifiable,
@@ -21,6 +22,7 @@ from anchor_oracle import (
     WikiMissing,
     canonical_bytes,
     check_anchor,
+    evaluate_page,
     evaluate_wiki,
     extract_anchors,
     validate_okf_frontmatter,
@@ -252,10 +254,202 @@ class TestAnchorExtraction:
         assert "src/b.py" in malformed[0]["fragment"]
 
 
+class TestMalformedDeduplication:
+    def test_inner_bare_attempt_inside_fragment_yields_one_entry(self) -> None:
+        # One authoring mistake, one diagnostic: a malformed `(src:` fragment
+        # whose interior happens to contain a bare-attempt-shaped region must
+        # not be reported twice (once per scan).
+        anchors, malformed = extract_anchors(
+            "Bad (src: src/a.py src: src/b.py `quote`) end."
+        )
+        assert anchors == []
+        assert len(malformed) == 1
+        assert "malformed anchor" in malformed[0]["reason"]
+
+    def test_bare_attempt_outside_fragment_still_reported(self) -> None:
+        # Dedup must not weaken either scan: a genuine bare attempt outside
+        # any malformed fragment's span keeps its own entry.
+        anchors, malformed = extract_anchors(
+            "Bad (src: broken) and bare src: b.py `quote` end."
+        )
+        assert anchors == []
+        reasons = sorted(item["reason"] for item in malformed)
+        assert len(malformed) == 2
+        assert "opening parenthesis" in reasons[0]
+        assert "malformed anchor" in reasons[1]
+
+
+class TestFragmentExcerptTrimming:
+    def test_bare_attempt_fragment_trims_stray_prefix_char(self) -> None:
+        # The (?:^|[^(]) alternative consumes one char before `src:`; a
+        # non-whitespace char (here `)`) must not leak into the excerpt.
+        anchors, malformed = extract_anchors("call()src: src/b.py `quote` end.")
+        assert anchors == []
+        assert len(malformed) == 1
+        assert malformed[0]["fragment"] == "src: src/b.py `quote`"
+
+    def test_bare_attempt_fragment_trims_whitespace_prefix(self) -> None:
+        anchors, malformed = extract_anchors("Bad src: src/b.py `quote` end.")
+        assert len(malformed) == 1
+        assert malformed[0]["fragment"] == "src: src/b.py `quote`"
+
+
 def anchor_for(text: str):
     anchors, malformed = extract_anchors(text)
     assert malformed == [] and len(anchors) == 1
     return anchors[0]
+
+
+@pytest.fixture()
+def circular_fixture(tmp_path: Path) -> Path:
+    """Fixture repo containing generated wiki output plus a symlink alias.
+
+    Mirrors the external reference auditor's circular-evidence selftest
+    control design: generated output under ``openwiki/`` and a symlink alias
+    (``alias.md``) whose lexical path dodges the denied prefix but whose
+    resolved path lands inside it.
+    """
+    fixture = tmp_path / "fixture"
+    (fixture / "openwiki").mkdir(parents=True)
+    (fixture / "src").mkdir()
+    (fixture / "openwiki/generated.md").write_text("Generated wiki output.\n")
+    (fixture / "src/real.py").write_text("REAL = 1\n")
+    (fixture / "alias.md").symlink_to(Path("openwiki") / "generated.md")
+    return fixture
+
+
+class TestCircularEvidence:
+    DENY = ("openwiki",)
+
+    def test_direct_anchor_into_denied_dir(self, circular_fixture: Path) -> None:
+        check = check_anchor(
+            circular_fixture,
+            anchor_for("(src: openwiki/generated.md `Generated wiki output.`)"),
+            circular_denylist=self.DENY,
+        )
+        assert check["status"] == "circular_evidence"
+
+    def test_symlink_alias_into_denied_dir(self, circular_fixture: Path) -> None:
+        # The denylist applies AFTER symlink resolution: a lexical path
+        # outside the denied prefix that resolves into it is caught.
+        check = check_anchor(
+            circular_fixture,
+            anchor_for("(src: alias.md `Generated wiki output.`)"),
+            circular_denylist=self.DENY,
+        )
+        assert check["status"] == "circular_evidence"
+
+    def test_empty_denylist_preserves_current_behavior(
+        self, circular_fixture: Path
+    ) -> None:
+        for text in (
+            "(src: openwiki/generated.md `Generated wiki output.`)",
+            "(src: alias.md `Generated wiki output.`)",
+        ):
+            assert (
+                check_anchor(circular_fixture, anchor_for(text))["status"]
+                == "resolved"
+            )
+
+    def test_denied_source_file_outside_prefix_still_resolves(
+        self, circular_fixture: Path
+    ) -> None:
+        check = check_anchor(
+            circular_fixture,
+            anchor_for("(src: src/real.py `REAL = 1`)"),
+            circular_denylist=self.DENY,
+        )
+        assert check["status"] == "resolved"
+
+    def test_denylist_is_path_prefix_not_string_prefix(
+        self, tmp_path: Path
+    ) -> None:
+        fixture = tmp_path / "fixture"
+        (fixture / "openwiki-notes").mkdir(parents=True)
+        (fixture / "openwiki-notes/real.md").write_text("Real source.\n")
+        check = check_anchor(
+            fixture,
+            anchor_for("(src: openwiki-notes/real.md `Real source.`)"),
+            circular_denylist=("openwiki",),
+        )
+        assert check["status"] == "resolved"
+
+    def test_trailing_slash_entry_is_normalized(
+        self, circular_fixture: Path
+    ) -> None:
+        check = check_anchor(
+            circular_fixture,
+            anchor_for("(src: openwiki/generated.md `Generated wiki output.`)"),
+            circular_denylist=("openwiki/",),
+        )
+        assert check["status"] == "circular_evidence"
+
+    @pytest.mark.parametrize(
+        "entry", ["", "   ", "/openwiki", "../openwiki", "openwiki/../src", "."]
+    )
+    def test_invalid_denylist_entry_fails_closed(
+        self, circular_fixture: Path, entry: str
+    ) -> None:
+        with pytest.raises(CircularDenylistInvalid):
+            check_anchor(
+                circular_fixture,
+                anchor_for("(src: src/real.py `REAL = 1`)"),
+                circular_denylist=(entry,),
+            )
+
+
+CIRCULAR_WIKI_PAGE = """---
+type: Reference
+---
+
+# Circular
+
+Aliased (src: alias.md `Generated wiki output.`).
+"""
+
+
+class TestCircularEvidenceVerdict:
+    def test_evaluate_page_plumbs_denylist(self, circular_fixture: Path) -> None:
+        case = evaluate_page(
+            circular_fixture,
+            "circular.md",
+            CIRCULAR_WIKI_PAGE.encode(),
+            circular_denylist=("openwiki",),
+        )
+        assert case["passed"] is False
+        assert case["checks"]["anchors"][0]["status"] == "circular_evidence"
+        assert "anchor[0] alias.md: circular_evidence" in case["failures"]
+
+    def test_evaluate_wiki_flags_circular_and_names_failure(
+        self, circular_fixture: Path, tmp_path: Path
+    ) -> None:
+        wiki = tmp_path / "wiki"
+        wiki.mkdir()
+        (wiki / "circular.md").write_text(CIRCULAR_WIKI_PAGE)
+        permissive = evaluate_wiki(
+            wiki, circular_fixture, fixture_sha=FIXTURE_SHA
+        )
+        assert permissive["passed"] is True
+        denied = evaluate_wiki(
+            wiki,
+            circular_fixture,
+            fixture_sha=FIXTURE_SHA,
+            circular_denylist=("openwiki",),
+        )
+        assert denied["passed"] is False
+        assert (
+            "anchor[0] alias.md: circular_evidence"
+            in denied["cases"][0]["failures"]
+        )
+
+    def test_explicit_empty_denylist_is_byte_identical(self) -> None:
+        # An empty denylist preserves current behavior exactly: same verdict
+        # bytes as not passing the parameter at all.
+        default = evaluate_wiki(WIKI_GOOD, FIXTURE_REPO, fixture_sha=FIXTURE_SHA)
+        explicit = evaluate_wiki(
+            WIKI_GOOD, FIXTURE_REPO, fixture_sha=FIXTURE_SHA, circular_denylist=()
+        )
+        assert canonical_bytes(default) == canonical_bytes(explicit)
 
 
 class TestAnchorResolution:
@@ -648,3 +842,97 @@ class TestCli:
         result = run_cli("--selftest")
         assert result.returncode == 0, result.stdout + result.stderr
         assert "hollow" in result.stdout.lower()
+
+    def test_selftest_has_circular_evidence_control(self) -> None:
+        result = run_cli("--selftest")
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "circular" in result.stdout.lower()
+
+
+@pytest.fixture()
+def circular_git_fixture(tmp_path: Path) -> tuple[Path, str, Path]:
+    """Committed fixture repo with generated output + symlink alias, plus a
+    wiki whose only anchor cites the generated output through the alias."""
+    repo = tmp_path / "repo"
+    (repo / "openwiki").mkdir(parents=True)
+    (repo / "openwiki/generated.md").write_text("Generated wiki output.\n")
+    (repo / "alias.md").symlink_to(Path("openwiki") / "generated.md")
+    subprocess.run(["git", "init", "-q", str(repo)], check=True, capture_output=True)
+    git("add", "-A", cwd=repo)
+    git(
+        "-c",
+        "user.email=oracle@test",
+        "-c",
+        "user.name=oracle",
+        "commit",
+        "-qm",
+        "pin circular fixture",
+        cwd=repo,
+    )
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    (wiki / "circular.md").write_text(CIRCULAR_WIKI_PAGE)
+    return repo, git("rev-parse", "HEAD", cwd=repo), wiki
+
+
+class TestCliCircularDenylist:
+    def test_flag_turns_generated_citation_into_failure(
+        self, circular_git_fixture: tuple[Path, str, Path], tmp_path: Path
+    ) -> None:
+        repo, head, wiki = circular_git_fixture
+        output = tmp_path / "verdict.json"
+        result = run_cli(
+            "--wiki-dir",
+            str(wiki),
+            "--fixture-repo",
+            str(repo),
+            "--fixture-sha",
+            head,
+            "--output",
+            str(output),
+            "--circular-denylist",
+            "openwiki",
+        )
+        assert result.returncode == 2, result.stderr
+        verdict = json.loads(output.read_text())
+        assert verdict["passed"] is False
+        anchor = verdict["cases"][0]["checks"]["anchors"][0]
+        assert anchor["status"] == "circular_evidence"
+
+    def test_without_flag_current_behavior_is_preserved(
+        self, circular_git_fixture: tuple[Path, str, Path], tmp_path: Path
+    ) -> None:
+        repo, head, wiki = circular_git_fixture
+        output = tmp_path / "verdict.json"
+        result = run_cli(
+            "--wiki-dir",
+            str(wiki),
+            "--fixture-repo",
+            str(repo),
+            "--fixture-sha",
+            head,
+            "--output",
+            str(output),
+        )
+        assert result.returncode == 0, result.stderr
+        assert json.loads(output.read_text())["passed"] is True
+
+    def test_invalid_denylist_entry_is_usage_error(
+        self, circular_git_fixture: tuple[Path, str, Path], tmp_path: Path
+    ) -> None:
+        repo, head, wiki = circular_git_fixture
+        output = tmp_path / "verdict.json"
+        result = run_cli(
+            "--wiki-dir",
+            str(wiki),
+            "--fixture-repo",
+            str(repo),
+            "--fixture-sha",
+            head,
+            "--output",
+            str(output),
+            "--circular-denylist",
+            "../escape",
+        )
+        assert result.returncode == 64
+        assert not output.exists()
