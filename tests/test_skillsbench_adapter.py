@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Mapping
 
 import pytest
 
@@ -293,27 +294,52 @@ def test_index_digest_and_bundle_bindings_are_enforced(tmp_path: Path) -> None:
         validate_bundle_index(output)
 
 
-def evidence(
+def execution_evidence(
+    report: Mapping[str, object],
+    surface: str,
     probe_digest: str,
     *,
     reward: float = 1.0,
-    diagnostics: str = "pass",
+    diagnostics_class: str = "pass",
+    diagnostics_digest: str | None = None,
+    task_id: str | None = None,
+    bundle_digest: str | None = None,
 ) -> dict[str, object]:
+    result_fill = "c" if surface == "upstream" else "d"
     value: dict[str, object] = {
         "schema_version": "skillsbench-execution-evidence@1",
+        "task_id": task_id or report["task_id"],
+        "bundle_digest": bundle_digest or report["bundle_digest"],
+        "surface": surface,
+        "upstream": {
+            "repository": "benchflow-ai/skillsbench",
+            "commit": "1" * 40,
+        },
+        "execution": {
+            "benchflow_version": "0.6.3",
+            "agent": "oracle",
+            "sandbox": "docker",
+        },
         "task_check_passed": True,
-        "oracle_reward": reward,
+        "oracle": {
+            "result_digest": "sha256:" + result_fill * 64,
+            "task_digest": "sha256:" + "e" * 64,
+            "reward": reward,
+            "error": None,
+            "verifier_error": None,
+        },
         "verifier_probe": {
             "input_digest": probe_digest,
             "reward": reward,
-            "diagnostics_class": diagnostics,
+            "diagnostics_class": diagnostics_class,
+            "diagnostics_digest": diagnostics_digest or ("sha256:" + "f" * 64),
         },
     }
     value["evidence_digest"] = sha256_bytes(canonical_bytes(value))
     return value
 
 
-def test_execution_evidence_promotes_only_exact_parity(tmp_path: Path) -> None:
+def test_execution_evidence_promotes_only_exact_bound_parity(tmp_path: Path) -> None:
     upstream, commit = fixture_checkout(tmp_path)
     policy = load_policy(write_policy(tmp_path / "policy.json", commit))
     bundle = import_selected_tasks(
@@ -323,15 +349,74 @@ def test_execution_evidence_promotes_only_exact_parity(tmp_path: Path) -> None:
     )[0]
     report = json.loads((bundle.bundle_dir / "parity.json").read_text())
     probe = "sha256:" + "a" * 64
-    equivalent = bind_execution_parity(report, evidence(probe), evidence(probe))
+    equivalent = bind_execution_parity(
+        report,
+        execution_evidence(report, "upstream", probe),
+        execution_evidence(report, "normalized", probe),
+    )
     assert equivalent["status"] == "equivalent"
     assert equivalent["ranking_eligible"] is True
+    assert equivalent["execution"]["same_oracle_task_digest"] is True
+    assert equivalent["execution"]["diagnostics_digest_equal"] is True
 
     rejected = bind_execution_parity(
-        report, evidence(probe), evidence("sha256:" + "b" * 64)
+        report,
+        execution_evidence(report, "upstream", probe),
+        execution_evidence(
+            report,
+            "normalized",
+            "sha256:" + "b" * 64,
+        ),
     )
     assert rejected["status"] == "rejected"
     assert rejected["ranking_eligible"] is False
+
+
+def test_execution_evidence_cannot_be_reused_or_tampered(tmp_path: Path) -> None:
+    upstream, commit = fixture_checkout(tmp_path)
+    policy = load_policy(write_policy(tmp_path / "policy.json", commit))
+    bundle = import_selected_tasks(
+        upstream_root=upstream,
+        output_root=tmp_path / "bundles",
+        policy=policy,
+    )[0]
+    report = json.loads((bundle.bundle_dir / "parity.json").read_text())
+    probe = "sha256:" + "a" * 64
+
+    wrong_task = execution_evidence(
+        report,
+        "upstream",
+        probe,
+        task_id="another-task",
+    )
+    with pytest.raises(SkillsBenchAdapterError, match="another task"):
+        bind_execution_parity(
+            report,
+            wrong_task,
+            execution_evidence(report, "normalized", probe),
+        )
+
+    tampered = execution_evidence(report, "upstream", probe)
+    tampered["oracle"]["reward"] = 0.0  # type: ignore[index]
+    with pytest.raises(SkillsBenchAdapterError, match="evidence_digest mismatch"):
+        bind_execution_parity(
+            report,
+            tampered,
+            execution_evidence(report, "normalized", probe),
+        )
+
+    wrong_bundle = execution_evidence(
+        report,
+        "normalized",
+        probe,
+        bundle_digest="sha256:" + "9" * 64,
+    )
+    with pytest.raises(SkillsBenchAdapterError, match="another bundle"):
+        bind_execution_parity(
+            report,
+            execution_evidence(report, "upstream", probe),
+            wrong_bundle,
+        )
 
 
 def test_license_and_role_coverage_are_enforced(tmp_path: Path) -> None:
