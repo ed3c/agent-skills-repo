@@ -13,20 +13,20 @@
       "title": "Reconcile executor landing evidence with main",
       "phase": "P0 Truth",
       "priority": "P0",
-      "status": "ready",
-      "evidence": "missing",
+      "status": "human_gate",
+      "evidence": "pr",
       "dependencies": [],
-      "exit_evidence": "A full landing commit is reachable from main or the executor issue is reopened and all contradictory tracker claims are corrected."
+      "exit_evidence": "Draft PR #21 is green, reopens the unlanded executor work, corrects contradictory tracker state, and adds a full-history landing-evidence gate; completion requires human merge admit and a main-reachable merge commit."
     },
     {
       "issue": 13,
       "title": "Add canonical Agent Skills SKILL.md export and conformance gate",
       "phase": "P0 Portability",
       "priority": "P0",
-      "status": "ready",
-      "evidence": "missing",
+      "status": "human_gate",
+      "evidence": "pr",
       "dependencies": [],
-      "exit_evidence": "Every Arena candidate has a reproducible canonical export that passes the upstream skills-ref validator."
+      "exit_evidence": "Draft PR #22 is green: all three current skills have reproducible canonical exports and pass the pinned upstream skills-ref validator; completion requires human merge admit and a main-reachable merge commit."
     },
     {
       "issue": 14,
