@@ -1,0 +1,170 @@
+{
+  "authority": {
+    "delivery_authority": false,
+    "preregistration_eligible": false,
+    "qualification_eligible": false,
+    "reason": "The source commit is reachable only in ed3c/skill-bettor, uses an earlier sandbox_executor API, and self-declares host/model deviations.",
+    "runtime_import_allowed": false,
+    "status": "historical-unlanded"
+  },
+  "historical_budgets": {
+    "cost_total_usd": "1.615403",
+    "formulas": {
+      "cost_total_usd": "decimal_sum(case_costs_usd)",
+      "latency_budget_ms": "max_observed_agent_wall_ms * 3 // 2",
+      "target_success_ppm": "passed_cases * 1000000 // total_cases"
+    },
+    "latency_budget_ms": 62847,
+    "recomputed": {
+      "all_equal": true,
+      "cost_total_usd": "1.615403",
+      "latency_budget_ms": 62847,
+      "target_success_ppm": 900000
+    },
+    "target_success_ppm": 900000
+  },
+  "known_deviations": [
+    {
+      "code": "agent-path-fallback",
+      "historical_value": "host-claude-p-fallback",
+      "required_revalidation": "Use the exact agent path intended for qualification."
+    },
+    {
+      "code": "model-class-drift",
+      "historical_value": "host default included an Opus-class model while the corpus convention expected Sonnet-class execution.",
+      "required_revalidation": "Pin one model ID before calibration and reuse it in qualification."
+    },
+    {
+      "code": "legacy-executor-api",
+      "historical_value": "The recovered implementation imports the earlier top-level sandbox_executor API.",
+      "required_revalidation": "Port to skill_arena.sandbox_executor; do not restore a second executor implementation."
+    },
+    {
+      "code": "missing-tree-artifacts",
+      "historical_value": "Several paths claimed by commit diff metadata are not readable from the source commit tree through the contents API.",
+      "required_revalidation": "Treat missing files/tests as absent evidence and rerun both stages."
+    }
+  ],
+  "manifest_digest": "sha256:f74e4f2e7d512b188d3ea64f851cd2e6cfe7db8f1a5cf89dff7b2e5ba6abe724",
+  "recovered_files": [
+    {
+      "git_blob_sha1": "2e6204ab4c8dbfc5ecc7de52683258d5e6904062",
+      "path": "calibration/__init__.py",
+      "role": "historical-module-export",
+      "source_path": "repo/agent-skills-repo/calibration/__init__.py"
+    },
+    {
+      "git_blob_sha1": "9a77039800bc5a1f9acc84e878d49d45b244c792",
+      "path": "calibration/core.py",
+      "role": "historical-stage1-implementation",
+      "source_path": "repo/agent-skills-repo/calibration/core.py"
+    },
+    {
+      "git_blob_sha1": "94bc2cd910c670a258b22fb7e6536185a28cab9e",
+      "path": "calibration/stage2.py",
+      "role": "historical-stage2-implementation",
+      "source_path": "repo/agent-skills-repo/calibration/stage2.py"
+    },
+    {
+      "git_blob_sha1": "648bc316707385365e6e28aac58d96c3efe2e944",
+      "path": "data/calibration/frozen_budgets_2026-08-06.json",
+      "role": "historical-freeze-artifact",
+      "source_path": "repo/agent-skills-repo/data/calibration/frozen_budgets_2026-08-06.json"
+    },
+    {
+      "git_blob_sha1": "74c633adc52223ea8503ea55c2ec34fdd1575e1f",
+      "path": "data/calibration/stage2_report_2026-08-06.json",
+      "role": "historical-stage2-report",
+      "source_path": "repo/agent-skills-repo/data/calibration/stage2_report_2026-08-06.json"
+    }
+  ],
+  "revalidation_requirements": [
+    "Land the sandbox executor contract and two physical OpenShell evidence bundles.",
+    "Port calibration to skill_arena.sandbox_executor.",
+    "Use the exact agent path and model intended for qualification.",
+    "Retain one attempt per public case and preserve failures.",
+    "Produce a new report and separate human freeze artifact.",
+    "Keep all historical budgets inaccessible to current qualification configuration."
+  ],
+  "schema_version": "historical-calibration-provenance@1",
+  "source": {
+    "commit": "4b2de858097cba50f8320c4fb7570136bb9715a3",
+    "repository": "ed3c/skill-bettor",
+    "target_prefix": "repo/agent-skills-repo/",
+    "target_repository": "ed3c/agent-skills-repo"
+  },
+  "stage2_report": {
+    "agent_path": "host-claude-p-fallback",
+    "case_costs_usd": [
+      "0.1253505",
+      "0.1458155",
+      "0.1685855",
+      "0.1486625",
+      "0.1553125",
+      "0.2116255",
+      "0.1544125",
+      "0.1378145",
+      "0.1947555",
+      "0.1730685"
+    ],
+    "case_count": 10,
+    "declared_sha256": "sha256:719628dd3327d32f0f4a96023104dea97dda43ebd1f7989875548b58d07f9bd5",
+    "evidentiary": false,
+    "max_observed_agent_wall_ms": 41898,
+    "observed_models": [
+      "claude-haiku-4-5-20251001",
+      "claude-opus-5[1m]"
+    ],
+    "passed_count": 9,
+    "pool": "public-only",
+    "receipts_emitted": "none-by-design",
+    "schema_version": "calibration-stage2-report@1",
+    "single_shot": true
+  },
+  "unrecoverable_tree_paths": [
+    {
+      "path": "calibration/freeze.py",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "calibration/stage2_runner.py",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "contracts/calibration-report.schema.json",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "contracts/frozen-budgets.schema.json",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "data/calibration/README.md",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "data/calibration/freeze_decision_2026-08-06.json",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "data/calibration/stage1_report_2026-08-06.json",
+      "reason": "The commit diff metadata claimed this path, but the source commit contents API returned Not Found; no blob identity is asserted."
+    },
+    {
+      "path": "tests/test_calibration.py",
+      "reason": "The commit diff metadata claimed calibration tests, but the source commit contents API did not expose a readable tree object; no test result is admitted."
+    },
+    {
+      "path": "tests/test_calibration_freeze.py",
+      "reason": "The commit diff metadata claimed calibration tests, but the source commit contents API did not expose a readable tree object; no test result is admitted."
+    },
+    {
+      "path": "tests/test_calibration_stage2.py",
+      "reason": "The commit diff metadata claimed calibration tests, but the source commit contents API did not expose a readable tree object; no test result is admitted."
+    },
+    {
+      "path": "tests/test_calibration_stage2_freeze.py",
+      "reason": "The commit diff metadata claimed calibration tests, but the source commit contents API did not expose a readable tree object; no test result is admitted."
+    }
+  ]
+}
