@@ -1,9 +1,6 @@
 from __future__ import annotations
 
 import base64
-import copy
-import json
-import os
 import shutil
 import subprocess
 from dataclasses import asdict
@@ -11,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -74,6 +72,22 @@ class FakePhysicalDriver:
             "started_at": started.isoformat(),
             "completed_at": completed.isoformat(),
         }
+        control_evidence = {
+            "openshell_version_stdout_sha256": "sha256:" + "5" * 64,
+            "gateway_status_stdout_sha256": "sha256:" + "6" * 64,
+            "docker_server_version": "27.5.1",
+            "runner_bytes_sha256": "sha256:" + "7" * 64,
+            "requested_policy_bytes_sha256": "sha256:" + "8" * 64,
+            "resource_enforcement": "openshell-limits+runner-rlimit@1",
+            "secrets_scrubbed": True,
+            "auto_providers_disabled": True,
+            "runner_input_bytes_sha256": "sha256:" + "9" * 64,
+            "create_stdout_sha256": "sha256:" + "a" * 64,
+            "effective_policy_bytes_sha256": POLICY_DIGEST,
+            "docker_container_inspect_sha256": "sha256:" + "b" * 64,
+            "docker_container_id": f"container-{request.sandbox_name}",
+            "docker_memory_bytes": request.profile.resource_limits.memory_bytes,
+        }
         attestation = {
             "schema_version": ATTESTATION_SCHEMA,
             "sandbox_name": request.sandbox_name,
@@ -89,10 +103,7 @@ class FakePhysicalDriver:
             "workspace_destroyed": True,
             "started_at": started.isoformat(),
             "completed_at": completed.isoformat(),
-            "control_evidence": {
-                "driver": "fake-physical",
-                "container_absent_after_delete": True,
-            },
+            "control_evidence": control_evidence,
         }
         return DriverOutcome(
             result=result,
@@ -181,7 +192,22 @@ def create_pair(tmp_path: Path) -> dict[str, object]:
     }
 
 
-def test_pair_is_admitted_and_matches_schema(tmp_path: Path) -> None:
+def verify_again(generated: dict[str, object], *, generated_at=None):
+    return verify_evidence_pair(
+        generated["bundles"],
+        case=case(),
+        profile=profile(),
+        public_key=load_public_key(generated["public_path"]),
+        private_key_path=generated["private_path"],
+        issuer_key_id="dev-pair-test",
+        benchmark_suite_digest=BENCHMARK_DIGEST,
+        skill_artifact_digest=SKILL_DIGEST,
+        repo_root=generated["repository"],
+        generated_at=generated_at,
+    )
+
+
+def test_pair_is_admitted_reproducible_and_matches_schema(tmp_path: Path) -> None:
     generated = create_pair(tmp_path)
     index = generated["index"]
     schema = load_json_object(SCHEMA_PATH)
@@ -199,8 +225,10 @@ def test_pair_is_admitted_and_matches_schema(tmp_path: Path) -> None:
         "distinct_sandbox_names": True,
         "distinct_workspace_nonces": True,
         "distinct_receipt_ids": True,
+        "distinct_container_ids": True,
         "same_image_digest": True,
         "same_policy_digest": True,
+        "same_docker_server_version": True,
         "same_deterministic_result": True,
         "cleanup_verified_for_both": True,
         "workspace_destroyed_for_both": True,
@@ -208,9 +236,17 @@ def test_pair_is_admitted_and_matches_schema(tmp_path: Path) -> None:
         "scanned_git_blobs": 1,
         "scanned_worktree_files": 1,
     }
+    assert index["execution_envelope"]["docker_server_version"] == "27.5.1"
     assert len({run["workspace_nonce"] for run in index["runs"]}) == 2
     assert len({run["sandbox_name"] for run in index["runs"]}) == 2
+    assert len({run["docker_container_id"] for run in index["runs"]}) == 2
     assert index["runs"][0]["output_evidence_digest"] == case().expected_evidence_digest
+    assert all("bundle_path" not in run for run in index["runs"])
+    assert all("currently_unexpired" not in run for run in index["runs"])
+
+    reproduced = verify_again(generated)
+    assert reproduced["generated_at"] == NOW.isoformat()
+    assert reproduced["pair_digest"] == index["pair_digest"]
 
 
 def test_duplicate_bundle_cannot_impersonate_two_runs(tmp_path: Path) -> None:
@@ -240,18 +276,15 @@ def test_bundle_byte_drift_is_rejected(tmp_path: Path) -> None:
     result_path.write_bytes(result_path.read_bytes() + b"\n")
 
     with pytest.raises(EvidencePairError, match="bundle file digest mismatch"):
-        verify_evidence_pair(
-            generated["bundles"],
-            case=case(),
-            profile=profile(),
-            public_key=load_public_key(generated["public_path"]),
-            private_key_path=generated["private_path"],
-            issuer_key_id="dev-pair-test",
-            benchmark_suite_digest=BENCHMARK_DIGEST,
-            skill_artifact_digest=SKILL_DIGEST,
-            repo_root=generated["repository"],
-            generated_at=NOW,
-        )
+        verify_again(generated, generated_at=NOW)
+
+
+def test_bundle_extra_file_is_rejected(tmp_path: Path) -> None:
+    generated = create_pair(tmp_path)
+    (generated["bundles"][1] / "unbound.log").write_text("not in manifest\n")
+
+    with pytest.raises(EvidencePairError, match="exactly the four contract files"):
+        verify_again(generated, generated_at=NOW)
 
 
 def test_public_key_must_match_audited_private_key(tmp_path: Path) -> None:
@@ -273,11 +306,15 @@ def test_public_key_must_match_audited_private_key(tmp_path: Path) -> None:
         )
 
 
-def test_committed_private_key_representation_is_rejected(tmp_path: Path) -> None:
+def test_committed_pkcs8_der_representation_is_rejected(tmp_path: Path) -> None:
     generated = create_pair(tmp_path)
     repository = generated["repository"]
-    raw = generated["private_path"].read_bytes()
-    (repository / "leak.txt").write_text(raw.hex() + "\n")
+    der = generated["key"].private_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    (repository / "leak.txt").write_bytes(base64.b64encode(der) + b"\n")
     git(repository, "add", "leak.txt")
     git(repository, "commit", "-m", "leak")
 
@@ -285,11 +322,18 @@ def test_committed_private_key_representation_is_rejected(tmp_path: Path) -> Non
         audit_private_key_absent(repository, generated["private_path"])
 
 
-def test_untracked_private_key_representation_is_rejected(tmp_path: Path) -> None:
+def test_ignored_pem_representation_is_rejected(tmp_path: Path) -> None:
     generated = create_pair(tmp_path)
     repository = generated["repository"]
-    raw = generated["private_path"].read_bytes()
-    (repository / "untracked.txt").write_bytes(base64.b64encode(raw) + b"\n")
+    (repository / ".gitignore").write_text("ignored-private.pem\n")
+    git(repository, "add", ".gitignore")
+    git(repository, "commit", "-m", "ignore fixture")
+    pem = generated["key"].private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    (repository / "ignored-private.pem").write_bytes(pem)
 
     with pytest.raises(EvidencePairError, match="worktree file"):
         audit_private_key_absent(repository, generated["private_path"])
