@@ -518,6 +518,25 @@ class TestFixtureHeadGate:
             verify_fixture_head(repo, head)
 
 
+class TestTrackedPages:
+    """Hand-authored pages living in openwiki/ (an agent-managed lane) must
+    keep their anchors resolving: an openwiki rerun may edit page bodies, and
+    this gate turns silent anchor drift into a red test."""
+
+    TRACKED = ["openwiki/qualification-pipeline.md"]
+
+    @pytest.mark.parametrize("relpath", TRACKED)
+    def test_tracked_page_anchors_resolve(self, relpath: str) -> None:
+        from anchor_oracle import evaluate_page
+
+        page = PROJECT / relpath
+        case = evaluate_page(PROJECT, page.name, page.read_bytes())
+        assert case["passed"] is True, case["failures"]
+        anchors = case["checks"]["anchors"]
+        assert anchors, "tracked page must carry at least one anchor"
+        assert all(a["status"] == "resolved" for a in anchors)
+
+
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
     env = dict(os.environ, PYTHONPATH=str(PROJECT))
     return subprocess.run(
