@@ -2,6 +2,23 @@
 
 This is the final repo generated from the `unknown-discovery-gcr-order` plan package.
 
+## Delivery evidence authority
+
+Issue comments, checkboxes, and project fields coordinate work; they do not prove delivery. The
+repository-local authority is `data/project/landing-evidence.json`. A work item may be marked
+`completed` only when `scripts/check_landing_evidence.py` verifies a full commit SHA reachable from
+`main`, the exact changed-path digest, and the test-evidence digest.
+
+The sandbox executor is **not currently reachable from `main`**. Issue #3 remains pending until a
+reviewable implementation and its evidence are landed. Therefore calibration and qualification must
+not claim executor-backed evidence yet.
+
+Validate the authority from a full-history checkout:
+
+```sh
+python3 scripts/check_landing_evidence.py --main-ref origin/main
+```
+
 ## Usage Entry
 
 Use this repo as a skill-asset governance seed:
@@ -16,6 +33,7 @@ python3 scripts/sample_autoresearch_traces.py
 python3 scripts/check_wiki_graph_sync.py
 python3 scripts/check_openwiki.py
 python3 scripts/check_plan_package_compat.py
+python3 scripts/check_landing_evidence.py --main-ref origin/main
 ```
 
 The primary human/agent guide is `openwiki/quickstart.md`, the wiki's single declared entry
@@ -30,6 +48,8 @@ runtime assets and validation scripts only. Small-loop control assets stay in
 - behavior cases: `skills/gemini_interactions/cases.json`
 - local defense entries: `.githooks/pre-push`, `.githooks/commit-msg`
 - production gate entry: `scripts/git_gate.py`
+- landing-evidence authority: `data/project/landing-evidence.json`
+- landing-evidence validator: `scripts/check_landing_evidence.py`
 - compensated molecular commit lineage: `data/commit_lineage/gcr_molecular_commits.json`
   (the ledger and its validator live here; the commits it describes do not. It is therefore
   **not** in `git_gate.py`'s gate list — validate it from the workspace that holds those
