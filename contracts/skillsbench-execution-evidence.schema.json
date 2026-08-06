@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/skillsbench-execution-evidence.schema.json",
+  "title": "SkillsBench execution parity evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "bundle_digest",
+    "surface",
+    "upstream",
+    "execution",
+    "task_check_passed",
+    "oracle",
+    "verifier_probe",
+    "evidence_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "skillsbench-execution-evidence@1"},
+    "task_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "bundle_digest": {"$ref": "#/$defs/sha256"},
+    "surface": {"enum": ["upstream", "normalized"]},
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["benchflow_version", "agent", "sandbox"],
+      "properties": {
+        "benchflow_version": {"type": "string", "minLength": 1},
+        "agent": {"const": "oracle"},
+        "sandbox": {"const": "docker"}
+      }
+    },
+    "task_check_passed": {"const": true},
+    "oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_digest",
+        "task_digest",
+        "reward",
+        "error",
+        "verifier_error"
+      ],
+      "properties": {
+        "result_digest": {"$ref": "#/$defs/sha256"},
+        "task_digest": {"$ref": "#/$defs/sha256"},
+        "reward": {"type": "number"},
+        "error": {"type": ["string", "null"]},
+        "verifier_error": {"type": ["string", "null"]}
+      }
+    },
+    "verifier_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_digest",
+        "reward",
+        "diagnostics_class",
+        "diagnostics_digest"
+      ],
+      "properties": {
+        "input_digest": {"$ref": "#/$defs/sha256"},
+        "reward": {"type": "number"},
+        "diagnostics_class": {"type": "string", "minLength": 1},
+        "diagnostics_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "evidence_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
