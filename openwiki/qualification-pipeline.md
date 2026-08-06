@@ -11,33 +11,42 @@ This page tracks what has actually run and where each part lives. Every
 factual claim carries a source anchor; this page is itself checkable by the
 anchor oracle it documents.
 
-## Directory structure (landed by slices 1+2)
+## Directory structure
 
 ```
 agent-skills-repo/
 ├── anchor_oracle/            # deterministic anchoring oracle (slice 1)
 ├── scripts/
 │   ├── anchor_oracle.py      # thin CLI over the oracle
-│   └── check_landing_evidence.py
+│   ├── check_landing_evidence.py
+│   ├── run_sandbox_case.py   # OpenShell host entry
+│   └── sandbox_case_runner.py# uploaded, scrubbed in-sandbox runner
 ├── skill_arena/
-│   ├── core.py               # admission, hard gates, receipts (dependency)
-│   ├── skill_assets.py       # artifact digests + corpus guards (slice 2)
-│   └── landing_evidence.py   # completion-evidence validator
-├── contracts/                # receipt and governance JSON schemas
-├── data/project/
-│   └── landing-evidence.json # repository-local completion authority
+│   ├── core.py               # admission, hard gates, receipts
+│   ├── skill_assets.py       # artifact digests + corpus guards
+│   ├── landing_evidence.py   # completion-evidence validator
+│   └── sandbox_executor/     # model, signing, outcomes, OpenShell adapter
+├── contracts/
+│   ├── sandbox-case-receipt.schema.json
+│   ├── sandbox-executor.schema.json
+│   └── landing-evidence.schema.json
+├── data/
+│   ├── project/landing-evidence.json
+│   ├── sandbox_cases/smoke-python.json
+│   ├── sandbox_profiles/
+│   └── verification_runs/openshell_executor_status.json
 ├── skills/repo_wiki_verified/
-│   ├── skills.md             # the discipline (WHY/HOW/WHEN/WHEN NOT)
-│   ├── manifest.json         # recomputable digests, pending-qualification
-│   └── corpus.json           # exportable PUBLIC cases only
+│   ├── skills.md
+│   ├── manifest.json
+│   └── corpus.json
 └── tests/
     ├── test_anchor_oracle.py
     ├── test_landing_evidence.py
     ├── test_repo_wiki_verified_corpus.py
-    └── fixtures/             # public fixtures; blind pool is NOT published
+    └── test_sandbox_executor.py
 ```
 
-## Dataflow (executed ✅ / pending ⛔)
+## Dataflow (executed ✅ / in review 🟡 / pending ⛔)
 
 ```
 published QA bank ──seeds──▶ corpus.json (public cases)
@@ -49,8 +58,11 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
         ▼ real evidence digests
 ✅ skill_arena admission + hard-gate dry run (DRAFT ppm threshold)
         ▼
-⛔ sandbox executor → calibration run → human-frozen budgets
-        → qualification run + human admit → first qualification receipt
+🟡 executor contract + OpenShell 0.0.59 adapter + simulated control-plane tests
+        ▼
+⛔ real gateway-backed run twice + admitted signed receipt + no-residue evidence
+        ▼
+⛔ calibration → human-frozen budgets → qualification → human admit
 ```
 
 ## Anchored claims
@@ -67,9 +79,17 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
   exportable corpus (src: skill_arena/skill_assets.py `def assert_corpus_exportable(`).
 - Completion requires a reachable commit plus digested paths and tests
   (src: data/project/landing-evidence.json `"completion_rule": "reachable-commit-plus-digested-paths-and-tests"`).
-- The sandbox executor remains pending in the repository authority
-  (src: data/project/landing-evidence.json `"title": "Sandbox executor walking skeleton",`).
-  Its evidence level is missing (src: data/project/landing-evidence.json `"evidence_level": "missing",`).
+- The executor requires a visibly development-scoped key
+  (src: skill_arena/sandbox_executor/signing.py `sandbox receipt key id must be visibly development-scoped (dev-*)`).
+- A key inside the repository is rejected
+  (src: skill_arena/sandbox_executor/signing.py `sandbox receipt private key must live outside the repository`).
+- A cleanup failure is a distinct non-signing result
+  (src: skill_arena/sandbox_executor/signing.py `sandbox cleanup was not verified`).
+- The OpenShell transport profile is pinned
+  (src: data/sandbox_profiles/openshell-0.0.59-docker.json `"target_transport_profile": "openshell-cli-create-command@0.0.59",`).
+- Contract code is not physical execution evidence; the status remains explicit
+  (src: data/verification_runs/openshell_executor_status.json `"real_integration": "not_executed",`).
+  It is not qualification eligible (src: data/verification_runs/openshell_executor_status.json `"qualification_eligible": false,`).
 - An unreachable commit can never satisfy a completed item
   (src: skill_arena/landing_evidence.py `completed commit is not reachable from`).
 
@@ -81,6 +101,8 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
   same PR as any change to the boundary between executed and pending stages.
 - A `completed` item requires a full commit reachable from `main`, exact
   changed paths, and digested test evidence; the validator checks all three.
-- The sandbox executor remains tracked by open issue #3. Calibration (#5) and
-  qualification (#6) cannot claim executor-backed evidence until that landing
-  exists and passes the repository-local authority gate.
+- The executor contract may be reviewed and merged without closing issue #3.
+  Issue #3 closes only after real OpenShell runs, receipt admission, tamper
+  rejection, external-key custody review, and no-residue evidence are landed.
+- Calibration (#5) and qualification (#6) remain blocked until that physical
+  integration evidence exists and passes the repository-local authority gate.
