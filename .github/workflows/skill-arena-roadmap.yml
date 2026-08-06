@@ -5,6 +5,7 @@ on:
     paths:
       - 'contracts/skill-arena-roadmap.schema.json'
       - 'data/project/skill-arena-roadmap.json'
+      - 'data/project/landing-evidence.json'
       - 'skill_arena/roadmap.py'
       - 'scripts/check_skill_arena_roadmap.py'
       - 'tests/test_skill_arena_roadmap.py'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'contracts/skill-arena-roadmap.schema.json'
       - 'data/project/skill-arena-roadmap.json'
+      - 'data/project/landing-evidence.json'
       - 'skill_arena/roadmap.py'
       - 'scripts/check_skill_arena_roadmap.py'
       - 'tests/test_skill_arena_roadmap.py'
