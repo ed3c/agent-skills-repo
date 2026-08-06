@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "managed-execution-receipt@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "receipt_id", "authorization_receipt_hash",
+        "decision_hash", "workload_identity_receipt_hash", "execution_attempt_id",
+        "skill_id", "artifact_digest", "qualification_receipt_id",
+        "snapshot_hash", "host_profile_id", "carrier_id",
+        "attestation_evidence_digest", "nonce_consumption_evidence_digest",
+        "feedback_digest", "outcome", "audience", "started_at",
+        "completed_at", "issued_at", "expires_at"
+      ],
+      "properties": {
+        "schema_version": {"const": "managed-execution-receipt@1"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "authorization_receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "decision_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "workload_identity_receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "execution_attempt_id": {"type": "string", "minLength": 1},
+        "skill_id": {"type": "string", "minLength": 1},
+        "artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "qualification_receipt_id": {"type": "string", "minLength": 1},
+        "snapshot_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "host_profile_id": {"type": "string", "minLength": 1},
+        "carrier_id": {"type": "string", "minLength": 1},
+        "attestation_evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "nonce_consumption_evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "feedback_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "outcome": {"enum": ["succeeded", "failed"]},
+        "audience": {"type": "string", "minLength": 1},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}

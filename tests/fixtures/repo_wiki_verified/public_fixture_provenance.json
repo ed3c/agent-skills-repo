@@ -1,0 +1,47 @@
+{
+  "files": [
+    {
+      "path": "skills/gemini_interactions/status.json",
+      "sha256": "ac12a595170f27f08a51ab5cfd09a601636acff5d0d83238d9ad896ec48edba1"
+    },
+    {
+      "path": "scripts/skill_description_linter.py",
+      "sha256": "876a4cb9f8fb4c268e58de4cc5991a24103e2c0729fe459b96bdee2d0ecd58a7"
+    },
+    {
+      "path": "scripts/git_gate.py",
+      "sha256": "4388b80d1ade871ee0b5de9ef9b14da40f04fde3243a8366db32efa57dba55fc"
+    },
+    {
+      "path": "scripts/ablation_engine.py",
+      "sha256": "cc24ee5ac1ad25e4a8623fe44f71eaa3f64a4fb6b3164bb2969dcbfac9c7a154"
+    },
+    {
+      "path": "scripts/validate_commit_message.py",
+      "sha256": "8dc04a3824079696f0e5fc67c0271ac509b3fa0afee0a3c398954135d7f4b570"
+    },
+    {
+      "path": "scripts/sync_wiki_to_graph.py",
+      "sha256": "4cf2f92b6b9a3dbb6bd2982ccd94e70b5f05403015b54a692e5bc25972b8721e"
+    },
+    {
+      "path": "scripts/validate_progressive_disclosure.py",
+      "sha256": "b02ebcca2cb2aea154b455045aa4a786aa5c5acec7750f725a7f4d27f0c0f5a5"
+    },
+    {
+      "path": "scripts/validate_skills_baseline.py",
+      "sha256": "338dcefe84adcec74cec6928af61718f0e8d0f583006addda69dbb17aa6fbf40"
+    },
+    {
+      "path": "scripts/no_op_pruner.py",
+      "sha256": "27070240f2b85af5e58d90de1bcdb9179cf50aa28b45aff6d99f31cca25ae3a4"
+    },
+    {
+      "path": "scripts/no_ops_purger.py",
+      "sha256": "e284a3221dd21592b43b9133c594b5f9eb02fc3ac5b62bee4633dca0819600e1"
+    }
+  ],
+  "origin": "ed3c/agent-skills-repo-fixture",
+  "pinned_sha": "59a1f214fae1ccd06cc18aa8e923f3263d353c1d",
+  "rule": "byte-exact copies of the listed files at the pinned sha; anchors in corpus.json resolve against this subset AND against the full pinned fixture"
+}

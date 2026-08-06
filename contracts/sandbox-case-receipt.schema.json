@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "sandbox-case-receipt@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "receipt_id", "case_id", "case_group",
+        "case_input_digest", "benchmark_suite_digest", "skill_artifact_digest",
+        "target_host_profile_id", "target_host_version", "target_transport_profile",
+        "target_policy_profile", "sandbox_profile_id", "sandbox_image_digest",
+        "sandbox_policy_digest", "sandbox_attestation_evidence_digest",
+        "artifact_access_policy", "workspace_disposition", "secret_policy",
+        "allowed_tools_digest",
+        "resource_limits", "passed", "output_evidence_digest",
+        "started_at", "completed_at", "issued_at", "expires_at"
+      ],
+      "properties": {
+        "schema_version": {"const": "sandbox-case-receipt@1"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "case_id": {"type": "string", "minLength": 1},
+        "case_group": {"enum": ["critical", "anchor", "target"]},
+        "case_input_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "benchmark_suite_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "skill_artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "target_host_profile_id": {"type": "string", "minLength": 1},
+        "target_host_version": {"type": "string", "minLength": 1},
+        "target_transport_profile": {"type": "string", "minLength": 1},
+        "target_policy_profile": {"type": "string", "minLength": 1},
+        "sandbox_profile_id": {"type": "string", "minLength": 1},
+        "sandbox_image_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "sandbox_policy_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "sandbox_attestation_evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "artifact_access_policy": {"const": "read-only@1"},
+        "workspace_disposition": {"const": "disposable@1"},
+        "secret_policy": {"const": "no-production-secrets@1"},
+        "allowed_tools_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cpu_time_ms", "wall_time_ms", "memory_bytes", "process_count_max", "network_policy"],
+          "properties": {
+            "cpu_time_ms": {"type": "integer", "minimum": 1},
+            "wall_time_ms": {"type": "integer", "minimum": 1},
+            "memory_bytes": {"type": "integer", "minimum": 1},
+            "process_count_max": {"type": "integer", "minimum": 1},
+            "network_policy": {"type": "string", "minLength": 1}
+          }
+        },
+        "passed": {"type": "boolean"},
+        "output_evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}

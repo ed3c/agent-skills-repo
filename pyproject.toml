@@ -3,6 +3,7 @@ name = "agent-skills-repo"
 version = "0.1.0"
 description = "GCR skill asset governance seed with deterministic local defenses."
 requires-python = ">=3.11"
+dependencies = ["jsonschema==4.26.0", "cryptography==50.0.0", "PyYAML==6.0.3"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

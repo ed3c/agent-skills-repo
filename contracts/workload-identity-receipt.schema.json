@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workload-identity-receipt@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "receipt_id", "subject", "trust_domain", "carrier_id", "audience",
+        "attestation_profile_id", "attestation_evidence_digest", "policy_snapshot_hash", "host_profile_id",
+        "host_version", "maximum_permissions", "available_skill_ids",
+        "maximum_p95_latency_us", "maximum_cost_microunits",
+        "transport_profile", "policy_profile", "host_capabilities",
+        "human_approval_policy_id", "human_approval_required", "issued_at", "not_before", "expires_at"
+      ],
+      "properties": {
+        "schema_version": {"const": "workload-identity-receipt@1"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "subject": {"type": "string", "minLength": 1},
+        "trust_domain": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*$"},
+        "carrier_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+        "audience": {"type": "string", "minLength": 1},
+        "attestation_profile_id": {"type": "string", "minLength": 1},
+        "attestation_evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "policy_snapshot_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "host_profile_id": {"type": "string", "minLength": 1},
+        "host_version": {"type": "string", "minLength": 1},
+        "maximum_permissions": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "available_skill_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "maximum_p95_latency_us": {"type": "integer", "minimum": 0},
+        "maximum_cost_microunits": {"type": "integer", "minimum": 0},
+        "transport_profile": {"type": "string", "minLength": 1},
+        "policy_profile": {"type": "string", "minLength": 1},
+        "host_capabilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "human_approval_policy_id": {"type": "string", "minLength": 1},
+        "human_approval_required": {"type": "boolean"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "not_before": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}

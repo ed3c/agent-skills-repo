@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "qualification-receipt@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "receipt_id", "skill_artifact_digest", "host_profile_id",
+        "host_version_range", "transport_profile", "policy_profile",
+        "benchmark_suite_digest", "evaluator_version", "measured_metrics",
+        "promotion_gate_receipt_hash", "issued_at", "expires_at", "status"
+      ],
+      "properties": {
+        "schema_version": {"const": "qualification-receipt@1"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "skill_artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "host_profile_id": {"type": "string", "minLength": 1},
+        "host_version_range": {"type": "string", "minLength": 1},
+        "transport_profile": {"type": "string", "minLength": 1},
+        "policy_profile": {"type": "string", "minLength": 1},
+        "benchmark_suite_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "evaluator_version": {"type": "string", "minLength": 1},
+        "promotion_gate_receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "measured_metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["success_rate_ppm", "p95_latency_us", "cost_microunits"],
+          "properties": {
+            "success_rate_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+            "p95_latency_us": {"type": "integer", "minimum": 0},
+            "cost_microunits": {"type": "integer", "minimum": 0}
+          }
+        },
+        "issued_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "status": {"const": "qualified"}
+      }
+    },
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}

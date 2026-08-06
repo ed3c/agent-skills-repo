@@ -1,0 +1,317 @@
+{
+  "cases": [
+    {
+      "acceptance": [
+        "Exactly two skill directories exist under skills/: autoresearch_composer and gemini_interactions",
+        "skills/gemini_interactions/status.json declares status:\"quarantined\" and production_routable:false (decision_date 2026-07-27)",
+        "autoresearch_composer has no status.json; data/lifecycle/skill_optimization_registry.json declares its current_status as \"production-seed-candidate\" and data/lifecycle/promotion_records.json declares promotion_status \"candidate_until_human_admit\" with human_admit \"required_before_promotion\""
+      ],
+      "case_id": "crit-assets01-quarantine-status",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "critical",
+      "mutation_labels": [
+        "boundary"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording the promotion status of the quarantined skill asset, quoting the pinned status file verbatim.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Skill asset promotion status\ndescription: Anchored answer for bank question assets-01 at the pinned fixture.\n---\n\n# Skill asset promotion status\n\nThe gemini_interactions asset is quarantined (src: skills/gemini_interactions/status.json `\"status\": \"quarantined\",`).\n\nand it is not routable to production (src: skills/gemini_interactions/status.json `\"production_routable\": false,`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "assets-01",
+        "seed_digest": "sha256:acba31a7d5d20da44b71a57fbb67b445859382403ba000c932b76fd09e1f3532"
+      },
+      "source_files": [
+        "skills/gemini_interactions/status.json",
+        "data/lifecycle/skill_optimization_registry.json",
+        "data/lifecycle/promotion_records.json"
+      ]
+    },
+    {
+      "acceptance": [
+        "skills.md text must contain the literal substrings \"WHY:\", \"HOW:\", \"WHEN:\", \"WHEN NOT:\" (REQUIRED tuple) or each missing one is reported",
+        "Word count (via text.replace(\"\\n\",\" \").split()) must not exceed 200 words",
+        "FORBIDDEN case-insensitive substrings are exactly: \"please\", \"recommended\", \"should\", \"easy to use\", \"best practice\"; any hit plus any missing marker or >200 words causes exit code 2 with \"FAIL: skill description lint failed\""
+      ],
+      "case_id": "crit-assets03-linter-contract",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "critical",
+      "mutation_labels": [
+        "boundary"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording the exact section markers and banned vocabulary the description linter enforces, quoting the pinned linter source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Skill description linter contract\ndescription: Anchored answer for bank question assets-03 at the pinned fixture.\n---\n\n# Skill description linter contract\n\nThe linter demands four literal section markers (src: scripts/skill_description_linter.py:12 `REQUIRED = (\"WHY:\", \"HOW:\", \"WHEN:\", \"WHEN NOT:\")`).\n\nand rejects five banned vocabulary items (src: scripts/skill_description_linter.py `FORBIDDEN = (\"please\", \"recommended\", \"should\", \"easy to use\", \"best practice\")`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "assets-03",
+        "seed_digest": "sha256:2f67d5723ba348522932c026e9dcbab45ead090d26f4879633e729302c889c61"
+      },
+      "source_files": [
+        "scripts/skill_description_linter.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "GATES has exactly 22 entries, in this order: validator.py, validate_skills_baseline.py, skill_description_linter.py, validate_progressive_disclosure.py, validate_goal_constraints.py, validate_commit_message.py, github_skill_harvester.py, synthetic_case_generator.py, synthetic_case_quality_report.py, semantic_arbitration_report.py, interactions_patch_assert_runner.py, local_regex_runner.py, benchmark_runner.py, ablation_engine.py, llm_judge.py, check_openwiki.py, check_wiki_graph_sync.py, render_lifecycle_openwiki.py, check_lifecycle_datasets.py, check_autoresearch_lifecycle.py, no_op_pruner.py, no_ops_purger.py",
+        "the for-loop `break`s on the first non-zero returncode, prints `FAIL: gate failed: {gate}` to stderr, and git_gate.py's own exit code becomes that failing gate's returncode (so gates after it never run)"
+      ],
+      "case_id": "crit-gates02-gate-roster",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "critical",
+      "mutation_labels": [
+        "chain_escalation"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording where the git gate declares its ordered roster of gate scripts, quoting the pinned gate source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Git gate roster\ndescription: Anchored answer for bank question gates-02 at the pinned fixture.\n---\n\n# Git gate roster\n\nThe gate roster is a literal ordered list (src: scripts/git_gate.py:18 `GATES = [`).\n\nand the runner walks it in declaration order (src: scripts/git_gate.py `for gate in GATES:`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "gates-02",
+        "seed_digest": "sha256:b6fccfa2eaf676fde00a9e4a65705374875abc6f2248abd6dc066f43145e05b1"
+      },
+      "source_files": [
+        "scripts/git_gate.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "TARGET_DELTA = 0.05 (a module-level constant)",
+        "verdict is 'PASS' only if delta > TARGET_DELTA (strictly greater than 0.05, not >=); the main() error message also fires when verdict != 'PASS'"
+      ],
+      "case_id": "anch-evals01-target-delta",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "anchor",
+      "mutation_labels": [
+        "boundary"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording the ablation target delta constant and the comparison that turns it into a verdict, quoting the pinned engine source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Ablation target delta\ndescription: Anchored answer for bank question evals-01 at the pinned fixture.\n---\n\n# Ablation target delta\n\nThe preregistered delta constant is fixed (src: scripts/ablation_engine.py:15 `TARGET_DELTA = 0.05`).\n\nand the verdict comparison is strictly greater-than (src: scripts/ablation_engine.py `\"verdict\": \"PASS\" if delta > TARGET_DELTA else \"FAIL\",`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "evals-01",
+        "seed_digest": "sha256:b98c0a6e6ee899b60999a3bb64de24efd71bc772859db5c223155aaaf6a13454"
+      },
+      "source_files": [
+        "scripts/ablation_engine.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "REQUIRED_FIELDS are: Intent-Slice:, Route:, Plan-Package:, Small-Loop:, Final-Repo:, Exchange-Format:, Exchange-Packet:, Fixed-Prompt-Context:, Iteration-Auto-Context:, Emergent-Prompt-Context:, Dataflow: — plus Intent-Slice must match `GCR-SLICE-\\d{2}`, Plan-Package/Small-Loop/Final-Repo must equal specific canonical absolute paths under the resolved workspace root, at least 5 absolute workspace paths must appear, and the message must reference `<external-workspace>/gemini_research/gcr/047d548af8f8e34c-conversation.md`, `ROUTES.md#plan-package-materialization`, and `modules/exchange-formats.md`",
+        "validate_file() returns exit code 2 and prints `FAIL: commit message traceability contract failed` plus the list of missing/mismatched fields to stderr if any check fails; on success it prints `PASS: commit message traceability contract` and returns 0"
+      ],
+      "case_id": "anch-gates06-commit-fields",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "anchor",
+      "mutation_labels": [
+        "constraint_conflict"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording where the commit-message hook declares its required fields, quoting the pinned hook source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Commit message required fields\ndescription: Anchored answer for bank question gates-06 at the pinned fixture.\n---\n\n# Commit message required fields\n\nThe hook declares a literal tuple of required fields (src: scripts/validate_commit_message.py:12 `REQUIRED_FIELDS = (`).\n\nand checks each declared field in turn (src: scripts/validate_commit_message.py `for field in REQUIRED_FIELDS:`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "gates-06",
+        "seed_digest": "sha256:028c28a32ada4a96b6531af17ce53463780d2dc0155bf599fcd7e9c4db7740b3"
+      },
+      "source_files": [
+        "scripts/validate_commit_message.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "data/wiki_graph/event_log.jsonl and data/wiki_graph/sample_graph.json are both fully rewritten via path.write_text(...) (not merged/appended) each run",
+        "The generator reads every *.md file under the openwiki/ root (default --wiki-root ROOT/openwiki, sorted via rglob) plus data/wiki_graph/schema.json for schema_version/embedding config; data/wiki_graph/schema.json itself is not overwritten by this script"
+      ],
+      "case_id": "anch-data02-graph-outputs",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "anchor",
+      "mutation_labels": [
+        "semantic_noise"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording which wiki-graph data files the sync script overwrites wholesale, quoting the pinned sync source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Wiki graph sync outputs\ndescription: Anchored answer for bank question data-02 at the pinned fixture.\n---\n\n# Wiki graph sync outputs\n\nThe sync script writes the event log wholesale (src: scripts/sync_wiki_to_graph.py `parser.add_argument(\"--event-log\", type=Path, default=ROOT / \"data/wiki_graph/event_log.jsonl\")`).\n\nand the graph snapshot wholesale (src: scripts/sync_wiki_to_graph.py `parser.add_argument(\"--graph-out\", type=Path, default=ROOT / \"data/wiki_graph/sample_graph.json\")`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "data-02",
+        "seed_digest": "sha256:6018f696dd2dc26fa6aa542be1c115ecc382e90f6db2f598d67eaf803dbab35a"
+      },
+      "source_files": [
+        "scripts/sync_wiki_to_graph.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "each skills/*/skills.md must contain WHY:, HOW:, WHEN:, WHEN NOT:, must contain a `references/` route pattern, and must have a sibling `references/` directory that actually exists on disk (`path.parent / \"references\"` must be a dir)",
+        "the NOISE regex `\\b(?:AWS_ACCESS_KEY|GOOGLE_APPLICATION_CREDENTIALS|[0-9]{1,3}(?:\\.[0-9]{1,3}){3})\\b` (i.e. those literal env-var names or any dotted-quad-shaped token like an IP address) matching anywhere in the root skill text triggers 'deployment detail leaked into root skill' and exit 2"
+      ],
+      "case_id": "targ-gates10-disclosure-signals",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "target",
+      "mutation_labels": [
+        "boundary"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording the root signals and route pattern the progressive disclosure check enforces, quoting the pinned check source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Progressive disclosure boundaries\ndescription: Anchored answer for bank question gates-10 at the pinned fixture.\n---\n\n# Progressive disclosure boundaries\n\nThe check demands four root signals (src: scripts/validate_progressive_disclosure.py `REQUIRED_ROOT_SIGNALS = (\"WHY:\", \"HOW:\", \"WHEN:\", \"WHEN NOT:\")`).\n\nand one route pattern into references (src: scripts/validate_progressive_disclosure.py `REQUIRED_ROUTES = (r\"references/\",)`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "gates-10",
+        "seed_digest": "sha256:6a69734f1753cdf4394b51b5acce34e6a704c08d7f24b754cff601235ffa586f"
+      },
+      "source_files": [
+        "scripts/validate_progressive_disclosure.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "Without --all it calls modified_case_files(), parsing `git status --porcelain` lines against regex `^[AM\\s]{1,2}\\s+(skills/.*/cases\\.json)$` to find only added/modified case files; if that yields zero paths it falls back to all_case_files() (every skills/*/cases.json) rather than passing/failing silently",
+        "If git status returns non-zero specifically because of 'not a git repository' in stderr, modified_case_files() returns [] (treated the same as 'no modified files', triggering the fallback-to-all path); any other non-zero git status raises RuntimeError, causing exit code 2"
+      ],
+      "case_id": "targ-evals09-baseline-selection",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "target",
+      "mutation_labels": [
+        "boundary",
+        "semantic_noise"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording how the baseline check selects case files to validate, quoting the pinned baseline source.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Baseline case selection\ndescription: Anchored answer for bank question evals-09 at the pinned fixture.\n---\n\n# Baseline case selection\n\nChanged-file selection is a literal regex (src: scripts/validate_skills_baseline.py `CASE_PATH = re.compile(r\"^[AM\\s]{1,2}\\s+(skills/.*/cases\\.json)$\")`).\n\nand the full scan is a directory glob (src: scripts/validate_skills_baseline.py `return sorted((ROOT / \"skills\").glob(\"*/cases.json\"))`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "evals-09",
+        "seed_digest": "sha256:36f9ccfb729a72ff79de604b7a685f842033a006abcec6a7d02a13faa3bca72b"
+      },
+      "source_files": [
+        "scripts/validate_skills_baseline.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "no_op_pruner.py is read-only/dry-run: its docstring is \"Dry-run no-op phrase detector for skill prompts\", it scans every skills/*/skills.md and never writes, only reporting findings; it takes no --skill argument, only --repo-root",
+        "no_ops_purger.py is the one that actually mutates: purge_text() removes matched no-op lines one at a time as long as run_p2_evaluation(candidate_text) does not regress below baseline, and its default target is a single file, ROOT/\"skills/gemini_interactions/skills.md\", via a --skill argument"
+      ],
+      "case_id": "targ-assets07-pruner-vs-purger",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "target",
+      "mutation_labels": [
+        "constraint_conflict"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page contrasting what the pruner and the purger scripts actually scan, quoting both pinned sources.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Pruner versus purger\ndescription: Anchored answer for bank question assets-07 at the pinned fixture.\n---\n\n# Pruner versus purger\n\nThe pruner scans against its own pattern list (src: scripts/no_op_pruner.py `NO_OPS = (\"clean code\", \"easy to read\", \"best practice\", \"highly recommended\", \"please\")`).\n\nwhile the purger matches its patterns case-insensitively (src: scripts/no_ops_purger.py `return any(re.search(pattern, line, re.IGNORECASE) for pattern in NO_OPS_PATTERNS)`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "assets-07",
+        "seed_digest": "sha256:5a55ec9805519acda683c441d6b6345360046e63dc7a0230d4a29f98e1d62a41"
+      },
+      "source_files": [
+        "scripts/no_op_pruner.py",
+        "scripts/no_ops_purger.py"
+      ]
+    },
+    {
+      "acceptance": [
+        "no_op_pruner.py only reads each skills/*/skills.md, lower-cases it, and checks for any of NO_OPS = (\"clean code\", \"easy to read\", \"best practice\", \"highly recommended\", \"please\"); if found it exits 2 with 'FAIL: no-op prompt phrases found' — it never writes anything",
+        "no_ops_purger.py's purge_text() only computes an in-memory simulated purge (using a fake heuristic run_p2_evaluation() that returns 0.10 or 0.95 based solely on whether the string \"Interactions\" appears) and prints purged_count/tokens_saved; main() never calls `.write_text()` on args.skill, so the on-disk skill file is never modified despite the script's name"
+      ],
+      "case_id": "targ-gates12-filler-shared-scan",
+      "forbidden_patterns": [
+        "guaranteed veracity",
+        "semantically infallible",
+        "proven beyond dispute"
+      ],
+      "group": "target",
+      "mutation_labels": [
+        "semantic_noise"
+      ],
+      "pool": "public",
+      "prompt": "Write an anchored wiki page recording the filler-phrase scan lines of the pruner and the purger, quoting both pinned sources.",
+      "reference_wiki_page": "---\ntype: Reference\ntitle: Filler phrase scanning\ndescription: Anchored answer for bank question gates-12 at the pinned fixture.\n---\n\n# Filler phrase scanning\n\nThe pruner declares its filler patterns inline (src: scripts/no_op_pruner.py `for phrase in NO_OPS:`).\n\nand the purger declares a separate pattern list (src: scripts/no_ops_purger.py `NO_OPS_PATTERNS = (`).\n",
+      "seed": {
+        "bank": "qa/bank-public.json",
+        "question_id": "gates-12",
+        "seed_digest": "sha256:ccedf4f6b12c6a71aaca7ffd21c58d5dba7887bce76c0ebcde036a396a2f21cd"
+      },
+      "source_files": [
+        "scripts/no_op_pruner.py",
+        "scripts/no_ops_purger.py"
+      ]
+    }
+  ],
+  "checker": {
+    "authority": "lexical-only; llm_judge_authority is advisory_only",
+    "cli": "scripts/anchor_oracle.py",
+    "library": "anchor_oracle.evaluate_wiki",
+    "verdict_schema": "anchor-oracle-verdict@1"
+  },
+  "hard_gate": {
+    "note": "integer ppm; DRAFT only — real preregistration happens at Slice 4/5, before any promotion decision reads this value",
+    "target_success_threshold_ppm": 900000,
+    "threshold_status": "DRAFT"
+  },
+  "mutation_label_vocabulary": [
+    "boundary",
+    "chain_escalation",
+    "constraint_conflict",
+    "semantic_noise"
+  ],
+  "pools": {
+    "blind": {
+      "cases_file": "tests/fixtures/blind_seed/blind_cases.json",
+      "fixture": "tests/fixtures/blind_seed",
+      "note": "blind gold cases live outside this exportable file; skill_arena.skill_assets.assert_corpus_exportable is the mechanical guard",
+      "provenance": "fresh content, never published; DO-NOT-PUBLISH"
+    },
+    "public": {
+      "fixture": {
+        "origin": "ed3c/agent-skills-repo-fixture",
+        "pinned_sha": "59a1f214fae1ccd06cc18aa8e923f3263d353c1d",
+        "vendored_subset": "tests/fixtures/repo_wiki_verified/public_fixture_subset"
+      },
+      "seed_bank": "qa/bank-public.json",
+      "seed_bank_provenance": "ed3c anchoring experiment @ df2f360; BOTH qa banks are published, so every bank-derived case is pool public"
+    }
+  },
+  "schema_version": "repo-wiki-verified-corpus@1",
+  "skill_id": "repo_wiki_verified"
+}

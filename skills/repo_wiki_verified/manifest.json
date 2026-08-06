@@ -1,0 +1,44 @@
+{
+  "artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+  "artifact_digest_spec": {
+    "algorithm": "sha256 over canonical JSON",
+    "artifact_files": "skills.md plus every regular file under references/, recursively",
+    "canonicalization": "entries {\"path\": <POSIX relpath from the skill directory>, \"sha256\": <lowercase hex sha256 of the file bytes>} sorted by path; canonical value {\"files\": [entries]}; canonical bytes json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(\",\", \":\")).encode(); digest \"sha256:\" + hexdigest of those bytes",
+    "exclusions": "manifest.json (cannot digest itself) and corpus.json (benchmark data, digested separately below)",
+    "implementation": "skill_arena.skill_assets.compute_artifact_digest"
+  },
+  "benchmark_corpus_digest": "sha256:0e835d69d6b2d14647c72068e9efca36ba87f42ce932934e686cc1c49d843057",
+  "benchmark_corpus_digest_spec": "sha256 over the raw bytes of corpus.json (the exportable public corpus file; blind cases live outside it and are not part of this digest)",
+  "capabilities": [
+    "repo-wiki-generation-with-pinned-openwiki-into-okf-v0.1",
+    "source-anchoring-every-factual-claim-as-src-path-verbatim-quote",
+    "mechanical-anchor-oracle-verification-loop",
+    "anchor-repair-until-lexical-pass"
+  ],
+  "negative_exemplars": [
+    "Certify that an anchored page is factually correct — lexical resolution is not entailment",
+    "Anchor claims against a dirty or unpinned checkout",
+    "Fetch sources over the network to anchor against"
+  ],
+  "non_capabilities": [
+    "no semantic-truth guarantee: a lexical anchor pass never establishes that a claim is true, current, or complete",
+    "no network fetching: the oracle and the loop read only the local pinned fixture repository",
+    "no host qualification: this artifact does not qualify, attest, or admit any execution host"
+  ],
+  "permissions": [
+    "fs-read:fixture-repo",
+    "fs-read:wiki-dir",
+    "fs-write:wiki-dir",
+    "exec:python3-scripts/anchor_oracle.py",
+    "exec:git-read-only-rev-parse-and-status"
+  ],
+  "positive_exemplars": [
+    "Generate a wiki for a pinned repo snapshot and iterate with the anchor oracle until every page passes lexically",
+    "Repair a page whose anchor reports quote_not_found by re-copying the quote byte-for-byte from the pinned file"
+  ],
+  "qualification_note": "explicit sentinel: no qualification receipt exists yet; the binding is validated at Slice 5",
+  "qualification_receipt_id": "pending-qualification",
+  "schema_version": "skill-manifest@1",
+  "skill_id": "repo_wiki_verified",
+  "skill_version": "0.1.0"
+}

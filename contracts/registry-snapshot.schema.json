@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "registry-snapshot@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payload", "snapshot_hash", "issuer_key_id", "signature"],
+  "properties": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+        "required": ["schema_version", "sequence", "issued_at", "not_after", "taxonomy_version", "ranking_policy", "skills", "qualification_receipts", "revocations"],
+      "properties": {
+        "schema_version": {"enum": ["registry-snapshot@1", "registry-snapshot@2"]},
+        "minimum_resolver_build": {"type": "string", "pattern": "^resolver@[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "required_features": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[a-z0-9-]+@[0-9]+$"},
+          "uniqueItems": true
+        },
+        "sequence": {"type": "integer", "minimum": 1},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "not_after": {"type": "string", "format": "date-time"},
+        "taxonomy_version": {"type": "string", "minLength": 1},
+        "taxonomy_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_version", "taxonomy_version", "core_capabilities", "customer_namespaces", "aliases", "deprecations"],
+          "properties": {
+            "schema_version": {"const": "capability-taxonomy@1"},
+            "taxonomy_version": {"type": "string", "minLength": 1},
+            "core_capabilities": {"type": "array", "items": {"type": "string", "pattern": "^core\\.[a-z0-9_.-]+$"}, "uniqueItems": true},
+            "customer_namespaces": {"type": "array", "items": {"type": "string", "pattern": "^customer\\.[a-z0-9_-]+$"}, "uniqueItems": true},
+            "aliases": {
+              "type": "object",
+              "propertyNames": {"pattern": "^(core|customer)\\.[a-z0-9_.-]+$"},
+              "additionalProperties": {"type": "string", "minLength": 1}
+            },
+            "deprecations": {
+              "type": "object",
+              "propertyNames": {"pattern": "^(core|customer)\\.[a-z0-9_.-]+$"},
+              "additionalProperties": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "revocation_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_version", "source_sequence", "source_observed_at", "propagation_target_seconds"],
+          "properties": {
+            "schema_version": {"const": "revocation-freshness@1"},
+            "source_sequence": {"type": "integer", "minimum": 0},
+            "source_observed_at": {"type": "string", "format": "date-time"},
+            "propagation_target_seconds": {"type": "integer", "minimum": 1, "maximum": 300}
+          }
+        },
+        "ranking_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["policy_id", "tokenizer_version", "normalization_version", "ranking_version", "minimum_score", "minimum_margin"],
+          "properties": {
+            "policy_id": {"const": "lexical-fixed-point@1"},
+            "tokenizer_version": {"const": "unicode-token@1"},
+            "normalization_version": {"const": "lowercase-token@1"},
+            "ranking_version": {"const": "bm25-char3-evidence@1"},
+            "minimum_score": {"type": "integer"},
+            "minimum_margin": {"type": "integer", "minimum": 0}
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["skill_id", "artifact_digest", "capabilities", "non_capabilities", "permissions", "positive_exemplars", "negative_exemplars", "qualification_receipt_id"],
+            "properties": {
+              "skill_id": {"type": "string", "minLength": 1},
+              "skill_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+              "artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+              "non_capabilities": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+              "required_host_capabilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+              "permissions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+              "supported_profiles": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["host_profile_ids", "transport_profiles", "policy_profiles"],
+                "properties": {
+                  "host_profile_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+                  "transport_profiles": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+                  "policy_profiles": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true}
+                }
+              },
+              "positive_exemplars": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+              "negative_exemplars": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+              "fallback_skill_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+              "qualification_receipt_id": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "qualification_receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["payload", "receipt_hash", "issuer_key_id", "signature"],
+            "properties": {
+              "payload": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["schema_version", "receipt_id", "skill_artifact_digest", "host_profile_id", "host_version_range", "transport_profile", "policy_profile", "benchmark_suite_digest", "evaluator_version", "measured_metrics", "promotion_gate_receipt_hash", "issued_at", "expires_at", "status"],
+                "properties": {
+                  "schema_version": {"const": "qualification-receipt@1"},
+                  "receipt_id": {"type": "string", "minLength": 1},
+                  "skill_artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+                  "host_profile_id": {"type": "string", "minLength": 1},
+                  "host_version_range": {"type": "string", "minLength": 1},
+                  "transport_profile": {"type": "string", "minLength": 1},
+                  "policy_profile": {"type": "string", "minLength": 1},
+                  "benchmark_suite_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+                  "evaluator_version": {"type": "string", "minLength": 1},
+                  "promotion_gate_receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+                  "measured_metrics": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["success_rate_ppm", "p95_latency_us", "cost_microunits"],
+                    "properties": {
+                      "success_rate_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+                      "p95_latency_us": {"type": "integer", "minimum": 0},
+                      "cost_microunits": {"type": "integer", "minimum": 0}
+                    }
+                  },
+                  "issued_at": {"type": "string", "format": "date-time"},
+                  "expires_at": {"type": "string", "format": "date-time"},
+                  "status": {"const": "qualified"}
+                }
+              },
+              "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "issuer_key_id": {"type": "string", "minLength": 1},
+              "signature": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "revocations": {"type": "array", "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "uniqueItems": true}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"schema_version": {"const": "registry-snapshot@2"}},
+            "required": ["schema_version"]
+          },
+          "then": {
+            "required": ["minimum_resolver_build", "required_features", "taxonomy_policy", "revocation_policy"]
+          }
+        },
+        {
+          "if": {
+            "properties": {"schema_version": {"const": "registry-snapshot@1"}},
+            "required": ["schema_version"]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {"required": ["minimum_resolver_build"]},
+                {"required": ["required_features"]},
+                {"required": ["taxonomy_policy"]},
+                {"required": ["revocation_policy"]}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "snapshot_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "issuer_key_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1}
+  }
+}
