@@ -10,6 +10,24 @@ on:
       - 'data/sandbox_cases/**'
       - 'data/sandbox_profiles/**'
       - 'data/verification_runs/openshell_executor_status.json'
+      - 'docs/sandbox-executor.md'
+      - 'openwiki/qualification-pipeline.md'
+      - 'README.md'
+      - 'tests/test_sandbox_executor.py'
+      - '.github/workflows/sandbox-executor-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skill_arena/sandbox_executor/**'
+      - 'scripts/run_sandbox_case.py'
+      - 'scripts/sandbox_case_runner.py'
+      - 'contracts/sandbox-executor.schema.json'
+      - 'data/sandbox_cases/**'
+      - 'data/sandbox_profiles/**'
+      - 'data/verification_runs/openshell_executor_status.json'
+      - 'docs/sandbox-executor.md'
+      - 'openwiki/qualification-pipeline.md'
+      - 'README.md'
       - 'tests/test_sandbox_executor.py'
       - '.github/workflows/sandbox-executor-contract.yml'
   workflow_dispatch:
