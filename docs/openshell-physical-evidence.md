@@ -53,6 +53,10 @@ The workflow executes exactly two attempts. It does not retry a failed run. Both
 return codes and logs are retained, the artifact is uploaded with `if: always()`,
 and the final job fails after upload when either attempt or pair admission fails.
 
+The physical job can run only from a manual dispatch on `refs/heads/main`, behind
+the `openshell-physical-evidence` environment, on a runner carrying the required
+labels. Pull-request code cannot invoke the self-hosted gateway or key.
+
 ## Bundle contract
 
 Each successful physical run must contain exactly:
@@ -82,9 +86,15 @@ The attestation must include the complete concrete-driver control surface:
 
 ## Pair admission
 
-Run the verifier directly when two bundles already exist:
+Run both offline gates when two bundles already exist:
 
 ```sh
+python scripts/audit_development_private_key.py \
+  --repo-root . \
+  --private-key "$OPENSHELL_DEV_KEY_PATH" \
+  --output /evidence/private-key-audit.json \
+  --refs-output /evidence/repository-refs.txt
+
 python scripts/verify_openshell_evidence_pair.py \
   --bundle /evidence/run-001 \
   --bundle /evidence/run-002 \
@@ -97,7 +107,7 @@ python scripts/verify_openshell_evidence_pair.py \
   --output /evidence/pair-index.json
 ```
 
-The verifier requires:
+The pair verifier requires:
 
 - both signatures admitted by `verify_sandbox_case_receipts` at their immutable
   issuance time;
@@ -113,9 +123,29 @@ The verifier requires:
 - the external private key absent from every reachable Git blob and from tracked,
   untracked, and ignored worktree files.
 
-The private-key scan covers raw Ed25519 bytes, PKCS8 DER, normalized PKCS8 PEM,
-and the hex/base64 representation of each. Diagnostics name only the Git object
-or path; they never print key material.
+The separate all-object key audit expands that boundary. The workflow fetches all
+branches, tags, and GitHub pull-request head refs, then scans:
+
+- every reachable commit, tree, annotated tag, and blob object;
+- the exact fetched ref-name/object-id snapshot;
+- reflog text;
+- tracked, untracked, and ignored worktree paths and regular files.
+
+The audit covers source bytes, raw Ed25519, PKCS8 DER, normalized PKCS8 PEM,
+lower/upper hex, standard/base64url, and padded/unpadded encodings. Diagnostics
+name only the Git object type/id or path; they never print key material.
+
+It emits two content-addressed artifacts:
+
+```text
+environment/private-key-audit.json
+environment/repository-refs.txt
+```
+
+`private-key-audit.json` binds the repository HEAD, exact ref snapshot digest,
+reflog digest, object-type counts, worktree count, representations checked, and
+an audit digest. `repository-refs.txt` makes the branch/tag/pull-ref set directly
+reviewable rather than relying on an unobservable `--all` claim.
 
 ## Reproducible index
 
@@ -125,8 +155,9 @@ the index uses the latest immutable receipt issuance time. Re-verifying the same
 repository refs, bundles, and key therefore reproduces the same `pair_digest`.
 
 The workflow additionally creates `artifact-manifest.json`, hashing every
-non-secret artifact file before GitHub upload. The GitHub artifact digest is a
-transport-level checksum; the repository pair and artifact digests remain the
+non-secret artifact file—including the key audit and exact ref snapshot—before
+GitHub upload. The GitHub artifact digest is a transport-level checksum; the
+repository pair, key-audit, ref-snapshot, and artifact digests remain the
 portable evidence identities.
 
 ## What still does not close issue #3
@@ -137,8 +168,9 @@ only after:
 
 1. the contract PR is reachable from `main`;
 2. a successful physical workflow artifact is independently reviewed;
-3. all non-secret raw bundles, pair index, environment metadata, tamper and
-   cleanup controls, and artifact digest land through a reviewable PR;
+3. all non-secret raw bundles, pair index, key audit, exact ref snapshot,
+   environment metadata, tamper and cleanup controls, and artifact digest land
+   through a reviewable PR;
 4. `data/verification_runs/openshell_executor_status.json` changes through that
    PR;
 5. the final merge commit and evidence digests enter
