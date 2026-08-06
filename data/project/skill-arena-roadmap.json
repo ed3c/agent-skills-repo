@@ -1,0 +1,114 @@
+{
+  "schema_version": "skill-arena-roadmap@1",
+  "reviewed_on": "2026-08-06",
+  "epic_issue": 11,
+  "authority": {
+    "coordination": "GitHub issues and pull requests coordinate work but do not prove delivery.",
+    "delivery": "A repository-local landing-evidence manifest, introduced by issue #12, is the delivery authority.",
+    "projection": "GitHub Projects v2 and human dashboards are projections of verified repository evidence."
+  },
+  "items": [
+    {
+      "issue": 12,
+      "title": "Reconcile executor landing evidence with main",
+      "phase": "P0 Truth",
+      "priority": "P0",
+      "status": "human_gate",
+      "evidence": "pr",
+      "dependencies": [],
+      "exit_evidence": "Draft PR #21 is green, reopens the unlanded executor work, corrects contradictory tracker state, and adds a full-history landing-evidence gate; completion requires human merge admit and a main-reachable merge commit."
+    },
+    {
+      "issue": 13,
+      "title": "Add canonical Agent Skills SKILL.md export and conformance gate",
+      "phase": "P0 Portability",
+      "priority": "P0",
+      "status": "human_gate",
+      "evidence": "pr",
+      "dependencies": [],
+      "exit_evidence": "Draft PR #22 is green: all three current skills have reproducible canonical exports and pass the pinned upstream skills-ref validator; completion requires human merge admit and a main-reachable merge commit."
+    },
+    {
+      "issue": 14,
+      "title": "Build a SkillsBench task.md adapter with an executable parity gate",
+      "phase": "P1 Benchmark",
+      "priority": "P1",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        12,
+        13
+      ],
+      "exit_evidence": "Three imported tasks have content-addressed bundles and executable upstream-versus-normalized parity reports."
+    },
+    {
+      "issue": 15,
+      "title": "Implement a paired randomized replicated Arena experiment runner",
+      "phase": "P1 Experiment",
+      "priority": "P1",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        12,
+        13,
+        14
+      ],
+      "exit_evidence": "One end-to-end paired run emits a signed replayable bundle and all contamination and tamper negative controls pass."
+    },
+    {
+      "issue": 16,
+      "title": "Establish public calibration and sealed qualification pools",
+      "phase": "P1 Corpus",
+      "priority": "P1",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        14,
+        15
+      ],
+      "exit_evidence": "A sealed snapshot is bound before execution and leakage, duplicate, paraphrase, and license negative controls pass."
+    },
+    {
+      "issue": 17,
+      "title": "Define Arena statistics eligibility gates and ranking policy",
+      "phase": "P1 Statistics",
+      "priority": "P1",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        15,
+        16
+      ],
+      "exit_evidence": "Deterministic fixtures reproduce paired estimates, intervals, eligibility states, and aggregation negative controls."
+    },
+    {
+      "issue": 18,
+      "title": "Add permissive-license supply-chain sandbox and provenance gates",
+      "phase": "P2 Trust",
+      "priority": "P2",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        13,
+        14,
+        15
+      ],
+      "exit_evidence": "Release and result artifacts pass repository CI, license, SBOM, vulnerability, sandbox-policy, signing, and provenance checks."
+    },
+    {
+      "issue": 19,
+      "title": "Publish the Arena leaderboard and automate GitHub Projects v2 tracking",
+      "phase": "P2 Product",
+      "priority": "P2",
+      "status": "blocked",
+      "evidence": "missing",
+      "dependencies": [
+        12,
+        15,
+        17,
+        18
+      ],
+      "exit_evidence": "A signed JSON and Parquet leaderboard snapshot is published and a closed issue with fabricated evidence cannot become Done in Projects v2."
+    }
+  ]
+}
