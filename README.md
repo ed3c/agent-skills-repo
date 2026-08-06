@@ -6,11 +6,12 @@ Evidence-first governance, qualification, and comparative-evaluation research fo
 
 This repository is **not yet a production SKILL.md Arena** and does not currently claim a qualified or ranked public catalog.
 
-What exists on reachable `main`:
+What exists on reachable `main` after this change:
 
 - ordered local governance gates and commit hooks;
 - deterministic source-anchor verification under `anchor_oracle/`;
 - signed evidence, admission, hard-gate, lifecycle, and economics contracts under `skill_arena/`;
+- a repository-local landing-evidence authority that binds completion to Git history, paths, and test evidence;
 - a quarantined legacy asset at `skills/gemini_interactions/`;
 - a native source-verified repo-wiki candidate at `skills/repo_wiki_verified/`, still marked `pending-qualification`;
 - public corpus and blind-pool leakage guards;
@@ -18,7 +19,7 @@ What exists on reachable `main`:
 
 What is being built next:
 
-- trustworthy reconciliation of the claimed executor landing (#12);
+- a real sandbox executor landing that is reachable from `main` (#3);
 - canonical Agent Skills `SKILL.md` export and upstream conformance (#13);
 - SkillsBench/BenchFlow task and execution adapters (#14–#15);
 - sealed benchmark governance, statistical eligibility, supply-chain trust, and leaderboard publication (#16–#19).
@@ -32,10 +33,12 @@ The comparative Arena roadmap and interim dashboard are tracked in [issue #11](h
 - Arena feasibility study and architecture: [`docs/research/skill-arena-feasibility-and-roadmap.md`](docs/research/skill-arena-feasibility-and-roadmap.md)
 - Machine-readable roadmap: [`data/project/skill-arena-roadmap.json`](data/project/skill-arena-roadmap.json)
 - Arena roadmap contract: [`contracts/skill-arena-roadmap.schema.json`](contracts/skill-arena-roadmap.schema.json)
+- Delivery evidence authority: [`data/project/landing-evidence.json`](data/project/landing-evidence.json)
+- Delivery evidence schema: [`contracts/landing-evidence.schema.json`](contracts/landing-evidence.schema.json)
 
 ## Usage Entry
 
-Run the local governance and roadmap checks from the repository root:
+Run the local governance, roadmap, and delivery-evidence checks from the repository root:
 
 ```sh
 git config core.hooksPath .githooks
@@ -44,6 +47,7 @@ python3 scripts/validate_commit_message.py --selftest
 python3 scripts/validate_molecular_commit_lineage.py --require-current-history
 python3 scripts/git_gate.py
 python3 scripts/check_skill_arena_roadmap.py
+python3 scripts/check_landing_evidence.py --main-ref origin/main
 
 python3 scripts/eval_autoresearch_composer.py \
   --dataset data/autoresearch_golden/pr_golden_set.json
@@ -53,9 +57,10 @@ python3 scripts/check_openwiki.py
 python3 scripts/check_plan_package_compat.py
 
 python3 -m pytest -q tests/test_skill_arena_roadmap.py
+python3 -m pytest -q tests/test_landing_evidence.py
 ```
 
-The new roadmap checker is intentionally separate from `scripts/git_gate.py` in the initial PR. Integrating it into the frozen production-gate evidence requires the tracker-evidence migration in #12 rather than silently changing historical gate semantics.
+The roadmap checker remains separate from `scripts/git_gate.py` so the historical production-gate receipt contract is not silently changed. Delivery completion is governed by the full-history landing-evidence workflow and repository-local authority.
 
 ## Product boundaries
 
@@ -77,6 +82,8 @@ The Arena epic is [#11](https://github.com/ed3c/agent-skills-repo/issues/11).
 - deterministic skill-asset and corpus guards under `skill_arena/skill_assets.py`;
 - admission, evidence, signature, gate, and qualification contracts under `skill_arena/` and `contracts/`;
 - deterministic source-anchor verification under `anchor_oracle/`;
+- repository-local completion evidence under `data/project/landing-evidence.json`;
+- completion-evidence validation under `skill_arena/landing_evidence.py` and `scripts/check_landing_evidence.py`;
 - local defense entries `.githooks/pre-push` and `.githooks/commit-msg`;
 - production gate entry `scripts/git_gate.py`;
 - OpenWiki entry `openwiki/quickstart.md` and graph projection tooling;
@@ -89,14 +96,17 @@ The compensated molecular commit-lineage ledger remains at `data/commit_lineage/
 
 An issue comment, checkbox, local test transcript, or short commit identifier is coordination information, not delivery proof.
 
-A completed roadmap item must eventually bind:
+A completed roadmap item must bind:
 
 - a full commit reachable from `main`;
-- expected changed paths and their digest;
-- test/receipt evidence digest;
+- the exact changed paths derived from that commit against its first parent;
+- a digest of those paths;
+- digested test or receipt evidence;
 - independent verification state where required.
 
-Issue #12 introduces the repository-local landing-evidence authority. GitHub Projects v2 and human dashboards are projections of that evidence, not substitutes for it.
+`data/project/landing-evidence.json` is the delivery authority. GitHub issues, pull requests, Projects v2, and human dashboards are projections of that evidence, not substitutes for it.
+
+The sandbox executor is not currently reachable from `main`. Issue #3 remains open, and calibration or qualification must not claim executor-backed evidence until a reviewable implementation passes this authority gate.
 
 ## What this repository does not own
 
