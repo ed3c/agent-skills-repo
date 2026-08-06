@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/skillsbench-parity-report.schema.json",
+  "title": "SkillsBench upstream-to-Arena parity report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "bundle_digest", "status", "ranking_eligible", "structural", "execution", "known_losses", "report_digest"],
+  "properties": {
+    "schema_version": {"const": "skillsbench-parity-report@1"},
+    "task_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "bundle_digest": {"$ref": "#/$defs/sha256"},
+    "status": {"enum": ["equivalent", "known_loss", "rejected"]},
+    "ranking_eligible": {"type": "boolean"},
+    "structural": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "compared_file_count", "file_set_digest", "task_bytes_preserved", "skill_injection_boundary_preserved"],
+      "properties": {
+        "status": {"const": "equivalent"},
+        "compared_file_count": {"type": "integer", "minimum": 1},
+        "file_set_digest": {"$ref": "#/$defs/sha256"},
+        "task_bytes_preserved": {"const": true},
+        "skill_injection_boundary_preserved": {"const": true}
+      }
+    },
+    "execution": {"type": "object"},
+    "known_losses": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "report_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "equivalent"}}},
+      "then": {"properties": {"ranking_eligible": {"const": true}, "known_losses": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["known_loss", "rejected"]}}},
+      "then": {"properties": {"ranking_eligible": {"const": false}}}
+    }
+  ]
+}

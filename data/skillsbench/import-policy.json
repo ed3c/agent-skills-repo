@@ -1,0 +1,69 @@
+{
+  "schema_version": "skillsbench-import-policy@1",
+  "upstream": {
+    "repository": "benchflow-ai/skillsbench",
+    "commit": "9a1f4dd5f7659f75707435da3ce854b6e48321d1",
+    "license": "Apache-2.0",
+    "license_path": "LICENSE",
+    "benchflow_requirement": "benchflow==0.6.3"
+  },
+  "allowed_licenses": [
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT"
+  ],
+  "tasks": [
+    {
+      "task_id": "dialogue-parser",
+      "path": "tasks/dialogue-parser",
+      "role": "code",
+      "expected_network_mode": "public",
+      "expected_skill_names": [
+        "dialogue-graph"
+      ],
+      "required_files": [
+        "environment/Dockerfile",
+        "environment/skills/dialogue-graph/SKILL.md",
+        "oracle/solve.sh",
+        "task.md",
+        "verifier/test.sh"
+      ]
+    },
+    {
+      "task_id": "pdf-excel-diff",
+      "path": "tasks/pdf-excel-diff",
+      "role": "skill-composition",
+      "expected_network_mode": "public",
+      "expected_skill_names": [
+        "pdf",
+        "xlsx"
+      ],
+      "required_files": [
+        "environment/Dockerfile",
+        "environment/skills/pdf/SKILL.md",
+        "environment/skills/xlsx/SKILL.md",
+        "oracle/solve.sh",
+        "task.md",
+        "verifier/test.sh"
+      ]
+    },
+    {
+      "task_id": "weighted-gdp-calc",
+      "path": "tasks/weighted-gdp-calc",
+      "role": "document-data",
+      "expected_network_mode": "public",
+      "expected_skill_names": [
+        "xlsx"
+      ],
+      "required_files": [
+        "environment/Dockerfile",
+        "environment/skills/xlsx/SKILL.md",
+        "oracle/solve.sh",
+        "task.md",
+        "verifier/test.sh"
+      ]
+    }
+  ]
+}
