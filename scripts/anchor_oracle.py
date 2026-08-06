@@ -17,6 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from anchor_oracle import (
+    CircularDenylistInvalid,
     EmptyWiki,
     FixtureDirty,
     FixtureHeadUnverifiable,
@@ -76,6 +77,21 @@ def resolve_case(case_id: str) -> str:
     return "resolved:" + case_id
 '''
 
+# Circular-evidence control (mirrors the external reference auditor's
+# symlink-aliased selftest design): generated wiki output stored inside the
+# fixture, cited both directly and through a symlink alias whose lexical
+# path dodges the denied prefix.
+CIRCULAR_PAGE = """---
+type: Reference
+title: Circular evidence page
+---
+
+# Circular evidence page
+
+Direct citation (src: openwiki/generated.md `Generated wiki output.`).
+Aliased citation (src: alias_generated.md `Generated wiki output.`).
+"""
+
 
 class _Parser(argparse.ArgumentParser):
     def error(self, message: str) -> None:  # type: ignore[override]
@@ -134,6 +150,37 @@ def run_selftest() -> int:
             "no_anchors" in cases["prose.md"]["failures"],
         )
 
+        (fixture / "openwiki").mkdir()
+        (fixture / "openwiki/generated.md").write_text("Generated wiki output.\n")
+        (fixture / "alias_generated.md").symlink_to(
+            Path("openwiki") / "generated.md"
+        )
+        circular_wiki = base / "wiki-circular"
+        circular_wiki.mkdir()
+        (circular_wiki / "circular.md").write_text(CIRCULAR_PAGE)
+
+        permissive = evaluate_wiki(circular_wiki, fixture, fixture_sha="selftest")
+        ok &= _control(
+            "empty denylist keeps generated-output anchors resolved",
+            permissive["passed"] is True,
+        )
+        denied = evaluate_wiki(
+            circular_wiki,
+            fixture,
+            fixture_sha="selftest",
+            circular_denylist=("openwiki",),
+        )
+        denied_statuses = [
+            check["status"]
+            for check in denied["cases"][0]["checks"]["anchors"]
+        ]
+        ok &= _control(
+            "denylist flags direct and symlink-aliased circular evidence",
+            denied["passed"] is False
+            and denied_statuses == ["circular_evidence", "circular_evidence"],
+            detail=",".join(denied_statuses),
+        )
+
         digest_before = good["cases"][0]["evidence_digest"]
         with (fixture / "src/demo.py").open("ab") as handle:
             handle.write(b"# tampered\n")
@@ -159,6 +206,18 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--fixture-repo")
     parser.add_argument("--fixture-sha")
     parser.add_argument("--output")
+    parser.add_argument(
+        "--circular-denylist",
+        action="append",
+        default=[],
+        metavar="PREFIX",
+        help=(
+            "fixture-relative path prefix holding generated wiki output;"
+            " anchors resolving into it (after symlink resolution) fail as"
+            " circular_evidence. Repeatable. Omitted entirely = check"
+            " disabled (no silent default)."
+        ),
+    )
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args(argv)
 
@@ -174,8 +233,13 @@ def main(argv: list[str]) -> int:
     try:
         head = verify_fixture_head(args.fixture_repo, args.fixture_sha)
         verdict = evaluate_wiki(
-            args.wiki_dir, args.fixture_repo, fixture_sha=head
+            args.wiki_dir,
+            args.fixture_repo,
+            fixture_sha=head,
+            circular_denylist=args.circular_denylist,
         )
+    except CircularDenylistInvalid as exc:
+        parser.error(str(exc))
     except (
         WikiMissing,
         EmptyWiki,
