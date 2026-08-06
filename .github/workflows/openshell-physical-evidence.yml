@@ -3,6 +3,7 @@ name: openshell-physical-evidence
 on:
   pull_request:
     paths:
+      - 'skill_arena/sandbox_executor/__init__.py'
       - 'skill_arena/sandbox_executor/evidence_pair.py'
       - 'scripts/verify_openshell_evidence_pair.py'
       - 'contracts/openshell-physical-evidence-pair.schema.json'
@@ -12,6 +13,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'skill_arena/sandbox_executor/__init__.py'
       - 'skill_arena/sandbox_executor/evidence_pair.py'
       - 'scripts/verify_openshell_evidence_pair.py'
       - 'contracts/openshell-physical-evidence-pair.schema.json'
@@ -53,8 +55,9 @@ jobs:
       - run: python scripts/verify_openshell_evidence_pair.py --help
 
   physical-pair:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: offline-contract
+    environment: openshell-physical-evidence
     runs-on: [self-hosted, linux, x64, openshell-evidence]
     timeout-minutes: 45
     env:
@@ -80,22 +83,35 @@ jobs:
         run: |
           set -euo pipefail
           : "${OPENSHELL_DEV_KEY_PATH:?self-hosted runner must define OPENSHELL_DEV_KEY_PATH}"
-          test -f "$OPENSHELL_DEV_KEY_PATH"
-          test ! -L "$OPENSHELL_DEV_KEY_PATH"
-          case "$(python - <<'PY'
+          python - <<'PY'
+          import os
+          import stat
           from pathlib import Path
-          print(Path().resolve() in Path(__import__('os').environ['OPENSHELL_DEV_KEY_PATH']).expanduser().resolve().parents)
+
+          root = Path.cwd().resolve()
+          key = Path(os.environ['OPENSHELL_DEV_KEY_PATH']).expanduser().resolve()
+          if not key.is_file() or key.is_symlink():
+              raise SystemExit('private key must be a regular non-symlink file')
+          if key == root or root in key.parents:
+              raise SystemExit('private key must be outside the checkout')
+          if stat.S_IMODE(key.stat().st_mode) & 0o077:
+              raise SystemExit('private key permissions must be owner-only')
           PY
-          )" in
-            False) ;;
-            *) echo "private key must be outside the checkout" >&2; exit 1 ;;
-          esac
-          test "$(stat -c '%a' "$OPENSHELL_DEV_KEY_PATH")" = 600
-          test "$(openshell --version | sed -nE 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' | head -n1)" = 0.0.59
-          openshell status > "$RUNNER_TEMP/openshell-status.txt"
+          VERSION_TEXT="$(openshell --version 2>&1)" python - <<'PY'
+          import os
+          import re
+
+          text = os.environ['VERSION_TEXT']
+          match = re.search(r'(?:openshell\s+)?(\d+\.\d+\.\d+)', text)
+          if match is None or match.group(1) != '0.0.59':
+              raise SystemExit(f'expected OpenShell 0.0.59, got: {text!r}')
+          PY
+          openshell status > "$RUNNER_TEMP/openshell-status.txt" 2>&1
           docker version --format '{{json .}}' > "$RUNNER_TEMP/docker-version.json"
-          python -m pip install -r requirements.lock
-          python -m pytest -q tests/test_sandbox_executor.py tests/test_openshell_evidence_pair.py
+          python -m pip install pytest==8.4.1 -r requirements.lock
+          python -m pytest -q \
+            tests/test_sandbox_executor.py \
+            tests/test_openshell_evidence_pair.py
       - name: Derive non-secret public trust material
         run: |
           set -euo pipefail
@@ -131,11 +147,9 @@ jobs:
         continue-on-error: true
         run: |
           set -uo pipefail
-          mkdir -p "$EVIDENCE_ROOT/run-001" "$EVIDENCE_ROOT/run-002"
           run_one() {
             local ordinal="$1"
             local output="$EVIDENCE_ROOT/run-$ordinal"
-            rmdir "$output"
             python scripts/run_sandbox_case.py \
               --private-key "$OPENSHELL_DEV_KEY_PATH" \
               --issuer-key-id "$ISSUER_KEY_ID" \
