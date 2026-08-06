@@ -1,0 +1,17 @@
+{
+  "schema_version": "sandbox-executor-implementation-status@1",
+  "issue": 3,
+  "profile": "openshell-0.0.59-docker@1",
+  "contract_implementation": "in_review",
+  "contract_tests": "pending_github_actions",
+  "real_integration": "not_executed",
+  "qualification_eligible": false,
+  "blocking_evidence": [
+    "one real OpenShell gateway-backed run executed twice",
+    "signed receipt admitted by skill_arena.core.verify_sandbox_case_receipts",
+    "tampered receipt rejected",
+    "fresh workspace and backing container destruction verified for both runs",
+    "development private key proven absent from repository history"
+  ],
+  "notes": "Contract tests and a concrete CLI adapter are not physical execution evidence. Issue #3 remains open until every blocking item is landed through repository-local landing evidence."
+}
