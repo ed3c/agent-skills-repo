@@ -33,7 +33,9 @@ The comparative Arena roadmap and interim dashboard are tracked in [issue #11](h
 - Machine-readable roadmap: [`data/project/skill-arena-roadmap.json`](data/project/skill-arena-roadmap.json)
 - Arena roadmap contract: [`contracts/skill-arena-roadmap.schema.json`](contracts/skill-arena-roadmap.schema.json)
 
-## Local checks
+## Usage Entry
+
+Run the local governance and roadmap checks from the repository root:
 
 ```sh
 git config core.hooksPath .githooks
