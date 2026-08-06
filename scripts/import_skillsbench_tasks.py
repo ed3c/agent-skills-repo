@@ -20,11 +20,13 @@ from arena_adapters.skillsbench import (  # noqa: E402
     import_selected_tasks,
     load_policy,
     validate_bundle_directory,
+    validate_bundle_index,
 )
 from arena_adapters.skillsbench.common import read_json_object  # noqa: E402
 
 DEFAULT_POLICY = ROOT / "data/skillsbench/import-policy.json"
 DEFAULT_BUNDLE_SCHEMA = ROOT / "contracts/skillsbench-task-bundle.schema.json"
+DEFAULT_INDEX_SCHEMA = ROOT / "contracts/skillsbench-task-index.schema.json"
 DEFAULT_PARITY_SCHEMA = ROOT / "contracts/skillsbench-parity-report.schema.json"
 
 
@@ -51,6 +53,19 @@ def validate_with_schemas(bundle_dir: Path) -> None:
         raise SkillsBenchAdapterError("; ".join(errors))
 
 
+def validate_index_with_schema(output_root: Path) -> list[dict[str, object]]:
+    rows = validate_bundle_index(output_root)
+    index_path = output_root / "index.json"
+    errors = _schema_errors(
+        read_json_object(index_path),
+        DEFAULT_INDEX_SCHEMA,
+        str(index_path),
+    )
+    if errors:
+        raise SkillsBenchAdapterError("; ".join(errors))
+    return rows
+
+
 def command_import(args: argparse.Namespace) -> int:
     policy = load_policy(args.policy)
     bundles = import_selected_tasks(
@@ -59,6 +74,7 @@ def command_import(args: argparse.Namespace) -> int:
         policy=policy,
         verify_git=not args.no_git,
     )
+    rows = validate_index_with_schema(args.output_root)
     for bundle in bundles:
         validate_with_schemas(bundle.bundle_dir)
     print(
@@ -66,7 +82,7 @@ def command_import(args: argparse.Namespace) -> int:
             {
                 "status": "imported",
                 "upstream_commit": policy.upstream.commit,
-                "bundle_count": len(bundles),
+                "bundle_count": len(rows),
                 "bundles": [
                     {
                         "task_id": bundle.task_id,
@@ -85,16 +101,10 @@ def command_import(args: argparse.Namespace) -> int:
 
 
 def command_validate_all(args: argparse.Namespace) -> int:
-    root = args.output_root
-    index = read_json_object(root / "index.json")
-    rows = index.get("bundles")
-    if not isinstance(rows, list) or not rows:
-        raise SkillsBenchAdapterError("bundle index has no rows")
+    rows = validate_index_with_schema(args.output_root)
     for row in rows:
-        if not isinstance(row, dict) or not isinstance(row.get("bundle_path"), str):
-            raise SkillsBenchAdapterError("bundle index row is malformed")
-        validate_with_schemas(root / row["bundle_path"])
-    print(f"PASS: validated {len(rows)} SkillsBench task bundle(s)")
+        validate_with_schemas(args.output_root / str(row["bundle_path"]))
+    print(f"PASS: validated index and {len(rows)} SkillsBench task bundle(s)")
     return 0
 
 
