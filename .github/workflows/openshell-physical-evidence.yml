@@ -5,9 +5,13 @@ on:
     paths:
       - 'skill_arena/sandbox_executor/__init__.py'
       - 'skill_arena/sandbox_executor/evidence_pair.py'
+      - 'skill_arena/sandbox_executor/key_audit.py'
       - 'scripts/verify_openshell_evidence_pair.py'
+      - 'scripts/audit_development_private_key.py'
       - 'contracts/openshell-physical-evidence-pair.schema.json'
+      - 'contracts/development-private-key-audit.schema.json'
       - 'tests/test_openshell_evidence_pair.py'
+      - 'tests/test_development_private_key_audit.py'
       - 'docs/openshell-physical-evidence.md'
       - '.github/workflows/openshell-physical-evidence.yml'
   push:
@@ -15,9 +19,13 @@ on:
     paths:
       - 'skill_arena/sandbox_executor/__init__.py'
       - 'skill_arena/sandbox_executor/evidence_pair.py'
+      - 'skill_arena/sandbox_executor/key_audit.py'
       - 'scripts/verify_openshell_evidence_pair.py'
+      - 'scripts/audit_development_private_key.py'
       - 'contracts/openshell-physical-evidence-pair.schema.json'
+      - 'contracts/development-private-key-audit.schema.json'
       - 'tests/test_openshell_evidence_pair.py'
+      - 'tests/test_development_private_key_audit.py'
       - 'docs/openshell-physical-evidence.md'
       - '.github/workflows/openshell-physical-evidence.yml'
   workflow_dispatch:
@@ -50,9 +58,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install pytest==8.4.1 -r requirements.lock
-      - run: python -m pytest -q tests/test_openshell_evidence_pair.py
+      - run: >-
+          python -m pytest -q
+          tests/test_openshell_evidence_pair.py
+          tests/test_development_private_key_audit.py
       - run: python -m compileall -q skill_arena scripts
       - run: python scripts/verify_openshell_evidence_pair.py --help
+      - run: python scripts/audit_development_private_key.py --help
 
   physical-pair:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
@@ -77,8 +89,9 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --force --prune origin \
-            '+refs/heads/*:refs/remotes/origin/*' \
-            '+refs/tags/*:refs/tags/*'
+            '+refs/heads/*:refs/remotes/origin/heads/*' \
+            '+refs/tags/*:refs/tags/*' \
+            '+refs/pull/*/head:refs/remotes/origin/pull/*'
       - name: Validate the pinned self-hosted execution environment
         run: |
           set -euo pipefail
@@ -111,8 +124,9 @@ jobs:
           python -m pip install pytest==8.4.1 -r requirements.lock
           python -m pytest -q \
             tests/test_sandbox_executor.py \
-            tests/test_openshell_evidence_pair.py
-      - name: Derive non-secret public trust material
+            tests/test_openshell_evidence_pair.py \
+            tests/test_development_private_key_audit.py
+      - name: Derive public trust material and audit every fetched Git surface
         run: |
           set -euo pipefail
           umask 077
@@ -142,6 +156,11 @@ jobs:
           target.write_bytes(public)
           target.chmod(0o600)
           PY
+          python scripts/audit_development_private_key.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --private-key "$OPENSHELL_DEV_KEY_PATH" \
+            --output "$EVIDENCE_ROOT/environment/private-key-audit.json" \
+            --refs-output "$EVIDENCE_ROOT/environment/repository-refs.txt"
       - name: Execute exactly two recorded physical attempts
         id: physical
         continue-on-error: true
@@ -254,3 +273,5 @@ jobs:
             exit 1
           fi
           test -f "$EVIDENCE_ROOT/pair-index.json"
+          test -f "$EVIDENCE_ROOT/environment/private-key-audit.json"
+          test -f "$EVIDENCE_ROOT/environment/repository-refs.txt"
