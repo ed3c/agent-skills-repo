@@ -1,0 +1,277 @@
+name: openshell-physical-evidence
+
+on:
+  pull_request:
+    paths:
+      - 'skill_arena/sandbox_executor/__init__.py'
+      - 'skill_arena/sandbox_executor/evidence_pair.py'
+      - 'skill_arena/sandbox_executor/key_audit.py'
+      - 'scripts/verify_openshell_evidence_pair.py'
+      - 'scripts/audit_development_private_key.py'
+      - 'contracts/openshell-physical-evidence-pair.schema.json'
+      - 'contracts/development-private-key-audit.schema.json'
+      - 'tests/test_openshell_evidence_pair.py'
+      - 'tests/test_development_private_key_audit.py'
+      - 'docs/openshell-physical-evidence.md'
+      - '.github/workflows/openshell-physical-evidence.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skill_arena/sandbox_executor/__init__.py'
+      - 'skill_arena/sandbox_executor/evidence_pair.py'
+      - 'skill_arena/sandbox_executor/key_audit.py'
+      - 'scripts/verify_openshell_evidence_pair.py'
+      - 'scripts/audit_development_private_key.py'
+      - 'contracts/openshell-physical-evidence-pair.schema.json'
+      - 'contracts/development-private-key-audit.schema.json'
+      - 'tests/test_openshell_evidence_pair.py'
+      - 'tests/test_development_private_key_audit.py'
+      - 'docs/openshell-physical-evidence.md'
+      - '.github/workflows/openshell-physical-evidence.yml'
+  workflow_dispatch:
+    inputs:
+      benchmark_suite_digest:
+        description: Full sha256 digest bound into both sandbox receipts
+        required: true
+        type: string
+      skill_artifact_digest:
+        description: Full sha256 digest bound into both sandbox receipts
+        required: true
+        type: string
+      issuer_key_id:
+        description: Development-scoped public trust identity (must start dev-)
+        required: true
+        default: dev-openshell-evidence-01
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # pinned v5 commit
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest==8.4.1 -r requirements.lock
+      - run: >-
+          python -m pytest -q
+          tests/test_openshell_evidence_pair.py
+          tests/test_development_private_key_audit.py
+      - run: python -m compileall -q skill_arena scripts
+      - run: python scripts/verify_openshell_evidence_pair.py --help
+      - run: python scripts/audit_development_private_key.py --help
+
+  physical-pair:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: offline-contract
+    environment: openshell-physical-evidence
+    runs-on: [self-hosted, linux, x64, openshell-evidence]
+    timeout-minutes: 45
+    env:
+      EVIDENCE_ROOT: ${{ runner.temp }}/openshell-physical-evidence
+      BENCHMARK_SUITE_DIGEST: ${{ inputs.benchmark_suite_digest }}
+      SKILL_ARTIFACT_DIGEST: ${{ inputs.skill_artifact_digest }}
+      ISSUER_KEY_ID: ${{ inputs.issuer_key_id }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # pinned v5 commit
+        with:
+          python-version: '3.11'
+      - name: Fetch every repository ref for the private-key history audit
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin \
+            '+refs/heads/*:refs/remotes/origin/heads/*' \
+            '+refs/tags/*:refs/tags/*' \
+            '+refs/pull/*/head:refs/remotes/origin/pull/*'
+      - name: Validate the pinned self-hosted execution environment
+        run: |
+          set -euo pipefail
+          : "${OPENSHELL_DEV_KEY_PATH:?self-hosted runner must define OPENSHELL_DEV_KEY_PATH}"
+          python - <<'PY'
+          import os
+          import stat
+          from pathlib import Path
+
+          root = Path.cwd().resolve()
+          key = Path(os.environ['OPENSHELL_DEV_KEY_PATH']).expanduser().resolve()
+          if not key.is_file() or key.is_symlink():
+              raise SystemExit('private key must be a regular non-symlink file')
+          if key == root or root in key.parents:
+              raise SystemExit('private key must be outside the checkout')
+          if stat.S_IMODE(key.stat().st_mode) & 0o077:
+              raise SystemExit('private key permissions must be owner-only')
+          PY
+          VERSION_TEXT="$(openshell --version 2>&1)" python - <<'PY'
+          import os
+          import re
+
+          text = os.environ['VERSION_TEXT']
+          match = re.search(r'(?:openshell\s+)?(\d+\.\d+\.\d+)', text)
+          if match is None or match.group(1) != '0.0.59':
+              raise SystemExit(f'expected OpenShell 0.0.59, got: {text!r}')
+          PY
+          openshell status > "$RUNNER_TEMP/openshell-status.txt" 2>&1
+          docker version --format '{{json .}}' > "$RUNNER_TEMP/docker-version.json"
+          python -m pip install pytest==8.4.1 -r requirements.lock
+          python -m pytest -q \
+            tests/test_sandbox_executor.py \
+            tests/test_openshell_evidence_pair.py \
+            tests/test_development_private_key_audit.py
+      - name: Derive public trust material and audit every fetched Git surface
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$EVIDENCE_ROOT/environment" "$EVIDENCE_ROOT/logs"
+          cp "$RUNNER_TEMP/openshell-status.txt" "$EVIDENCE_ROOT/environment/"
+          cp "$RUNNER_TEMP/docker-version.json" "$EVIDENCE_ROOT/environment/"
+          git rev-parse HEAD > "$EVIDENCE_ROOT/environment/repository-head.txt"
+          python -m pip freeze --all | LC_ALL=C sort \
+            > "$EVIDENCE_ROOT/environment/python-environment.txt"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from cryptography.hazmat.primitives import serialization
+          from skill_arena.sandbox_executor import load_private_key
+
+          root = Path.cwd().resolve()
+          key = load_private_key(
+              os.environ['OPENSHELL_DEV_KEY_PATH'],
+              repo_root=root,
+              issuer_key_id=os.environ['ISSUER_KEY_ID'],
+          )
+          public = key.public_key().public_bytes(
+              encoding=serialization.Encoding.Raw,
+              format=serialization.PublicFormat.Raw,
+          )
+          target = Path(os.environ['EVIDENCE_ROOT']) / 'dev-public.key'
+          target.write_bytes(public)
+          target.chmod(0o600)
+          PY
+          python scripts/audit_development_private_key.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --private-key "$OPENSHELL_DEV_KEY_PATH" \
+            --output "$EVIDENCE_ROOT/environment/private-key-audit.json" \
+            --refs-output "$EVIDENCE_ROOT/environment/repository-refs.txt"
+      - name: Execute exactly two recorded physical attempts
+        id: physical
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          run_one() {
+            local ordinal="$1"
+            local output="$EVIDENCE_ROOT/run-$ordinal"
+            python scripts/run_sandbox_case.py \
+              --private-key "$OPENSHELL_DEV_KEY_PATH" \
+              --issuer-key-id "$ISSUER_KEY_ID" \
+              --benchmark-suite-digest "$BENCHMARK_SUITE_DIGEST" \
+              --skill-artifact-digest "$SKILL_ARTIFACT_DIGEST" \
+              --run-id "phys-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${ordinal}" \
+              --output-dir "$output" \
+              > "$EVIDENCE_ROOT/logs/run-$ordinal.log" 2>&1
+          }
+          rc1=0
+          rc2=0
+          run_one 001 || rc1=$?
+          run_one 002 || rc2=$?
+          RC1="$rc1" RC2="$rc2" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ['EVIDENCE_ROOT'])
+          value = {
+              'schema_version': 'openshell-physical-attempt-status@1',
+              'run_001_returncode': int(os.environ['RC1']),
+              'run_002_returncode': int(os.environ['RC2']),
+              'retry_until_pass': False,
+          }
+          (root / 'attempt-status.json').write_text(
+              json.dumps(value, indent=2, sort_keys=True) + '\n'
+          )
+          PY
+          if [ "$rc1" -ne 0 ] || [ "$rc2" -ne 0 ]; then
+            exit 1
+          fi
+          python scripts/verify_openshell_evidence_pair.py \
+            --bundle "$EVIDENCE_ROOT/run-001" \
+            --bundle "$EVIDENCE_ROOT/run-002" \
+            --public-key "$EVIDENCE_ROOT/dev-public.key" \
+            --private-key "$OPENSHELL_DEV_KEY_PATH" \
+            --issuer-key-id "$ISSUER_KEY_ID" \
+            --benchmark-suite-digest "$BENCHMARK_SUITE_DIGEST" \
+            --skill-artifact-digest "$SKILL_ARTIFACT_DIGEST" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output "$EVIDENCE_ROOT/pair-index.json" \
+            > "$EVIDENCE_ROOT/logs/pair-verifier.log" 2>&1
+      - name: Build a content-addressed workflow artifact manifest
+        if: always()
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ['EVIDENCE_ROOT'])
+          root.mkdir(parents=True, exist_ok=True)
+          entries = []
+          for path in sorted(root.rglob('*')):
+              if path.name == 'artifact-manifest.json':
+                  continue
+              if path.is_symlink():
+                  raise SystemExit(f'symlink forbidden in evidence artifact: {path}')
+              if not path.is_file():
+                  continue
+              data = path.read_bytes()
+              entries.append({
+                  'path': path.relative_to(root).as_posix(),
+                  'sha256': hashlib.sha256(data).hexdigest(),
+                  'size_bytes': len(data),
+              })
+          payload = {
+              'schema_version': 'openshell-physical-workflow-artifact@1',
+              'repository_head': os.environ['GITHUB_SHA'],
+              'workflow_run_id': os.environ['GITHUB_RUN_ID'],
+              'workflow_run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'files': entries,
+          }
+          raw = json.dumps(
+              payload,
+              ensure_ascii=False,
+              sort_keys=True,
+              separators=(',', ':'),
+          ).encode()
+          payload['artifact_digest'] = 'sha256:' + hashlib.sha256(raw).hexdigest()
+          (root / 'artifact-manifest.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n'
+          )
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: openshell-physical-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/openshell-physical-evidence
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce the single recorded attempt outcome
+        if: always()
+        env:
+          PHYSICAL_OUTCOME: ${{ steps.physical.outcome }}
+        run: |
+          if [ "$PHYSICAL_OUTCOME" != success ]; then
+            echo "physical evidence attempt failed; inspect the uploaded immutable artifact" >&2
+            exit 1
+          fi
+          test -f "$EVIDENCE_ROOT/pair-index.json"
+          test -f "$EVIDENCE_ROOT/environment/private-key-audit.json"
+          test -f "$EVIDENCE_ROOT/environment/repository-refs.txt"

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/openshell-physical-evidence-pair.schema.json",
+  "title": "OpenShell paired physical evidence index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "case_id",
+    "sandbox_profile_id",
+    "benchmark_suite_digest",
+    "skill_artifact_digest",
+    "issuer_key_id",
+    "public_key_digest",
+    "execution_envelope",
+    "runs",
+    "controls",
+    "pair_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "openshell-physical-evidence-pair@1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "case_id": {"type": "string", "minLength": 1},
+    "sandbox_profile_id": {"type": "string", "minLength": 1},
+    "benchmark_suite_digest": {"$ref": "#/$defs/sha256"},
+    "skill_artifact_digest": {"$ref": "#/$defs/sha256"},
+    "issuer_key_id": {"type": "string", "pattern": "^dev-.+$"},
+    "public_key_digest": {"$ref": "#/$defs/sha256"},
+    "execution_envelope": {"$ref": "#/$defs/execution_envelope"},
+    "runs": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/run"}
+    },
+    "controls": {"$ref": "#/$defs/controls"},
+    "pair_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "execution_envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "openshell_version",
+        "openshell_source_ref",
+        "substrate",
+        "transport",
+        "docker_server_version",
+        "sandbox_image_digest",
+        "sandbox_policy_digest"
+      ],
+      "properties": {
+        "openshell_version": {"const": "0.0.59"},
+        "openshell_source_ref": {"const": "NVIDIA/OpenShell@v0.0.59"},
+        "substrate": {"const": "docker"},
+        "transport": {"const": "openshell-cli-create-command@0.0.59"},
+        "docker_server_version": {"type": "string", "minLength": 1},
+        "sandbox_image_digest": {"$ref": "#/$defs/sha256"},
+        "sandbox_policy_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "file_hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attestation.json",
+        "bundle-manifest.json",
+        "receipt.json",
+        "result.json"
+      ],
+      "properties": {
+        "attestation.json": {"$ref": "#/$defs/sha256"},
+        "bundle-manifest.json": {"$ref": "#/$defs/sha256"},
+        "receipt.json": {"$ref": "#/$defs/sha256"},
+        "result.json": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bundle_digest",
+        "receipt_hash",
+        "receipt_id",
+        "sandbox_name",
+        "workspace_nonce",
+        "docker_container_id",
+        "sandbox_image_digest",
+        "sandbox_policy_digest",
+        "output_evidence_digest",
+        "issued_at",
+        "expires_at",
+        "file_hashes",
+        "result_command_digest",
+        "attestation_digest",
+        "result_digest",
+        "control_evidence_digest"
+      ],
+      "properties": {
+        "bundle_digest": {"$ref": "#/$defs/sha256"},
+        "receipt_hash": {"$ref": "#/$defs/sha256"},
+        "receipt_id": {"type": "string", "minLength": 1},
+        "sandbox_name": {"type": "string", "minLength": 1},
+        "workspace_nonce": {"type": "string", "minLength": 1},
+        "docker_container_id": {"type": "string", "minLength": 1},
+        "sandbox_image_digest": {"$ref": "#/$defs/sha256"},
+        "sandbox_policy_digest": {"$ref": "#/$defs/sha256"},
+        "output_evidence_digest": {"$ref": "#/$defs/sha256"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"},
+        "file_hashes": {"$ref": "#/$defs/file_hashes"},
+        "result_command_digest": {"$ref": "#/$defs/sha256"},
+        "attestation_digest": {"$ref": "#/$defs/sha256"},
+        "result_digest": {"$ref": "#/$defs/sha256"},
+        "control_evidence_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_admitted_at_issued_time",
+        "tamper_rejected_for_both",
+        "original_bundles_unchanged",
+        "distinct_sandbox_names",
+        "distinct_workspace_nonces",
+        "distinct_receipt_ids",
+        "distinct_container_ids",
+        "same_image_digest",
+        "same_policy_digest",
+        "same_docker_server_version",
+        "same_deterministic_result",
+        "cleanup_verified_for_both",
+        "workspace_destroyed_for_both",
+        "private_key_history_absent",
+        "scanned_git_blobs",
+        "scanned_worktree_files"
+      ],
+      "properties": {
+        "receipt_admitted_at_issued_time": {"const": true},
+        "tamper_rejected_for_both": {"const": true},
+        "original_bundles_unchanged": {"const": true},
+        "distinct_sandbox_names": {"const": true},
+        "distinct_workspace_nonces": {"const": true},
+        "distinct_receipt_ids": {"const": true},
+        "distinct_container_ids": {"const": true},
+        "same_image_digest": {"const": true},
+        "same_policy_digest": {"const": true},
+        "same_docker_server_version": {"const": true},
+        "same_deterministic_result": {"const": true},
+        "cleanup_verified_for_both": {"const": true},
+        "workspace_destroyed_for_both": {"const": true},
+        "private_key_history_absent": {"const": true},
+        "scanned_git_blobs": {"type": "integer", "minimum": 1},
+        "scanned_worktree_files": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}
