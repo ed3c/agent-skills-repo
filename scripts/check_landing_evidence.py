@@ -15,6 +15,9 @@ from skill_arena.landing_evidence import (  # noqa: E402
     LandingEvidenceError,
     validate_landing_evidence,
 )
+from skill_arena.landing_evidence_fragments import (  # noqa: E402
+    load_landing_evidence_bundle,
+)
 
 
 def main() -> int:
@@ -23,6 +26,12 @@ def main() -> int:
         "--manifest",
         type=Path,
         default=ROOT / "data/project/landing-evidence.json",
+    )
+    parser.add_argument(
+        "--fragments-dir",
+        type=Path,
+        default=ROOT / "data/project/landing-evidence.d",
+        help="sorted upsert fragments; absent directory is allowed",
     )
     parser.add_argument(
         "--schema",
@@ -39,7 +48,10 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        manifest = load_landing_evidence_bundle(
+            args.manifest,
+            args.fragments_dir,
+        )
         schema = json.loads(args.schema.read_text(encoding="utf-8"))
         validate_landing_evidence(
             manifest,
