@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 31,
+    "title": "Port and revalidate two-stage calibration",
+    "status": "blocked",
+    "evidence_level": "reachable_on_main",
+    "notes": "Historical recovery and quarantine are reachable through PR #33. The calibration runtime has not been ported to the landed skill_arena.sandbox_executor contract, and no fresh public-only calibration or human freeze exists. Blocked on issue #30."
+  }
+}
