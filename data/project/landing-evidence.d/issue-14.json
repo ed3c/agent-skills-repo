@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 14,
+    "title": "SkillsBench task adapter with executable parity gate",
+    "status": "in_review",
+    "evidence_level": "reachable_on_main",
+    "notes": "The pinned byte-preserving structural adapter is reachable from main through PR #24 (76e7068ccc8a07d292580352158f076773f9c1df). The issue remains incomplete because the first three bundles have not all produced landed executable parity evidence; see issue #25."
+  }
+}
