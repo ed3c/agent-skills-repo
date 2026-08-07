@@ -1,0 +1,24 @@
+{
+  "schema_version": "skillsbench-execution-probe-policy@1",
+  "tasks": [
+    {
+      "task_id": "dialogue-parser",
+      "output_paths": [
+        "/app/dialogue.dot",
+        "/app/dialogue.json"
+      ]
+    },
+    {
+      "task_id": "pdf-excel-diff",
+      "output_paths": [
+        "/root/diff_report.json"
+      ]
+    },
+    {
+      "task_id": "weighted-gdp-calc",
+      "output_paths": [
+        "/root/gdp.xlsx"
+      ]
+    }
+  ]
+}

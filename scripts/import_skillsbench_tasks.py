@@ -16,15 +16,24 @@ if str(ROOT) not in sys.path:
 
 from arena_adapters.skillsbench import (  # noqa: E402
     SkillsBenchAdapterError,
-    bind_execution_parity,
     import_selected_tasks,
     load_policy,
     validate_bundle_directory,
     validate_bundle_index,
 )
 from arena_adapters.skillsbench.common import read_json_object  # noqa: E402
+from arena_adapters.skillsbench.execution import (  # noqa: E402
+    build_execution_evidence,
+    probe_output_paths,
+    write_execution_evidence,
+)
+from arena_adapters.skillsbench.execution_image import (  # noqa: E402
+    attach_environment_image_identity,
+    bind_execution_parity_with_environment_image,
+)
 
 DEFAULT_POLICY = ROOT / "data/skillsbench/import-policy.json"
+DEFAULT_PROBE_POLICY = ROOT / "data/skillsbench/execution-probe-policy.json"
 DEFAULT_BUNDLE_SCHEMA = ROOT / "contracts/skillsbench-task-bundle.schema.json"
 DEFAULT_INDEX_SCHEMA = ROOT / "contracts/skillsbench-task-index.schema.json"
 DEFAULT_EXECUTION_SCHEMA = ROOT / "contracts/skillsbench-execution-evidence.schema.json"
@@ -109,6 +118,47 @@ def command_validate_all(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_probe_paths(args: argparse.Namespace) -> int:
+    for path in probe_output_paths(args.probe_policy, args.task_id):
+        print(path)
+    return 0
+
+
+def command_extract_execution(args: argparse.Namespace) -> int:
+    bundle = read_json_object(args.bundle_json)
+    task = bundle.get("task")
+    if not isinstance(task, dict) or not isinstance(task.get("task_id"), str):
+        raise SkillsBenchAdapterError("bundle manifest lacks task_id")
+    paths = probe_output_paths(args.probe_policy, str(task["task_id"]))
+    evidence = build_execution_evidence(
+        bundle_manifest=bundle,
+        surface=args.surface,
+        jobs_root=args.jobs_root,
+        fixture_root=args.fixture_root,
+        verifier_logs_root=args.verifier_logs_root,
+        output_paths=paths,
+        benchflow_version=args.benchflow_version,
+        task_check_passed=args.task_check_passed,
+    )
+    image_identity = args.environment_images or (
+        args.output.parent / "environment-images.json"
+    )
+    evidence = attach_environment_image_identity(
+        evidence,
+        image_identity_path=image_identity,
+        surface=args.surface,
+    )
+    errors = _schema_errors(evidence, DEFAULT_EXECUTION_SCHEMA, str(args.output))
+    if errors:
+        raise SkillsBenchAdapterError("; ".join(errors))
+    write_execution_evidence(args.output, evidence)
+    print(
+        f"PASS: extracted {args.surface} execution evidence"
+        f" digest={evidence['evidence_digest']}"
+    )
+    return 0
+
+
 def command_bind_execution(args: argparse.Namespace) -> int:
     report = read_json_object(args.parity_report)
     upstream = read_json_object(args.upstream_evidence)
@@ -121,7 +171,11 @@ def command_bind_execution(args: argparse.Namespace) -> int:
     ]
     if errors:
         raise SkillsBenchAdapterError("; ".join(errors))
-    result = bind_execution_parity(report, upstream, normalized)
+    result = bind_execution_parity_with_environment_image(
+        report,
+        upstream,
+        normalized,
+    )
     errors = _schema_errors(result, DEFAULT_PARITY_SCHEMA, str(args.output))
     if errors:
         raise SkillsBenchAdapterError("; ".join(errors))
@@ -148,6 +202,35 @@ def parser() -> argparse.ArgumentParser:
     validate_parser = subparsers.add_parser("validate-all")
     validate_parser.add_argument("--output-root", type=Path, required=True)
     validate_parser.set_defaults(handler=command_validate_all)
+
+    paths_parser = subparsers.add_parser("probe-paths")
+    paths_parser.add_argument("--probe-policy", type=Path, default=DEFAULT_PROBE_POLICY)
+    paths_parser.add_argument("--task-id", required=True)
+    paths_parser.set_defaults(handler=command_probe_paths)
+
+    extract_parser = subparsers.add_parser("extract-execution")
+    extract_parser.add_argument("--probe-policy", type=Path, default=DEFAULT_PROBE_POLICY)
+    extract_parser.add_argument("--bundle-json", type=Path, required=True)
+    extract_parser.add_argument(
+        "--surface",
+        choices=("upstream", "normalized"),
+        required=True,
+    )
+    extract_parser.add_argument("--jobs-root", type=Path, required=True)
+    extract_parser.add_argument("--fixture-root", type=Path, required=True)
+    extract_parser.add_argument("--verifier-logs-root", type=Path, required=True)
+    extract_parser.add_argument("--benchflow-version", required=True)
+    extract_parser.add_argument(
+        "--environment-images",
+        type=Path,
+        help=(
+            "recorded source/normalized Docker image identity; defaults to "
+            "environment-images.json beside --output"
+        ),
+    )
+    extract_parser.add_argument("--task-check-passed", action="store_true")
+    extract_parser.add_argument("--output", type=Path, required=True)
+    extract_parser.set_defaults(handler=command_extract_execution)
 
     bind_parser = subparsers.add_parser("bind-execution")
     bind_parser.add_argument("--parity-report", type=Path, required=True)
