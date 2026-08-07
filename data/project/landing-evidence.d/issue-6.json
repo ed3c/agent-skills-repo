@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 6,
+    "title": "First real qualification receipt",
+    "status": "blocked",
+    "evidence_level": "missing",
+    "notes": "No current qualification receipt or candidate-to-qualified transition is repository-local. The next attempt requires the physical evidence pair, fresh calibration/freeze, the replicated hard-gate policy from issue #35, signed promotion evidence, and explicit human admit."
+  }
+}
