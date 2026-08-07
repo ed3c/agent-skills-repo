@@ -16,7 +16,6 @@ if str(ROOT) not in sys.path:
 
 from arena_adapters.skillsbench import (  # noqa: E402
     SkillsBenchAdapterError,
-    bind_execution_parity,
     import_selected_tasks,
     load_policy,
     validate_bundle_directory,
@@ -27,6 +26,10 @@ from arena_adapters.skillsbench.execution import (  # noqa: E402
     build_execution_evidence,
     probe_output_paths,
     write_execution_evidence,
+)
+from arena_adapters.skillsbench.execution_image import (  # noqa: E402
+    attach_environment_image_identity,
+    bind_execution_parity_with_environment_image,
 )
 
 DEFAULT_POLICY = ROOT / "data/skillsbench/import-policy.json"
@@ -137,6 +140,14 @@ def command_extract_execution(args: argparse.Namespace) -> int:
         benchflow_version=args.benchflow_version,
         task_check_passed=args.task_check_passed,
     )
+    image_identity = args.environment_images or (
+        args.output.parent / "environment-images.json"
+    )
+    evidence = attach_environment_image_identity(
+        evidence,
+        image_identity_path=image_identity,
+        surface=args.surface,
+    )
     errors = _schema_errors(evidence, DEFAULT_EXECUTION_SCHEMA, str(args.output))
     if errors:
         raise SkillsBenchAdapterError("; ".join(errors))
@@ -160,7 +171,11 @@ def command_bind_execution(args: argparse.Namespace) -> int:
     ]
     if errors:
         raise SkillsBenchAdapterError("; ".join(errors))
-    result = bind_execution_parity(report, upstream, normalized)
+    result = bind_execution_parity_with_environment_image(
+        report,
+        upstream,
+        normalized,
+    )
     errors = _schema_errors(result, DEFAULT_PARITY_SCHEMA, str(args.output))
     if errors:
         raise SkillsBenchAdapterError("; ".join(errors))
@@ -205,6 +220,14 @@ def parser() -> argparse.ArgumentParser:
     extract_parser.add_argument("--fixture-root", type=Path, required=True)
     extract_parser.add_argument("--verifier-logs-root", type=Path, required=True)
     extract_parser.add_argument("--benchflow-version", required=True)
+    extract_parser.add_argument(
+        "--environment-images",
+        type=Path,
+        help=(
+            "recorded source/normalized Docker image identity; defaults to "
+            "environment-images.json beside --output"
+        ),
+    )
     extract_parser.add_argument("--task-check-passed", action="store_true")
     extract_parser.add_argument("--output", type=Path, required=True)
     extract_parser.set_defaults(handler=command_extract_execution)
