@@ -138,6 +138,9 @@ def bind_execution_parity_with_environment_image(
     upstream_evidence: Mapping[str, object],
     normalized_evidence: Mapping[str, object],
 ) -> dict[str, object]:
+    # Authenticate both enriched documents before comparing any of their fields.
+    _validate_evidence_digest(upstream_evidence, "upstream evidence")
+    _validate_evidence_digest(normalized_evidence, "normalized evidence")
     upstream_execution = upstream_evidence.get("execution")
     normalized_execution = normalized_evidence.get("execution")
     if not isinstance(upstream_execution, Mapping) or not isinstance(
