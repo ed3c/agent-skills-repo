@@ -1,0 +1,39 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 35,
+    "title": "Replicated hard-gate policy for intermittent cases",
+    "status": "completed",
+    "evidence_level": "independently_verified",
+    "notes": "Delivered by merged PR #36. The policy is forward-only under qualification-run@2 and does not reinterpret legacy single-shot runs.",
+    "landing": {
+      "commit_sha": "87785a7c5830b02d253bf73af3b8fd45b7ae74a0",
+      "pull_request": 36,
+      "changed_paths": [
+        ".github/workflows/replicated-hard-gates.yml",
+        "contracts/hard-gate-repetition-policy.schema.json",
+        "contracts/replicated-hard-gate-result.schema.json",
+        "data/qualification/hard-gate-repetition-policy-v1.json",
+        "docs/replicated-hard-gates.md",
+        "scripts/check_replicated_hard_gates.py",
+        "skill_arena/replicated_gates.py",
+        "tests/test_replicated_hard_gates.py"
+      ],
+      "changed_paths_digest": "sha256:51b0d78c24152f742a973fef482b516fe2f75489a19e22550578718e191011b3",
+      "test_evidence": {
+        "source": "workflow",
+        "commands": [
+          "python -m pytest -q tests/test_replicated_hard_gates.py",
+          "python -m compileall -q skill_arena scripts",
+          "python scripts/check_replicated_hard_gates.py --selftest",
+          "python scripts/git_gate.py"
+        ],
+        "result_summary": "PR #36 passed the replicated-hard-gates workflow (run 31190289920) and repository skill-ci (run 31190288510). The dedicated job completed pytest, compileall, and the positive/instability selftest; exact-file pre-publication validation reported 17 focused tests passed.",
+        "independently_verified": true,
+        "digest": "sha256:bb95d53311fca78b399d51b164c6d27de5dc8a77f054c46819c4fac70a07d774"
+      }
+    }
+  }
+}

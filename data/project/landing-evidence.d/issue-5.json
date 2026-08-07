@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 5,
+    "title": "End-to-end calibration run",
+    "status": "blocked",
+    "evidence_level": "reachable_on_main",
+    "notes": "PR #33 (517693bb4bd0f44d51e5ffb88a0f7f985c28962f) landed historical calibration provenance and recomputation guards only. Historical budgets remain quarantined and are not current preregistration authority. Fresh calibration is blocked on physical executor evidence and issue #31."
+  }
+}

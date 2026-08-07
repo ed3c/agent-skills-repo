@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 25,
+    "title": "SkillsBench execution parity for the first three bundles",
+    "status": "pending",
+    "evidence_level": "pull_request",
+    "notes": "Execution-parity implementation exists on closed, unmerged PR #26. The three-task current-head runtime matrix did not land, so no bundle is promoted to ranking eligibility by repository authority."
+  }
+}

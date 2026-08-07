@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 30,
+    "title": "Two OpenShell gateway-backed physical evidence bundles",
+    "status": "blocked",
+    "evidence_level": "reachable_on_main",
+    "notes": "The main-only protected self-hosted workflow, offline pair verifier, and all-object development-key audit are reachable through PR #32. The actual two physical attempts, pair index, environment evidence, and non-secret raw bundles have not been executed and landed."
+  }
+}

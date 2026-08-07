@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 3,
+    "title": "Sandbox executor walking skeleton",
+    "status": "blocked",
+    "evidence_level": "reachable_on_main",
+    "notes": "The fail-closed OpenShell contract is reachable from main through PR #29 (75837fc032c3d25641404af8fcc71f1372bf6b4e), and the paired-evidence verifier plus development-key audit are reachable through PR #32 (c3d8931f2ed4a75e3781550639062bef36d7621d). Completion remains blocked because no repository-local gateway-backed physical evidence pair has been executed and landed."
+  }
+}

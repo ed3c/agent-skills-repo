@@ -5,18 +5,24 @@ on:
     paths:
       - 'contracts/landing-evidence.schema.json'
       - 'data/project/landing-evidence.json'
+      - 'data/project/landing-evidence.d/**'
       - 'skill_arena/landing_evidence.py'
+      - 'skill_arena/landing_evidence_fragments.py'
       - 'scripts/check_landing_evidence.py'
       - 'tests/test_landing_evidence.py'
+      - 'tests/test_landing_evidence_fragments.py'
       - '.github/workflows/landing-evidence.yml'
   push:
     branches: [main]
     paths:
       - 'contracts/landing-evidence.schema.json'
       - 'data/project/landing-evidence.json'
+      - 'data/project/landing-evidence.d/**'
       - 'skill_arena/landing_evidence.py'
+      - 'skill_arena/landing_evidence_fragments.py'
       - 'scripts/check_landing_evidence.py'
       - 'tests/test_landing_evidence.py'
+      - 'tests/test_landing_evidence_fragments.py'
       - '.github/workflows/landing-evidence.yml'
   workflow_dispatch:
 
@@ -34,5 +40,5 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install pytest==8.4.1 -r requirements.lock
-      - run: python -m pytest -q tests/test_landing_evidence.py
+      - run: python -m pytest -q tests/test_landing_evidence.py tests/test_landing_evidence_fragments.py
       - run: python scripts/check_landing_evidence.py --main-ref origin/main
