@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/replicated-hard-gate-result.schema.json",
+  "title": "Replicated qualification hard-gate result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "policy_digest",
+    "hard_gate_evidence_digest",
+    "promotion_allowed",
+    "failed_gates",
+    "target_success_rate",
+    "target_success_rate_ppm",
+    "target_success_threshold_ppm",
+    "unique_case_count",
+    "metered_attempt_count",
+    "repetitions_per_case",
+    "cost_basis",
+    "unstable_cases",
+    "case_summaries",
+    "legacy_runs_reinterpreted",
+    "llm_judge",
+    "llm_judge_authority"
+  ],
+  "properties": {
+    "schema_version": {"const": "replicated-hard-gate-result@1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "policy_digest": {"$ref": "#/$defs/sha256"},
+    "hard_gate_evidence_digest": {"$ref": "#/$defs/sha256"},
+    "promotion_allowed": {"type": "boolean"},
+    "failed_gates": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "critical_case_unstable",
+          "anchor_case_unstable",
+          "critical_failure",
+          "anchor_failure",
+          "target_threshold"
+        ]
+      }
+    },
+    "target_success_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "target_success_rate_ppm": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "target_success_threshold_ppm": {"type": "integer", "minimum": 1, "maximum": 1000000},
+    "unique_case_count": {"type": "integer", "minimum": 3},
+    "metered_attempt_count": {"type": "integer", "minimum": 9},
+    "repetitions_per_case": {"type": "integer", "minimum": 3, "maximum": 100},
+    "cost_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "attempt_count", "attempt_multiplier_per_case"],
+      "properties": {
+        "unit": {"const": "metered-attempt-count"},
+        "attempt_count": {"type": "integer", "minimum": 9},
+        "attempt_multiplier_per_case": {"type": "integer", "minimum": 3, "maximum": 100}
+      }
+    },
+    "unstable_cases": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "case_summaries": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"$ref": "#/$defs/case_summary"}
+    },
+    "legacy_runs_reinterpreted": {"const": false},
+    "llm_judge": {"type": ["string", "null"]},
+    "llm_judge_authority": {"const": "advisory_only"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "case_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "group",
+        "repetitions",
+        "passed_attempts",
+        "failed_attempts",
+        "status"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "group": {"enum": ["critical", "anchor", "target"]},
+        "repetitions": {"type": "integer", "minimum": 3},
+        "passed_attempts": {"type": "integer", "minimum": 0},
+        "failed_attempts": {"type": "integer", "minimum": 0},
+        "status": {"enum": ["all_pass", "all_fail", "mixed"]}
+      }
+    }
+  }
+}

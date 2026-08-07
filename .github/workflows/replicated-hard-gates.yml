@@ -1,0 +1,40 @@
+name: replicated-hard-gates
+
+on:
+  pull_request:
+    paths:
+      - 'skill_arena/replicated_gates.py'
+      - 'scripts/check_replicated_hard_gates.py'
+      - 'contracts/hard-gate-repetition-policy.schema.json'
+      - 'contracts/replicated-hard-gate-result.schema.json'
+      - 'data/qualification/hard-gate-repetition-policy-v1.json'
+      - 'tests/test_replicated_hard_gates.py'
+      - 'docs/replicated-hard-gates.md'
+      - '.github/workflows/replicated-hard-gates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'skill_arena/replicated_gates.py'
+      - 'scripts/check_replicated_hard_gates.py'
+      - 'contracts/hard-gate-repetition-policy.schema.json'
+      - 'contracts/replicated-hard-gate-result.schema.json'
+      - 'data/qualification/hard-gate-repetition-policy-v1.json'
+      - 'tests/test_replicated_hard_gates.py'
+      - 'docs/replicated-hard-gates.md'
+      - '.github/workflows/replicated-hard-gates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # pinned v5 commit
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pytest==8.4.1 jsonschema==4.25.0
+      - run: python -m pytest -q tests/test_replicated_hard_gates.py
+      - run: python -m compileall -q skill_arena scripts
+      - run: python scripts/check_replicated_hard_gates.py --selftest

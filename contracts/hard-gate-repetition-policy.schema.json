@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/hard-gate-repetition-policy.schema.json",
+  "title": "Qualification hard-gate repetition policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "status",
+    "effective_scope",
+    "legacy_single_shot_policy_id",
+    "legacy_run_handling",
+    "repetitions_per_case",
+    "critical_anchor_mode",
+    "mixed_critical_anchor_action",
+    "target_mode",
+    "cost_basis",
+    "cost_attempt_multiplier"
+  ],
+  "properties": {
+    "schema_version": {"const": "hard-gate-repetition-policy@1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "status": {"const": "adopted"},
+    "effective_scope": {"const": "qualification-run@2"},
+    "legacy_single_shot_policy_id": {"const": "hard-gate-single-shot@1"},
+    "legacy_run_handling": {"const": "preserve-no-rejudging"},
+    "repetitions_per_case": {"type": "integer", "minimum": 3, "maximum": 100},
+    "critical_anchor_mode": {"const": "all-pass-or-invalid"},
+    "mixed_critical_anchor_action": {"const": "invalidate-run-and-retire-case"},
+    "target_mode": {"const": "pooled-attempt-rate"},
+    "cost_basis": {"const": "metered-attempt-count"},
+    "cost_attempt_multiplier": {"type": "integer", "minimum": 3, "maximum": 100}
+  }
+}
