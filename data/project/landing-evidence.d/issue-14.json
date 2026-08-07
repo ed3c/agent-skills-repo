@@ -5,8 +5,40 @@
   "work_item": {
     "issue_number": 14,
     "title": "SkillsBench task adapter with executable parity gate",
-    "status": "in_review",
-    "evidence_level": "reachable_on_main",
-    "notes": "The pinned byte-preserving structural adapter is reachable from main through PR #24 (76e7068ccc8a07d292580352158f076773f9c1df). The issue remains incomplete because the first three bundles have not all produced landed executable parity evidence; see issue #25."
+    "status": "completed",
+    "evidence_level": "independently_verified",
+    "notes": "The structural adapter landed through PR #24. PR #38 then landed executable source/normalized Oracle and same-fixture verifier parity for the first three pinned bundles; all three are equivalent and ranking-eligible.",
+    "landing": {
+      "commit_sha": "f3d6f937f126e8d7cd00754848ccfddaabb459f4",
+      "pull_request": 38,
+      "changed_paths": [
+        ".github/workflows/skillsbench-execution-parity.yml",
+        "arena_adapters/skillsbench/execution.py",
+        "arena_adapters/skillsbench/execution_image.py",
+        "contracts/skillsbench-execution-evidence.schema.json",
+        "contracts/skillsbench-execution-probe-policy.schema.json",
+        "data/skillsbench/execution-probe-policy.json",
+        "scripts/import_skillsbench_tasks.py",
+        "scripts/run_skillsbench_execution_parity.sh",
+        "tests/test_skillsbench_execution.py",
+        "tests/test_skillsbench_execution_benchflow_shape.py",
+        "tests/test_skillsbench_execution_image_binding.py",
+        "tests/test_skillsbench_execution_policy.py"
+      ],
+      "changed_paths_digest": "sha256:9cefefca76c935028ecb97c235f2942264ff3fa36539b1977ec584f0ed26d047",
+      "test_evidence": {
+        "source": "workflow",
+        "commands": [
+          "python -m pytest -q tests/test_skillsbench_execution.py tests/test_skillsbench_execution_benchflow_shape.py tests/test_skillsbench_execution_image_binding.py",
+          "python -m pytest -q tests/test_skillsbench_adapter.py",
+          "bench tasks check <source-and-normalized-package> --sandbox docker",
+          "bash scripts/run_skillsbench_execution_parity.sh",
+          "python scripts/git_gate.py"
+        ],
+        "result_summary": "PR #38 head bf97db86714728590f43f9eb32e24f88666895ce passed skill-ci run 31193122152, skillsbench-adapter run 31193122360, and three-task skillsbench-execution-parity run 31193119749. dialogue-parser, weighted-gdp-calc, and pdf-excel-diff each produced source/normalized Oracle reward 1.0, matching immutable Docker image identity, identical same-fixture verifier reward/diagnostics, status equivalent, and ranking_eligible true. Artifact digests: dialogue-parser sha256:71652e556292a5c4e36733b8480a3224de2628ff579ac5f2c4112e8cf8a0e5cb; weighted-gdp-calc sha256:8e9f3d3ecad2407e809c257be63d2347ca8074a997d1eb58d87145d81aa8daca; pdf-excel-diff sha256:a5445b1b79628ecd144ec6d9dcc412cb48520dd3e1dc34cb925c2932f0afe4df.",
+        "independently_verified": true,
+        "digest": "sha256:513bf7455e3859dabf22d5af38f8d168546c3b8f2f4e828a3b7642564de1063c"
+      }
+    }
   }
 }
