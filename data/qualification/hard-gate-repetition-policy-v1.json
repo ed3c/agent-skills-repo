@@ -1,0 +1,14 @@
+{
+  "schema_version": "hard-gate-repetition-policy@1",
+  "policy_id": "qualification-replicated-hard-gate@1",
+  "status": "adopted",
+  "effective_scope": "qualification-run@2",
+  "legacy_single_shot_policy_id": "hard-gate-single-shot@1",
+  "legacy_run_handling": "preserve-no-rejudging",
+  "repetitions_per_case": 5,
+  "critical_anchor_mode": "all-pass-or-invalid",
+  "mixed_critical_anchor_action": "invalidate-run-and-retire-case",
+  "target_mode": "pooled-attempt-rate",
+  "cost_basis": "metered-attempt-count",
+  "cost_attempt_multiplier": 5
+}
