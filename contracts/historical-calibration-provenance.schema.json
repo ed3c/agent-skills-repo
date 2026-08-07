@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/historical-calibration-provenance.schema.json",
+  "title": "Historical unlanded calibration provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority",
+    "source",
+    "recovered_files",
+    "unrecoverable_tree_paths",
+    "stage2_report",
+    "historical_budgets",
+    "known_deviations",
+    "revalidation_requirements",
+    "manifest_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "historical-calibration-provenance@1"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "delivery_authority",
+        "qualification_eligible",
+        "preregistration_eligible",
+        "runtime_import_allowed",
+        "reason"
+      ],
+      "properties": {
+        "status": {"const": "historical-unlanded"},
+        "delivery_authority": {"const": false},
+        "qualification_eligible": {"const": false},
+        "preregistration_eligible": {"const": false},
+        "runtime_import_allowed": {"const": false},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "target_repository", "target_prefix"],
+      "properties": {
+        "repository": {"const": "ed3c/skill-bettor"},
+        "commit": {"const": "4b2de858097cba50f8320c4fb7570136bb9715a3"},
+        "target_repository": {"const": "ed3c/agent-skills-repo"},
+        "target_prefix": {"const": "repo/agent-skills-repo/"}
+      }
+    },
+    "recovered_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/recovered_file"}
+    },
+    "unrecoverable_tree_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/unrecoverable_path"}
+    },
+    "stage2_report": {"$ref": "#/$defs/stage2_report"},
+    "historical_budgets": {"$ref": "#/$defs/historical_budgets"},
+    "known_deviations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/deviation"}
+    },
+    "revalidation_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "manifest_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repository_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    },
+    "decimal_usd": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]*)\\.[0-9]{1,7}$"
+    },
+    "recovered_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "source_path", "git_blob_sha1", "role"],
+      "properties": {
+        "path": {"$ref": "#/$defs/repository_path"},
+        "source_path": {
+          "type": "string",
+          "pattern": "^repo/agent-skills-repo/.+$"
+        },
+        "git_blob_sha1": {"$ref": "#/$defs/sha1"},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "unrecoverable_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "reason"],
+      "properties": {
+        "path": {"$ref": "#/$defs/repository_path"},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "stage2_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "declared_sha256",
+        "evidentiary",
+        "receipts_emitted",
+        "single_shot",
+        "pool",
+        "agent_path",
+        "observed_models",
+        "case_count",
+        "passed_count",
+        "max_observed_agent_wall_ms",
+        "case_costs_usd"
+      ],
+      "properties": {
+        "schema_version": {"const": "calibration-stage2-report@1"},
+        "declared_sha256": {"const": "sha256:719628dd3327d32f0f4a96023104dea97dda43ebd1f7989875548b58d07f9bd5"},
+        "evidentiary": {"const": false},
+        "receipts_emitted": {"const": "none-by-design"},
+        "single_shot": {"const": true},
+        "pool": {"const": "public-only"},
+        "agent_path": {"const": "host-claude-p-fallback"},
+        "observed_models": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "case_count": {"const": 10},
+        "passed_count": {"const": 9},
+        "max_observed_agent_wall_ms": {"const": 41898},
+        "case_costs_usd": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/decimal_usd"}
+        }
+      }
+    },
+    "historical_budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_success_ppm",
+        "latency_budget_ms",
+        "cost_total_usd",
+        "formulas",
+        "recomputed"
+      ],
+      "properties": {
+        "target_success_ppm": {"const": 900000},
+        "latency_budget_ms": {"const": 62847},
+        "cost_total_usd": {"const": "1.615403"},
+        "formulas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target_success_ppm", "latency_budget_ms", "cost_total_usd"],
+          "properties": {
+            "target_success_ppm": {"const": "passed_cases * 1000000 // total_cases"},
+            "latency_budget_ms": {"const": "max_observed_agent_wall_ms * 3 // 2"},
+            "cost_total_usd": {"const": "decimal_sum(case_costs_usd)"}
+          }
+        },
+        "recomputed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_success_ppm",
+            "latency_budget_ms",
+            "cost_total_usd",
+            "all_equal"
+          ],
+          "properties": {
+            "target_success_ppm": {"const": 900000},
+            "latency_budget_ms": {"const": 62847},
+            "cost_total_usd": {"const": "1.615403"},
+            "all_equal": {"const": true}
+          }
+        }
+      }
+    },
+    "deviation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "historical_value", "required_revalidation"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "historical_value": {"type": "string", "minLength": 1},
+        "required_revalidation": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
