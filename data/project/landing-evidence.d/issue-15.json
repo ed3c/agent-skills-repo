@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 15,
+    "title": "Paired randomized replicated Arena experiment runner",
+    "status": "in_review",
+    "evidence_level": "reachable_on_main",
+    "notes": "The harness-independent control plane is reachable from main through PR #40 (5573a6a7b267676e2cf77e8e1d0959a74067ece2): signed deterministic preregistration, paired/randomized invocation identity, fresh one-attempt workspaces, complete failure denominators, content-addressed signed bundles, and credential-free offline replay. Completion remains open because no pinned BenchFlow baseline/candidate matrix and raw runtime evidence have landed yet."
+  }
+}
