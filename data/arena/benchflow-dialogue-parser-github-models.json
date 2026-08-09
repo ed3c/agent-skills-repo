@@ -1,0 +1,32 @@
+{
+  "schema_version": "arena-benchflow-runtime-policy@1",
+  "policy_id": "skillsbench-dialogue-parser-github-models@1",
+  "benchflow_version": "0.6.3",
+  "agent": "pi-acp",
+  "model": "github-models/openai/gpt-4.1-mini",
+  "catalog_model_id": "openai/gpt-4.1-mini",
+  "sandbox": "docker",
+  "sandbox_profile_id": "github-hosted-ubuntu-24.04-docker@1",
+  "task_id": "dialogue-parser",
+  "task_family": "code",
+  "task_bundle_digest": "sha256:822261046590e0521d715920df5612c55c2d76b1cc3bb3f43aa45123d2ed2b57",
+  "candidate_skill_name": "dialogue-graph",
+  "usage_tracking": "required",
+  "max_retries": 0,
+  "concurrency": 1,
+  "skill_nudge": "name",
+  "network_policy": "public",
+  "allowed_tools": [
+    "bash",
+    "edit",
+    "read",
+    "write"
+  ],
+  "sandbox_setup_timeout_sec": 180,
+  "agent_timeout_sec": 900,
+  "agent_idle_timeout_sec": 600,
+  "process_timeout_sec": 1200,
+  "repetitions": 3,
+  "catalog_api_version": "2026-03-10",
+  "catalog_url": "https://models.github.ai/catalog/models"
+}
