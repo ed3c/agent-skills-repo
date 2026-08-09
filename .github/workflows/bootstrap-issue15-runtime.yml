@@ -45,13 +45,20 @@ jobs:
           python -m compileall -q skill_arena scripts
           python scripts/arena_experiment.py selftest
           python -m json.tool contracts/arena-benchflow-runtime.schema.json >/dev/null
-      - name: Replace bootstrap material with the validated implementation
+      - name: Push only non-workflow implementation bytes
         run: |
           set -euo pipefail
-          rm -rf .github/bootstrap/issue15-runtime
-          rm -f .github/workflows/bootstrap-issue15-runtime.yml
+          rm -f .github/workflows/arena-experiment-benchflow.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
-          git commit -m 'feat(arena): add real BenchFlow paired runtime'
+          git add \
+            skill_arena/experiment/__init__.py \
+            skill_arena/experiment/benchflow_adapter.py \
+            scripts/run_arena_benchflow_experiment.py \
+            scripts/check_arena_benchflow_runtime.py \
+            data/arena/benchflow-dialogue-parser-github-models.json \
+            contracts/arena-benchflow-runtime.schema.json \
+            tests/test_arena_experiment_benchflow_adapter.py \
+            docs/arena-benchflow-runtime.md
+          git commit -m 'feat(arena): add real BenchFlow paired runtime core'
           git push origin HEAD:agent/issue-15-benchflow-runtime
