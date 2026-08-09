@@ -68,7 +68,10 @@ jobs:
           git init "$root"
           git -C "$root" remote add origin https://github.com/benchflow-ai/skillsbench.git
           git -C "$root" sparse-checkout init --cone
-          git -C "$root" sparse-checkout set tasks/dialogue-parser
+          git -C "$root" sparse-checkout set \
+            tasks/dialogue-parser \
+            tasks/pdf-excel-diff \
+            tasks/weighted-gdp-calc
           git -C "$root" fetch --depth=1 --filter=blob:none origin "$SKILLSBENCH_SHA"
           git -C "$root" checkout --detach FETCH_HEAD
           test "$(git -C "$root" rev-parse HEAD)" = "$SKILLSBENCH_SHA"
