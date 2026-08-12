@@ -69,7 +69,7 @@ def test_current_repository_skills_export_and_validate(tmp_path: Path) -> None:
         (output / "repo-wiki-verified/export-manifest.json").read_text()
     )
     assert repo_manifest["source"]["artifact_digest"] == (
-        "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6"
+        "sha256:0f86a29fed777610db3697f9c36be8a45757ff7b6b71342d52029be47abc3f6f"
     )
 
 

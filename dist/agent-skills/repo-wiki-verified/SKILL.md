@@ -7,9 +7,9 @@ metadata:
   ed3c-export-schema: "agent-skills-export@1"
   ed3c-lifecycle-status: "pending-qualification"
   ed3c-production-routable: "false"
-  ed3c-source-artifact-digest: "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6"
+  ed3c-source-artifact-digest: "sha256:0f86a29fed777610db3697f9c36be8a45757ff7b6b71342d52029be47abc3f6f"
   ed3c-source-skill-id: "repo_wiki_verified"
-  ed3c-source-version: "0.1.0"
+  ed3c-source-version: "0.1.1"
 ---
 # Repo Wiki Verified
 

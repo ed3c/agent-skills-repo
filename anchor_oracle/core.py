@@ -15,6 +15,10 @@ default: no silent built-ins) turns anchors that resolve — after symlink
 resolution — into generated wiki output stored inside the fixture into the
 failing status ``circular_evidence``: documentation citing documentation is
 not source evidence.
+
+A ``quote_not_found`` check also carries a bounded, deterministic
+``nearest_source_span`` diagnostic. It identifies only real contiguous source
+bytes that explain an interior deletion; it never changes the lexical verdict.
 """
 
 from __future__ import annotations
@@ -63,6 +67,22 @@ AnchorStatus = Literal[
     "line_ref_on_undecodable_file",
     "quote_outside_line_ref",
 ]
+
+NEAREST_SPAN_KIND = "nearest-source-span@1"
+SpanStatus = Literal["interior_elision", "no_candidate", "search_incomplete"]
+
+SPAN_QUOTE_EMPTY = "quote-empty"
+SPAN_QUOTE_PRESENT = "quote-present-in-source"
+SPAN_SOURCE_EMPTY = "source-empty"
+SPAN_NO_ANCHORED_EDGE = "no-anchored-prefix-or-suffix"
+SPAN_EDGES_DO_NOT_COVER_QUOTE = "prefix-and-suffix-do-not-cover-quote"
+SPAN_NO_ORDERED_OCCURRENCE = "no-ordered-prefix-then-suffix-occurrence"
+SPAN_ELISION_EXCEEDS_BOUND = "elided-run-exceeds-bound"
+SPAN_SEARCH_BOUND_EXHAUSTED = "search-bound-exhausted"
+SPAN_TEXT_NOT_UTF8 = "span-not-utf8"
+
+_MAX_SPLIT_PROBES = 64
+_MAX_PREFIX_OCCURRENCES = 32
 
 
 class AnchorOracleError(ValueError):
@@ -123,6 +143,42 @@ class LineRef(TypedDict):
     end: int
 
 
+class SourceSpan(TypedDict):
+    start: int
+    end: int
+    text: str | None
+    text_absent_reason: str | None
+
+
+class SpanAlignment(TypedDict):
+    matched_prefix_bytes: int
+    matched_suffix_bytes: int
+    elided_bytes: int
+    elided_text: str | None
+    elided_text_absent_reason: str | None
+    divergence_quote_offset: int
+    divergence_source_offset: int
+
+
+class SpanSearch(TypedDict):
+    longest_prefix_bytes: int
+    longest_suffix_bytes: int
+    best_elided_bytes: int | None
+    max_elided_bytes: int
+    splits_examined: int
+    search_truncated: bool
+
+
+class SpanDiagnostic(TypedDict):
+    kind: str
+    status: SpanStatus
+    reason: str | None
+    quote_bytes: int
+    span: SourceSpan | None
+    alignment: SpanAlignment | None
+    search: SpanSearch
+
+
 class AnchorCheck(TypedDict):
     index: int
     path: str
@@ -131,6 +187,7 @@ class AnchorCheck(TypedDict):
     quote: str
     status: AnchorStatus
     target_sha256: str | None
+    nearest_source_span: NotRequired[SpanDiagnostic]
 
 
 class MalformedAnchor(TypedDict):
@@ -495,6 +552,231 @@ def _is_inside(root: Path, candidate: Path) -> bool:
     return str(relative) != "."
 
 
+def _longest_matching_prefix(quote: bytes, source: bytes) -> int:
+    low, high = 0, len(quote)
+    while low < high:
+        mid = (low + high + 1) // 2
+        if source.find(quote[:mid]) >= 0:
+            low = mid
+        else:
+            high = mid - 1
+    return low
+
+
+def _longest_matching_suffix(quote: bytes, source: bytes) -> int:
+    low, high = 0, len(quote)
+    while low < high:
+        mid = (low + high + 1) // 2
+        if source.find(quote[len(quote) - mid :]) >= 0:
+            low = mid
+        else:
+            high = mid - 1
+    return low
+
+
+def _occurrences(
+    source: bytes, needle: bytes, limit: int
+) -> tuple[list[int], bool]:
+    found: list[int] = []
+    start = 0
+    while len(found) < limit:
+        position = source.find(needle, start)
+        if position < 0:
+            return found, False
+        found.append(position)
+        start = position + 1
+    return found, source.find(needle, start) >= 0
+
+
+def _common_prefix_len(left: bytes, right: bytes) -> int:
+    limit = min(len(left), len(right))
+    index = 0
+    while index < limit and left[index] == right[index]:
+        index += 1
+    return index
+
+
+def _common_suffix_len(left: bytes, right: bytes) -> int:
+    limit = min(len(left), len(right))
+    index = 0
+    while index < limit and left[-1 - index] == right[-1 - index]:
+        index += 1
+    return index
+
+
+def _decode_or_absent(data: bytes) -> tuple[str | None, str | None]:
+    try:
+        return data.decode("utf-8"), None
+    except UnicodeDecodeError:
+        return None, SPAN_TEXT_NOT_UTF8
+
+
+def _no_span_candidate(
+    reason: str,
+    *,
+    status: SpanStatus = "no_candidate",
+    quote_bytes: int,
+    prefix: int = 0,
+    suffix: int = 0,
+    best_elided: int | None = None,
+    max_elided: int = 0,
+    splits: int = 0,
+    truncated: bool = False,
+) -> SpanDiagnostic:
+    return {
+        "kind": NEAREST_SPAN_KIND,
+        "status": status,
+        "reason": reason,
+        "quote_bytes": quote_bytes,
+        "span": None,
+        "alignment": None,
+        "search": {
+            "longest_prefix_bytes": prefix,
+            "longest_suffix_bytes": suffix,
+            "best_elided_bytes": best_elided,
+            "max_elided_bytes": max_elided,
+            "splits_examined": splits,
+            "search_truncated": truncated,
+        },
+    }
+
+
+def nearest_source_span(
+    quote: str,
+    source_bytes: bytes,
+    *,
+    max_elided_bytes: int | None = None,
+) -> SpanDiagnostic:
+    """Find a real source span that explains a quote's interior deletion.
+
+    Every offset is a byte offset into ``source_bytes``. The bounded,
+    deterministic search only returns a span when deleting one interior run
+    reconstructs the quote; rewritten text is not presented as a repair.
+    """
+    quote_bytes = quote.encode("utf-8")
+    bound = len(quote_bytes) if max_elided_bytes is None else max_elided_bytes
+    if type(bound) is not int or bound < 0:
+        raise ValueError("max_elided_bytes must be a non-negative integer")
+    if not quote_bytes:
+        return _no_span_candidate(
+            SPAN_QUOTE_EMPTY, quote_bytes=0, max_elided=bound
+        )
+    if not source_bytes:
+        return _no_span_candidate(
+            SPAN_SOURCE_EMPTY, quote_bytes=len(quote_bytes), max_elided=bound
+        )
+    if quote_bytes in source_bytes:
+        return _no_span_candidate(
+            SPAN_QUOTE_PRESENT, quote_bytes=len(quote_bytes), max_elided=bound
+        )
+
+    prefix_len = _longest_matching_prefix(quote_bytes, source_bytes)
+    suffix_len = _longest_matching_suffix(quote_bytes, source_bytes)
+    common = {
+        "quote_bytes": len(quote_bytes),
+        "prefix": prefix_len,
+        "suffix": suffix_len,
+        "max_elided": bound,
+    }
+    if prefix_len == 0 and suffix_len == 0:
+        return _no_span_candidate(SPAN_NO_ANCHORED_EDGE, **common)
+    if prefix_len + suffix_len < len(quote_bytes):
+        return _no_span_candidate(SPAN_EDGES_DO_NOT_COVER_QUOTE, **common)
+
+    lowest_split = max(1, len(quote_bytes) - suffix_len)
+    highest_split = min(prefix_len, len(quote_bytes) - 1)
+    split_count = highest_split - lowest_split + 1
+    truncated = split_count > _MAX_SPLIT_PROBES
+    splits = range(
+        lowest_split,
+        min(highest_split + 1, lowest_split + _MAX_SPLIT_PROBES),
+    )
+
+    best: tuple[int, int, int] | None = None
+    for split in splits:
+        head, tail = quote_bytes[:split], quote_bytes[split:]
+        starts, more = _occurrences(
+            source_bytes, head, _MAX_PREFIX_OCCURRENCES
+        )
+        truncated = truncated or more
+        for start in starts:
+            tail_start = source_bytes.find(tail, start + split)
+            if tail_start < 0:
+                continue
+            candidate = (
+                tail_start - (start + split),
+                start,
+                tail_start + len(tail),
+            )
+            if best is None or candidate < best:
+                best = candidate
+
+    if truncated:
+        return _no_span_candidate(
+            SPAN_SEARCH_BOUND_EXHAUSTED,
+            status="search_incomplete",
+            best_elided=None if best is None else best[0],
+            splits=len(splits),
+            truncated=True,
+            **common,
+        )
+    if best is None:
+        return _no_span_candidate(
+            SPAN_NO_ORDERED_OCCURRENCE,
+            splits=len(splits),
+            truncated=truncated,
+            **common,
+        )
+    elided, start, end = best
+    if elided > bound:
+        return _no_span_candidate(
+            SPAN_ELISION_EXCEEDS_BOUND,
+            best_elided=elided,
+            splits=len(splits),
+            truncated=truncated,
+            **common,
+        )
+
+    span_bytes = source_bytes[start:end]
+    span_text, span_absent = _decode_or_absent(span_bytes)
+    matched_prefix = _common_prefix_len(quote_bytes, span_bytes)
+    matched_suffix = min(
+        _common_suffix_len(quote_bytes, span_bytes),
+        len(quote_bytes) - matched_prefix,
+    )
+    elided_bytes = span_bytes[matched_prefix : len(span_bytes) - matched_suffix]
+    elided_text, elided_absent = _decode_or_absent(elided_bytes)
+    return {
+        "kind": NEAREST_SPAN_KIND,
+        "status": "interior_elision",
+        "reason": None,
+        "quote_bytes": len(quote_bytes),
+        "span": {
+            "start": start,
+            "end": end,
+            "text": span_text,
+            "text_absent_reason": span_absent,
+        },
+        "alignment": {
+            "matched_prefix_bytes": matched_prefix,
+            "matched_suffix_bytes": matched_suffix,
+            "elided_bytes": len(elided_bytes),
+            "elided_text": elided_text,
+            "elided_text_absent_reason": elided_absent,
+            "divergence_quote_offset": matched_prefix,
+            "divergence_source_offset": start + matched_prefix,
+        },
+        "search": {
+            "longest_prefix_bytes": prefix_len,
+            "longest_suffix_bytes": suffix_len,
+            "best_elided_bytes": elided,
+            "max_elided_bytes": bound,
+            "splits_examined": len(splits),
+            "search_truncated": truncated,
+        },
+    }
+
+
 def check_anchor(
     fixture_repo: Path | str,
     anchor: Anchor,
@@ -564,6 +846,7 @@ def check_anchor(
         if start < 1 or end < start:
             return failed("invalid_line_ref")
     if anchor.quote.encode("utf-8") not in data:
+        check["nearest_source_span"] = nearest_source_span(anchor.quote, data)
         return failed("quote_not_found")
 
     if anchor.line_ref is not None:

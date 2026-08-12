@@ -1,5 +1,5 @@
 {
-  "registry_digest": "sha256:11c8deceffbc26836f56df7d8547422de69ae17562003228bf05e57d071859c0",
+  "registry_digest": "sha256:65acb165b4c40cccf6053131c80e8401710b6c12b52a2f67ab64672cee40f3e9",
   "schema_version": "agent-skills-registry@1",
   "skills": [
     {
@@ -23,10 +23,10 @@
     {
       "export_manifest": "dist/agent-skills/repo-wiki-verified/export-manifest.json",
       "lifecycle_status": "pending-qualification",
-      "portable_artifact_digest": "sha256:8019007c5eb01a1a7c15adc6a2c6afbeae12ba0df3e16d0c370b58120dbb2abb",
+      "portable_artifact_digest": "sha256:a6a9a1ea9c5337c2d2eb6131e00604c9a08879fe1bae66fa787fbbf2f0fda5da",
       "portable_name": "repo-wiki-verified",
       "production_routable": false,
-      "source_artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+      "source_artifact_digest": "sha256:0f86a29fed777610db3697f9c36be8a45757ff7b6b71342d52029be47abc3f6f",
       "source_skill_id": "repo_wiki_verified"
     }
   ],
