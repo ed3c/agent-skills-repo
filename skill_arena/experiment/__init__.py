@@ -16,6 +16,15 @@ from .model import (
     ExperimentError,
     InvocationCapture,
 )
+from .provider_policy import (
+    LocalProviderPolicy,
+    OllamaHttpProbe,
+    load_provider_policy,
+    load_provider_revocations,
+    validate_provider_attempt,
+    validate_provider_preflight,
+    validate_provider_revocations,
+)
 from .plan import generate_plan, sign_plan, validate_plan, verify_plan_envelope
 from .replay import replay_bundle
 from .runner import run_experiment
@@ -26,17 +35,24 @@ __all__ = [
     "ExperimentAdapter",
     "ExperimentError",
     "InvocationCapture",
+    "LocalProviderPolicy",
+    "OllamaHttpProbe",
     "enforce_github_models_retirement",
     "fetch_github_model_catalog_evidence",
     "generate_plan",
+    "load_provider_policy",
+    "load_provider_revocations",
     "load_runtime_policy",
     "prepare_benchflow_runtime",
+    "validate_provider_attempt",
     "replay_bundle",
     "run_experiment",
     "sign_plan",
     "summarize_paired_bundle",
     "validate_catalog_evidence",
     "validate_plan",
+    "validate_provider_preflight",
+    "validate_provider_revocations",
     "validate_preparation",
     "verify_plan_envelope",
 ]

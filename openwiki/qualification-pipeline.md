@@ -19,16 +19,22 @@ agent-skills-repo/
 ├── scripts/
 │   ├── anchor_oracle.py            # thin CLI over the oracle
 │   ├── check_landing_evidence.py
+│   ├── check_arena_provider_preflight.py
+│   ├── preflight_arena_provider.py
 │   ├── run_sandbox_case.py         # OpenShell contract CLI
 │   └── sandbox_case_runner.py      # uploaded deterministic task runner
 ├── skill_arena/
 │   ├── core.py                     # admission, hard gates, receipts
 │   ├── skill_assets.py             # artifact digests + corpus guards
 │   ├── landing_evidence.py         # completion-evidence validator
+│   ├── experiment/provider_policy.py # local provider policy + preflight
 │   └── sandbox_executor/           # contract, adapter, signing, publication
 ├── contracts/
+│   ├── arena-provider-policy.schema.json
 │   └── sandbox-executor.schema.json
 ├── data/
+│   ├── arena/ollama-qwen3-4b-local.json
+│   ├── arena/provider-observation-revocations.json
 │   ├── project/landing-evidence.json
 │   ├── sandbox_cases/smoke-python.json
 │   ├── sandbox_profiles/
@@ -59,6 +65,9 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
         ▼ real evidence digests
 ✅ skill_arena admission + hard-gate dry run (DRAFT ppm threshold)
         │
+        ▼
+✅ proposed zero-cost local provider policy + one capability preflight
+        │                    (experiment execution remains unauthorized)
         ▼
 ✅ OpenShell executor contract + CLI + signed bundle writer + contract tests
         │
@@ -102,6 +111,14 @@ qualification by themselves.
   (src: data/verification_runs/openshell_executor_status.json `"qualification_eligible": false,`).
 - Contract CI names its own non-evidentiary boundary
   (src: .github/workflows/sandbox-executor-contract.yml `Assert contract CI is not physical integration evidence`).
+- The local provider policy keeps efficacy execution disabled after capability
+  discovery (src: data/arena/ollama-qwen3-4b-local.json `"experiment_execution_authorized": false,`).
+- The provider receipt records that no credential was used
+  (src: data/verification_runs/ollama_qwen3_provider_preflight_2026-08-12.json `"credential_used": false,`).
+- The attempt receipt preserves the bounded capability denominator
+  (src: data/verification_runs/ollama_qwen3_provider_attempt_2026-08-12.json `"model_invocation_count": 1,`).
+- The offline checker verifies capability evidence without provider access
+  (src: scripts/check_arena_provider_preflight.py `"status": "verified",`).
 - The contract document requires two fresh physical runs before issue #3 can
   close (src: docs/sandbox-executor.md `two runs must show distinct workspace nonces and no residue before`).
 - An unreachable commit can never satisfy a completed item
@@ -123,3 +140,5 @@ qualification by themselves.
   proof are reviewable and recorded by the repository authority.
 - Calibration (#5) and qualification (#6) cannot consume executor-backed
   evidence while the committed status remains `real_integration: not_executed`.
+- Provider capability does not authorize #46 or #53 execution while the
+  canonical provider policy remains `experiment_execution_authorized: false`.

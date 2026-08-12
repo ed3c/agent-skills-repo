@@ -1,8 +1,123 @@
 {
   "chunks": [
     {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:0",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance)"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:1",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Verdict table (fixture × tool)"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Verdict table (fixture × tool)"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:2",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:3",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D1 — wiki_good: ours PASS vs both references FAIL"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D1 — wiki_good: ours PASS vs both references FAIL"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:4",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D2 — arm-b-retrofit / arm-d-gate-driven: published ed3c baseline PASS vs both live runs FAIL (measured-set divergence)"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D2 — arm-b-retrofit / arm-d-gate-driven: published ed3c baseline PASS vs both live runs FAIL (measured-set divergence)"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:5",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D3 — arm-c-generated: 2 anchors into generated wiki output — Ref B flags \"circular evidence\", ours resolves them"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D3 — arm-c-generated: 2 anchors into generated wiki output — Ref B flags \"circular evidence\", ours resolves them"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:6",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D4 — front-matter semantics: three different contracts"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D4 — front-matter semantics: three different contracts"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:7",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D5 — Ref A on every backtick-dialect fixture: not-comparable (format mismatch), recorded, not silently skipped"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D5 — Ref A on every backtick-dialect fixture: not-comparable (format mismatch), recorded, not silently skipped"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:8",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D6 — absence semantics: empty wiki PASSes Ref A and \"fails\" Ref B; only ours reports absence as its own state"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Divergences and adjudications > D6 — absence semantics: empty wiki PASSes Ref A and \"fails\" Ref B; only ours reports absence as its own state"
+    },
+    {
+      "chunk_id": "chunk:openwiki/anchor-oracle-comparison.md:9",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Bottom line"
+      ],
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "text": "anchor_oracle dual-reference comparison (issue #2 acceptance) > Bottom line"
+    },
+    {
       "chunk_id": "chunk:openwiki/architecture/data-authority.md:0",
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Data Authority"
@@ -12,7 +127,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/architecture/data-authority.md:1",
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Data Authority",
@@ -23,7 +138,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/architecture/data-authority.md:2",
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Data Authority",
@@ -34,7 +149,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/architecture/data-authority.md:3",
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Data Authority",
@@ -184,7 +299,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/governance/molecular-commit-lineage.md:0",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Molecular Commit Lineage"
@@ -194,7 +309,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/governance/molecular-commit-lineage.md:1",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Molecular Commit Lineage",
@@ -205,7 +320,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/governance/molecular-commit-lineage.md:2",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Molecular Commit Lineage",
@@ -216,7 +331,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/governance/molecular-commit-lineage.md:3",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Molecular Commit Lineage",
@@ -227,7 +342,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/governance/molecular-commit-lineage.md:4",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Molecular Commit Lineage",
@@ -859,7 +974,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:0",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks"
@@ -869,7 +984,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:1",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -880,7 +995,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:2",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -891,7 +1006,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:3",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -902,7 +1017,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:4",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -913,7 +1028,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:5",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -924,7 +1039,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/nonofficial/production-bottlenecks.md:6",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Production Bottlenecks",
@@ -1663,6 +1778,60 @@
       ],
       "source_path": "openwiki/operations/index.md",
       "text": "Files"
+    },
+    {
+      "chunk_id": "chunk:openwiki/qualification-pipeline.md:0",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow"
+      ],
+      "source_path": "openwiki/qualification-pipeline.md",
+      "text": "Qualification pipeline — structure and dataflow"
+    },
+    {
+      "chunk_id": "chunk:openwiki/qualification-pipeline.md:1",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Directory structure"
+      ],
+      "source_path": "openwiki/qualification-pipeline.md",
+      "text": "Qualification pipeline — structure and dataflow > Directory structure"
+    },
+    {
+      "chunk_id": "chunk:openwiki/qualification-pipeline.md:2",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Dataflow (executed ✅ / pending ⛔)"
+      ],
+      "source_path": "openwiki/qualification-pipeline.md",
+      "text": "Qualification pipeline — structure and dataflow > Dataflow (executed ✅ / pending ⛔)"
+    },
+    {
+      "chunk_id": "chunk:openwiki/qualification-pipeline.md:3",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Anchored claims"
+      ],
+      "source_path": "openwiki/qualification-pipeline.md",
+      "text": "Qualification pipeline — structure and dataflow > Anchored claims"
+    },
+    {
+      "chunk_id": "chunk:openwiki/qualification-pipeline.md:4",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "embedding_model_id": "local-hash-embedding@0.1.0",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Tracking contract"
+      ],
+      "source_path": "openwiki/qualification-pipeline.md",
+      "text": "Qualification pipeline — structure and dataflow > Tracking contract"
     },
     {
       "chunk_id": "chunk:openwiki/quickstart.md:0",
@@ -3139,51 +3308,128 @@
   "edges": [
     {
       "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:0",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:1",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:2",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:3",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:4",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:5",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:6",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:7",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:8",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/anchor-oracle-comparison.md:9",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "wiki-graph-schema@0.1.0",
+      "edge_type": "USES_SCHEMA",
+      "source_event_id": "evt:d8c95cfa4ad0bb5dc1665d61",
+      "src": "doc:openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
       "dst": "section:openwiki/architecture/data-authority.md:0",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/architecture/data-authority.md:1",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/architecture/data-authority.md:2",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/architecture/data-authority.md:3",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../nonofficial/production-bottlenecks.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "defense-gate-chain.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "wiki-graph-schema@0.1.0",
       "edge_type": "USES_SCHEMA",
-      "source_event_id": "evt:f59b46d75d3ed6eee574918e",
+      "source_event_id": "evt:b464a0fcf09276d763b2448e",
       "src": "doc:openwiki/architecture/data-authority.md"
     },
     {
@@ -3407,70 +3653,70 @@
       "commit_sha": "local-dev",
       "dst": "section:openwiki/governance/molecular-commit-lineage.md:0",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/governance/molecular-commit-lineage.md:1",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/governance/molecular-commit-lineage.md:2",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/governance/molecular-commit-lineage.md:3",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/governance/molecular-commit-lineage.md:4",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../nonofficial/code-call-lifecycle.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../nonofficial/production-bottlenecks.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../nonofficial/prompt-trace-assets.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../quickstart.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "wiki-graph-schema@0.1.0",
       "edge_type": "USES_SCHEMA",
-      "source_event_id": "evt:8768356c5814670a7e908d8a",
+      "source_event_id": "evt:50f4961e2af55b2f5e23d0e4",
       "src": "doc:openwiki/governance/molecular-commit-lineage.md"
     },
     {
@@ -4408,98 +4654,98 @@
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:0",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:1",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:2",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:3",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:4",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:5",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/nonofficial/production-bottlenecks.md:6",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../operations/entrypoint-matrix.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../quickstart.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../skill-assets/gemini-interactions.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../terminal-operator/overview.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "../validation/semantic-arbitration.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "code-call-lifecycle.md",
       "edge_type": "LINKS_TO",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "wiki-graph-schema@0.1.0",
       "edge_type": "USES_SCHEMA",
-      "source_event_id": "evt:ab279f818c5e5a14e99204cf",
+      "source_event_id": "evt:fd9a10c0367223923fc521ae",
       "src": "doc:openwiki/nonofficial/production-bottlenecks.md"
     },
     {
@@ -5201,6 +5447,48 @@
       "edge_type": "USES_SCHEMA",
       "source_event_id": "evt:37375df797ad6a066bf220e2",
       "src": "doc:openwiki/operations/index.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/qualification-pipeline.md:0",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/qualification-pipeline.md:1",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/qualification-pipeline.md:2",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/qualification-pipeline.md:3",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "section:openwiki/qualification-pipeline.md:4",
+      "edge_type": "HAS_SECTION",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "dst": "wiki-graph-schema@0.1.0",
+      "edge_type": "USES_SCHEMA",
+      "source_event_id": "evt:327caa226fb1964250e67776",
+      "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
@@ -6767,7 +7055,138 @@
   "nodes": [
     {
       "commit_sha": "local-dev",
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "license": {
+        "code_license": "MIT",
+        "commercial_use": "allowed-local-artifact",
+        "copyleft_risk": "none",
+        "data_license": "local-project-docs",
+        "model_license": "N/A-deterministic-local-hash-no-model-weights"
+      },
+      "node_id": "doc:openwiki/anchor-oracle-comparison.md",
+      "node_type": "WikiDocument",
+      "schema_version": "wiki-graph-schema@0.1.0",
+      "source_path": "openwiki/anchor-oracle-comparison.md",
+      "title": "anchor_oracle dual-reference comparison (issue #2 acceptance)"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)"
+      ],
+      "level": 1,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:0",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Verdict table (fixture × tool)"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:1",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:2",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D1 — wiki_good: ours PASS vs both references FAIL"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:3",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D2 — arm-b-retrofit / arm-d-gate-driven: published ed3c baseline PASS vs both live runs FAIL (measured-set divergence)"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:4",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D3 — arm-c-generated: 2 anchors into generated wiki output — Ref B flags \"circular evidence\", ours resolves them"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:5",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D4 — front-matter semantics: three different contracts"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:6",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D5 — Ref A on every backtick-dialect fixture: not-comparable (format mismatch), recorded, not silently skipped"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:7",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Divergences and adjudications",
+        "D6 — absence semantics: empty wiki PASSes Ref A and \"fails\" Ref B; only ours reports absence as its own state"
+      ],
+      "level": 3,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:8",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "content_sha256": "a058a1051b51bda381c091f6a4ab161fa7875214939a8ce2809ba426d12a500d",
+      "heading_path": [
+        "anchor_oracle dual-reference comparison (issue #2 acceptance)",
+        "Bottom line"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/anchor-oracle-comparison.md:9",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/anchor-oracle-comparison.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "license": {
         "code_license": "MIT",
         "commercial_use": "allowed-local-artifact",
@@ -6782,7 +7201,7 @@
       "title": "Data Authority"
     },
     {
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "heading_path": [
         "Data Authority"
       ],
@@ -6792,7 +7211,7 @@
       "source_path": "openwiki/architecture/data-authority.md"
     },
     {
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "heading_path": [
         "Data Authority",
         "Ownership table"
@@ -6803,7 +7222,7 @@
       "source_path": "openwiki/architecture/data-authority.md"
     },
     {
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "heading_path": [
         "Data Authority",
         "Evidence origin: three tiers"
@@ -6814,7 +7233,7 @@
       "source_path": "openwiki/architecture/data-authority.md"
     },
     {
-      "content_sha256": "b4ca11aefde2ebd8b0b72ca62e79e728cae9b27c6123f2cdcb8ec8b6864d32ed",
+      "content_sha256": "1fe94d8da585c105ef49ce70b9bff659c060fddcd97c2b483bdb1b838265933a",
       "heading_path": [
         "Data Authority",
         "Regeneration commands"
@@ -7029,7 +7448,7 @@
     },
     {
       "commit_sha": "local-dev",
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "license": {
         "code_license": "MIT",
         "commercial_use": "allowed-local-artifact",
@@ -7044,7 +7463,7 @@
       "title": "Molecular Commit Lineage"
     },
     {
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "heading_path": [
         "Molecular Commit Lineage"
       ],
@@ -7054,7 +7473,7 @@
       "source_path": "openwiki/governance/molecular-commit-lineage.md"
     },
     {
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "heading_path": [
         "Molecular Commit Lineage",
         "The commit message contract"
@@ -7065,7 +7484,7 @@
       "source_path": "openwiki/governance/molecular-commit-lineage.md"
     },
     {
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "heading_path": [
         "Molecular Commit Lineage",
         "The compensating ledger"
@@ -7076,7 +7495,7 @@
       "source_path": "openwiki/governance/molecular-commit-lineage.md"
     },
     {
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "heading_path": [
         "Molecular Commit Lineage",
         "Two validation modes, very different strength"
@@ -7087,7 +7506,7 @@
       "source_path": "openwiki/governance/molecular-commit-lineage.md"
     },
     {
-      "content_sha256": "57c5296b7dcd294db0ff13af51c6b5d942bcda47938d1a16503aa1aa01a494ba",
+      "content_sha256": "0a46a274ef9f55061d9431d4fc784c4a2a29b44937a86e79625a5b694946c4f9",
       "heading_path": [
         "Molecular Commit Lineage",
         "Validation"
@@ -7864,7 +8283,7 @@
     },
     {
       "commit_sha": "local-dev",
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "license": {
         "code_license": "MIT",
         "commercial_use": "allowed-local-artifact",
@@ -7879,7 +8298,7 @@
       "title": "Production Bottlenecks"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks"
       ],
@@ -7889,7 +8308,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "Evidence is local-zero-LLM-regex-canary, not behavior"
@@ -7900,7 +8319,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "root-local-runtime: the toolchain is pinned to one machine"
@@ -7911,7 +8330,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "The vendored operator cannot run here"
@@ -7922,7 +8341,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "Gates that do less than their name suggests"
@@ -7933,7 +8352,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "Adversarial review is pending, not absent-therefore-fine"
@@ -7944,7 +8363,7 @@
       "source_path": "openwiki/nonofficial/production-bottlenecks.md"
     },
     {
-      "content_sha256": "cb9dd12a6927375b51c8f96fde7d90b35889aecac0753a8bc9df185f8afb84e1",
+      "content_sha256": "901c9fe21ceb44e3ae1b7a9805be0202aa56f6bd7544de9205fe4efb44f1b2df",
       "heading_path": [
         "Production Bottlenecks",
         "documentation debt"
@@ -8828,6 +9247,76 @@
       "node_id": "section:openwiki/operations/index.md:0",
       "node_type": "WikiSection",
       "source_path": "openwiki/operations/index.md"
+    },
+    {
+      "commit_sha": "local-dev",
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "license": {
+        "code_license": "MIT",
+        "commercial_use": "allowed-local-artifact",
+        "copyleft_risk": "none",
+        "data_license": "local-project-docs",
+        "model_license": "N/A-deterministic-local-hash-no-model-weights"
+      },
+      "node_id": "doc:openwiki/qualification-pipeline.md",
+      "node_type": "WikiDocument",
+      "schema_version": "wiki-graph-schema@0.1.0",
+      "source_path": "openwiki/qualification-pipeline.md",
+      "title": "Qualification pipeline — structure and dataflow"
+    },
+    {
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow"
+      ],
+      "level": 1,
+      "node_id": "section:openwiki/qualification-pipeline.md:0",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/qualification-pipeline.md"
+    },
+    {
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Directory structure"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/qualification-pipeline.md:1",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/qualification-pipeline.md"
+    },
+    {
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Dataflow (executed ✅ / pending ⛔)"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/qualification-pipeline.md:2",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/qualification-pipeline.md"
+    },
+    {
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Anchored claims"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/qualification-pipeline.md:3",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/qualification-pipeline.md"
+    },
+    {
+      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "heading_path": [
+        "Qualification pipeline — structure and dataflow",
+        "Tracking contract"
+      ],
+      "level": 2,
+      "node_id": "section:openwiki/qualification-pipeline.md:4",
+      "node_type": "WikiSection",
+      "source_path": "openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",

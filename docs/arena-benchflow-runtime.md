@@ -69,10 +69,13 @@ HTTP authorization, other HTTP status, transport, and catalog-schema failures
 use separate sanitized diagnostics. Response bodies, exception reasons, and
 credential values are never included.
 
-This retirement guard does not select a replacement provider and does not
-complete #15 or #46. A new provider requires a new versioned policy, explicit
-credential and budget authority, a fresh six-invocation physical run, offline
-replay, non-secret evidence landing, and repository-local delivery authority.
+This retirement guard itself does not select a replacement provider and does
+not complete #15 or #46. The separate proposed local-provider policy and its
+capability-only receipt are documented in `docs/arena-provider-policy.md`.
+That policy has no credential or external API spend, but it deliberately keeps
+experiment execution unauthorized. Completion still requires a reviewed
+execution revision, a fresh six-invocation physical run, offline replay,
+non-secret evidence landing, and repository-local delivery authority.
 
 The workflow consequently requests no `models: read` permission and cannot
 schedule the retired provider. Its contract job exercises the fail-closed guard.

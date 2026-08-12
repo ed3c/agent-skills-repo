@@ -7,13 +7,22 @@ on:
       - 'scripts/arena_experiment.py'
       - 'scripts/run_arena_benchflow_experiment.py'
       - 'scripts/check_arena_benchflow_runtime.py'
+      - 'scripts/check_arena_provider_preflight.py'
+      - 'scripts/preflight_arena_provider.py'
       - 'contracts/arena-experiment.schema.json'
       - 'contracts/arena-benchflow-runtime.schema.json'
+      - 'contracts/arena-provider-policy.schema.json'
       - 'contracts/github-models-retirement-authority.schema.json'
       - 'data/arena/benchflow-dialogue-parser-github-models.json'
       - 'data/arena/github-models-retirement.json'
+      - 'data/arena/ollama-qwen3-4b-local.json'
+      - 'data/arena/provider-observation-revocations.json'
+      - 'data/verification_runs/ollama_qwen3_provider_preflight_2026-08-12.json'
+      - 'data/verification_runs/ollama_qwen3_provider_attempt_2026-08-12.json'
       - 'tests/test_arena_experiment.py'
       - 'tests/test_arena_experiment_benchflow_adapter.py'
+      - 'tests/test_arena_provider_policy.py'
+      - 'docs/arena-provider-policy.md'
       - 'docs/arena-benchflow-runtime.md'
       - '.github/workflows/arena-experiment-benchflow.yml'
   workflow_dispatch:
@@ -37,12 +46,24 @@ jobs:
       - run: |
           python -m pytest -q \
             tests/test_arena_experiment.py \
-            tests/test_arena_experiment_benchflow_adapter.py
+            tests/test_arena_experiment_benchflow_adapter.py \
+            tests/test_arena_provider_policy.py
       - run: python -m compileall -q skill_arena scripts
       - run: python scripts/arena_experiment.py selftest
       - run: python -m json.tool contracts/arena-benchflow-runtime.schema.json >/dev/null
+      - run: python -m json.tool contracts/arena-provider-policy.schema.json >/dev/null
+      - run: python -m json.tool data/arena/ollama-qwen3-4b-local.json >/dev/null
       - run: python -m json.tool contracts/github-models-retirement-authority.schema.json >/dev/null
       - run: python -m json.tool data/arena/github-models-retirement.json >/dev/null
+      - name: Verify proposed local provider policy and landed capability receipt offline
+        run: |
+          python scripts/preflight_arena_provider.py \
+            --policy data/arena/ollama-qwen3-4b-local.json \
+            --validate-only
+          python scripts/check_arena_provider_preflight.py \
+            --policy data/arena/ollama-qwen3-4b-local.json \
+            --receipt data/verification_runs/ollama_qwen3_provider_preflight_2026-08-12.json \
+            --attempt-receipt data/verification_runs/ollama_qwen3_provider_attempt_2026-08-12.json
 
   # Retained as an archival outline of PR #42's failed physical attempt.
   # GitHub Models is retired, so this job must never be scheduled again.

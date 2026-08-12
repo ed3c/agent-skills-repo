@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/arena-provider-policy.schema.json",
+  "title": "Arena local provider policy and capability preflight",
+  "oneOf": [
+    {"$ref": "#/$defs/provider_policy"},
+    {"$ref": "#/$defs/preflight_receipt"},
+    {"$ref": "#/$defs/attempt_receipt"},
+    {"$ref": "#/$defs/revocation_registry"}
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "provider_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "policy_id",
+        "selection_status",
+        "provider_id",
+        "provider_software",
+        "provider_version",
+        "endpoint_kind",
+        "host_base_url",
+        "sandbox_base_url",
+        "network_scope",
+        "model_id",
+        "model_digest",
+        "model_family",
+        "model_parameter_size",
+        "model_quantization",
+        "model_license",
+        "benchflow_version",
+        "benchflow_agent",
+        "benchflow_model",
+        "sandbox",
+        "credential_kind",
+        "credential_env",
+        "external_api_cost_microunits_max",
+        "capability_requirements",
+        "max_capability_probe_invocations",
+        "experiment_execution_authorized",
+        "observation_actor_id",
+        "observation_authority_id",
+        "revocation_registry_path",
+        "coordination_issue_url",
+        "selection_rationale"
+      ],
+      "properties": {
+        "schema_version": {"const": "arena-provider-policy@1"},
+        "policy_id": {"const": "ollama-qwen3-4b-local@1"},
+        "selection_status": {"const": "proposed"},
+        "provider_id": {"const": "ollama-local"},
+        "provider_software": {"const": "ollama"},
+        "provider_version": {"const": "0.15.5"},
+        "endpoint_kind": {"const": "openai-chat-completions"},
+        "host_base_url": {"const": "http://127.0.0.1:11434/v1"},
+        "sandbox_base_url": {"const": "http://host.docker.internal:11434/v1"},
+        "network_scope": {"const": "local-machine-only"},
+        "model_id": {"const": "qwen3:4b"},
+        "model_digest": {
+          "const": "sha256:359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+        },
+        "model_family": {"const": "qwen3"},
+        "model_parameter_size": {"const": "4.0B"},
+        "model_quantization": {"const": "Q4_K_M"},
+        "model_license": {"const": "Apache-2.0"},
+        "benchflow_version": {"const": "0.6.3"},
+        "benchflow_agent": {"const": "pi-acp"},
+        "benchflow_model": {"const": "vllm/qwen3:4b"},
+        "sandbox": {"const": "docker"},
+        "credential_kind": {"const": "none"},
+        "credential_env": {"type": "null"},
+        "external_api_cost_microunits_max": {"const": 0},
+        "capability_requirements": {
+          "const": ["chat-completions", "model-digest", "tool-calls", "usage"]
+        },
+        "max_capability_probe_invocations": {"const": 1},
+        "experiment_execution_authorized": {"const": false},
+        "observation_actor_id": {"const": "github:ed3c"},
+        "observation_authority_id": {"const": "repository-owner-review@1"},
+        "revocation_registry_path": {
+          "const": "data/arena/provider-observation-revocations.json"
+        },
+        "coordination_issue_url": {
+          "const": "https://github.com/ed3c/agent-skills-repo/issues/46"
+        },
+        "selection_rationale": {"type": "string", "minLength": 1}
+      }
+    },
+    "attempt_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "attempt_id",
+        "policy_id",
+        "policy_digest",
+        "coordination_issue_url",
+        "observer_kind",
+        "observer_actor_id",
+        "observation_authority_id",
+        "observer_host_digest",
+        "runtime_identity",
+        "revocation_registry_digest",
+        "started_at",
+        "completed_at",
+        "status",
+        "model_invocation_count",
+        "diagnostic",
+        "receipt_digest",
+        "attempt_digest"
+      ],
+      "properties": {
+        "schema_version": {"const": "arena-provider-attempt@1"},
+        "attempt_id": {"type": "string", "minLength": 1, "pattern": "^\\S+$"},
+        "policy_id": {"const": "ollama-qwen3-4b-local@1"},
+        "policy_digest": {"$ref": "#/$defs/sha256"},
+        "coordination_issue_url": {
+          "const": "https://github.com/ed3c/agent-skills-repo/issues/46"
+        },
+        "observer_kind": {"const": "local-owner-session"},
+        "observer_actor_id": {"const": "github:ed3c"},
+        "observation_authority_id": {"const": "repository-owner-review@1"},
+        "observer_host_digest": {"$ref": "#/$defs/sha256"},
+        "runtime_identity": {"type": "string", "minLength": 1},
+        "revocation_registry_digest": {"$ref": "#/$defs/sha256"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": ["string", "null"], "format": "date-time"},
+        "status": {"enum": ["started", "invoking", "failed", "succeeded"]},
+        "model_invocation_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "diagnostic": {"type": ["string", "null"]},
+        "receipt_digest": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        },
+        "attempt_digest": {"$ref": "#/$defs/sha256"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "succeeded"}}},
+          "then": {
+            "properties": {
+              "completed_at": {"type": "string", "format": "date-time"},
+              "model_invocation_count": {"const": 1},
+              "diagnostic": {"type": "null"},
+              "receipt_digest": {"$ref": "#/$defs/sha256"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "failed"}}},
+          "then": {
+            "properties": {
+              "completed_at": {"type": "string", "format": "date-time"},
+              "diagnostic": {"type": "string", "minLength": 1},
+              "receipt_digest": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "revocation_registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "registry_id",
+        "actor_id",
+        "authority_id",
+        "updated_at",
+        "revoked_attempt_ids",
+        "superseded_attempt_ids",
+        "registry_digest"
+      ],
+      "properties": {
+        "schema_version": {"const": "arena-provider-observation-revocations@1"},
+        "registry_id": {"const": "local-provider-observation-revocations@1"},
+        "actor_id": {"const": "github:ed3c"},
+        "authority_id": {"const": "repository-owner-review@1"},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "revoked_attempt_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "superseded_attempt_ids": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "registry_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "preflight_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "attempt_id",
+        "policy_id",
+        "policy_digest",
+        "provider_id",
+        "provider_version",
+        "endpoint_kind",
+        "base_url",
+        "model_id",
+        "model_digest",
+        "checked_at",
+        "capabilities",
+        "token_usage",
+        "credential_used",
+        "external_api_cost_microunits",
+        "ready",
+        "experiment_execution_authorized",
+        "receipt_digest"
+      ],
+      "properties": {
+        "schema_version": {"const": "arena-provider-preflight@1"},
+        "attempt_id": {"type": "string", "minLength": 1, "pattern": "^\\S+$"},
+        "policy_id": {"const": "ollama-qwen3-4b-local@1"},
+        "policy_digest": {"$ref": "#/$defs/sha256"},
+        "provider_id": {"const": "ollama-local"},
+        "provider_version": {"const": "0.15.5"},
+        "endpoint_kind": {"const": "openai-chat-completions"},
+        "base_url": {"const": "http://127.0.0.1:11434/v1"},
+        "model_id": {"const": "qwen3:4b"},
+        "model_digest": {
+          "const": "sha256:359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+        },
+        "checked_at": {"type": "string", "format": "date-time"},
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["chat_completions", "model_digest", "tool_calls", "usage"],
+          "properties": {
+            "chat_completions": {"const": true},
+            "model_digest": {"const": true},
+            "tool_calls": {"const": true},
+            "usage": {"const": true}
+          }
+        },
+        "token_usage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prompt_tokens", "completion_tokens", "total_tokens"],
+          "properties": {
+            "prompt_tokens": {"type": "integer", "minimum": 0},
+            "completion_tokens": {"type": "integer", "minimum": 0},
+            "total_tokens": {"type": "integer", "minimum": 0}
+          }
+        },
+        "credential_used": {"const": false},
+        "external_api_cost_microunits": {"const": 0},
+        "ready": {"const": true},
+        "experiment_execution_authorized": {"const": false},
+        "receipt_digest": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}
