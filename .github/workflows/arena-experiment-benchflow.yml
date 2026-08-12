@@ -9,7 +9,9 @@ on:
       - 'scripts/check_arena_benchflow_runtime.py'
       - 'contracts/arena-experiment.schema.json'
       - 'contracts/arena-benchflow-runtime.schema.json'
+      - 'contracts/github-models-retirement-authority.schema.json'
       - 'data/arena/benchflow-dialogue-parser-github-models.json'
+      - 'data/arena/github-models-retirement.json'
       - 'tests/test_arena_experiment.py'
       - 'tests/test_arena_experiment_benchflow_adapter.py'
       - 'docs/arena-benchflow-runtime.md'
@@ -22,7 +24,6 @@ concurrency:
 
 permissions:
   contents: read
-  models: read
 
 jobs:
   contract:
@@ -40,11 +41,13 @@ jobs:
       - run: python -m compileall -q skill_arena scripts
       - run: python scripts/arena_experiment.py selftest
       - run: python -m json.tool contracts/arena-benchflow-runtime.schema.json >/dev/null
+      - run: python -m json.tool contracts/github-models-retirement-authority.schema.json >/dev/null
+      - run: python -m json.tool data/arena/github-models-retirement.json >/dev/null
 
+  # Retained as an archival outline of PR #42's failed physical attempt.
+  # GitHub Models is retired, so this job must never be scheduled again.
   paired-runtime:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.pull_request.head.repo.full_name == github.repository
+    if: ${{ false }} # retired provider; archival specification only
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:

@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 from skill_arena.experiment import (  # noqa: E402
     BenchFlowExperimentAdapter,
     ExperimentError,
+    enforce_github_models_retirement,
     fetch_github_model_catalog_evidence,
     generate_plan,
     load_runtime_policy,
@@ -150,8 +151,17 @@ def _artifact_manifest(root: Path) -> dict[str, object]:
 
 def command_run(args: argparse.Namespace) -> int:
     policy = load_runtime_policy(args.runtime_policy)
+    retirement_authority = _load_object(
+        args.retirement_authority, "GitHub Models retirement authority"
+    )
     if args.task_id != policy.task_id:
         raise ExperimentError("requested task differs from runtime policy")
+    started_at = datetime.now(timezone.utc)
+    enforce_github_models_retirement(
+        policy=policy,
+        checked_at=started_at,
+        retirement_authority=retirement_authority,
+    )
     token = os.environ.get(args.github_token_env, "")
     if not token:
         raise ExperimentError(
@@ -168,11 +178,10 @@ def command_run(args: argparse.Namespace) -> int:
             raise ExperimentError("runtime output root must start empty")
     destination.mkdir(parents=True, exist_ok=True)
 
-    started_at = datetime.now(timezone.utc)
     catalog = fetch_github_model_catalog_evidence(
         token=token,
         policy=policy,
-        fetched_at=started_at,
+        retirement_authority=retirement_authority,
     )
     _write_object(destination / "model-catalog-evidence.json", catalog)
     shutil.copyfile(args.runtime_policy, destination / "runtime-policy.json")
@@ -292,6 +301,7 @@ def command_run(args: argparse.Namespace) -> int:
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     root.add_argument("--runtime-policy", type=Path, required=True)
+    root.add_argument("--retirement-authority", type=Path, required=True)
     root.add_argument("--bundles-root", type=Path, required=True)
     root.add_argument("--task-id", required=True)
     root.add_argument("--bench-bin", type=Path, required=True)

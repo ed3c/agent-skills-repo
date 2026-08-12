@@ -1,8 +1,8 @@
 # First real Arena baseline/candidate runtime
 
-This document defines the first real execution profile for issue #15. It is a
-single-task runtime proof that the reusable experiment contract can drive a
-real agent, not a public leaderboard claim.
+This document records the first attempted real execution profile for issue
+#15. It remains the immutable description of that attempt, not a public
+leaderboard claim and not a currently executable provider profile.
 
 ## Pinned profile
 
@@ -23,11 +23,81 @@ real agent, not a public leaderboard claim.
 | Internal retries | 0 |
 | Concurrency per invocation | 1 |
 
-GitHub's Models catalog endpoint is queried at runtime with the workflow-scoped
-`GITHUB_TOKEN`, `models: read`, and API version `2026-03-10`. The safe catalog
-fields and their digest are published; the token is not. The repository policy
-pins the model ID, while the catalog evidence records the version actually
-advertised during the run.
+As originally designed, GitHub's Models catalog endpoint was queried with the
+workflow-scoped `GITHUB_TOKEN`, `models: read`, and API version `2026-03-10`.
+The repository policy remains unchanged so the failed attempt keeps its exact
+meaning.
+
+## Provider retirement boundary
+
+GitHub's source statement says that GitHub Models, including its catalog and
+inference APIs, was retired on 2026-07-30. The statement gives a date but not a
+time of day. The repository therefore keeps that observation as the date-only
+`retired_on` fact and separately adopts `2026-07-31T00:00:00Z` as its
+fail-closed enforcement policy. This preserves every possible 2026-07-30
+historical fetch; fetches at or after the policy timestamp are refused.
+
+The official retirement statement is materialized as
+`data/arena/github-models-retirement.json` and constrained by
+`contracts/github-models-retirement-authority.schema.json`. The record keeps two
+explicit states. `source_statement` binds the date-only claim, official URL,
+observer's stable GitHub account identity, observation timestamp, statement
+digest, and its own revocation mechanism. `enforcement_policy` binds the exact
+provider, catalog endpoint, model prefix, policy timestamp, stable decision
+authority/time, source-statement digest, rationale, policy digest, and its own
+revocation mechanism. Revocation requires a superseding reviewed record at the
+same canonical repository path; #46 is only its coordination pointer. The outer
+record has its own canonical digest. These are source and fail-closed
+execution-policy authorities reviewed through repository delivery; neither is
+sandbox admission, lifecycle, routing, or ranking authority.
+
+The runtime CLI requires this authority explicitly. At or after the effective
+timestamp it refuses the profile before token, filesystem, catalog, or model
+prerequisites. The diagnostic names the fixed provider, policy timestamp,
+digest-pinned official authority URL, and record digest. The catalog endpoint,
+response body, exception reason, and credential values are never copied into
+diagnostics.
+
+Network fetch uses an internal UTC clock and rechecks the retirement policy
+immediately before opening the endpoint. A caller cannot supply an historical
+evidence timestamp to reopen network access, and the CLI does not reuse its
+earlier prerequisite-check time. Historical evidence replay uses the separate
+offline evidence validator and never reopens the provider endpoint. Tests may
+inject a deterministic clock solely to exercise the pre-cutoff contract.
+
+HTTP authorization, other HTTP status, transport, and catalog-schema failures
+use separate sanitized diagnostics. Response bodies, exception reasons, and
+credential values are never included.
+
+This retirement guard does not select a replacement provider and does not
+complete #15 or #46. A new provider requires a new versioned policy, explicit
+credential and budget authority, a fresh six-invocation physical run, offline
+replay, non-secret evidence landing, and repository-local delivery authority.
+
+The workflow consequently requests no `models: read` permission and cannot
+schedule the retired provider. Its contract job exercises the fail-closed guard.
+The former `paired-runtime` body remains visibly disabled as an archival
+outline of PR #42; the full commit above is the exact historical identity. A
+replacement provider must add a new physical job under its own reviewed policy
+rather than silently reviving it.
+
+### PR #42 failed-attempt evidence gap
+
+GitHub run `31307442167`, job `93229900533`, at full commit
+`3ecfe059260c96ad1df4d2360775904a32949df1` has a readable external job log
+showing `ATTEMPT_OUTCOME=failure`, offline verification skipped, and the
+observed catalog `HTTPError` before invocation 1. Artifact metadata identifies
+artifact `9036379174`, named `arena-benchflow-dialogue-parser-1`, with upload
+digest `8dc68ad8623a8bb26387e209aee956a11162deac12fb8a541f6130eba9ca60c7`.
+
+That metadata is not a repository-local evidence bundle. During issue #47
+review, two independent archive-download paths both returned HTTP 403, so the
+raw `workflow-attempt.json`, stdout, and stderr cannot be read back or hashed
+here. No full invocation identity, repository-local cleanup proof, or landed
+artifact manifest exists. This is an explicit evidence gap: the observed
+physical failure must not be dropped from the denominator, but it contributes
+no qualification evidence and cannot satisfy #15. PR history, CI state, and
+the metadata above are not substitutes for the missing raw receipt.
 
 ## Why the Arena does not call `bench skills eval`
 
@@ -65,7 +135,8 @@ Before signing the plan, the runtime:
    and SHA-256 under its directory;
 4. builds the task Docker image and records its immutable image ID and Docker
    server version;
-5. queries and digests the exact GitHub Models catalog entry;
+5. validates provider retirement authority, then queries and digests the exact
+   GitHub Models catalog entry only when the profile was active;
 6. combines runtime-policy and model-catalog digests into one effective policy
    digest.
 
@@ -128,5 +199,7 @@ It does not estimate general skill lift. The paired document is forced to keep:
 ranking_claim_allowed: false
 ```
 
-Issue #15 closes only after this runtime implementation and its non-secret raw
-evidence land on `main` through the repository landing authority.
+Issue #15 closes only after a live replacement-provider implementation and its
+non-secret raw evidence land on `main` through the repository landing
+authority. The retired profile and its failed attempt do not satisfy that
+boundary.

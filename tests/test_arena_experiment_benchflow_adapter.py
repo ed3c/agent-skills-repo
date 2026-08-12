@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import subprocess
 import sys
 import types
+import urllib.error
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping
@@ -13,7 +16,9 @@ import pytest
 import yaml
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from jsonschema import Draft202012Validator
 
+import skill_arena.experiment.benchflow_adapter as benchflow_adapter_module
 from skill_arena.experiment import (
     generate_plan,
     replay_bundle,
@@ -35,15 +40,22 @@ from skill_arena.experiment.model import (
     SPEC_SCHEMA,
     canonical_bytes,
     sha256_bytes,
+    sha256_json,
 )
-from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "data/arena/benchflow-dialogue-parser-github-models.json"
+RETIREMENT_AUTHORITY_PATH = ROOT / "data/arena/github-models-retirement.json"
+RETIREMENT_AUTHORITY_SCHEMA_PATH = (
+    ROOT / "contracts/github-models-retirement-authority.schema.json"
+)
+WORKFLOW_PATH = ROOT / ".github/workflows/arena-experiment-benchflow.yml"
 IMAGE = "sha256:" + "1" * 64
 TASK_DIGEST = "sha256:" + "2" * 64
 TOKEN = "ghp_abcdefghijklmnopqrstuvwxyz123456"
 NOW = datetime(2026, 8, 9, tzinfo=timezone.utc)
+BEFORE_RETIREMENT = datetime(2026, 7, 29, tzinfo=timezone.utc)
+RETIREMENT_BOUNDARY = datetime(2026, 7, 31, tzinfo=timezone.utc)
 
 
 @pytest.fixture(autouse=True)
@@ -60,6 +72,11 @@ def skillsbench_validator(monkeypatch: pytest.MonkeyPatch) -> list[Path]:
     module.validate_bundle_directory = validate_bundle_directory  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "arena_adapters", package)
     monkeypatch.setitem(sys.modules, "arena_adapters.skillsbench", module)
+    monkeypatch.setattr(
+        benchflow_adapter_module,
+        "_UTC_CLOCK",
+        lambda: BEFORE_RETIREMENT,
+    )
     return calls
 
 
@@ -99,6 +116,14 @@ class Response:
         return json.dumps(self.value).encode("utf-8")
 
 
+class RawResponse:
+    def __init__(self, value: bytes):
+        self.value = value
+
+    def read(self) -> bytes:
+        return self.value
+
+
 def catalog_rows(runtime_policy: BenchFlowRuntimePolicy) -> list[dict[str, object]]:
     return [
         {
@@ -114,11 +139,15 @@ def catalog_rows(runtime_policy: BenchFlowRuntimePolicy) -> list[dict[str, objec
     ]
 
 
+def retirement_authority() -> dict[str, object]:
+    return json.loads(RETIREMENT_AUTHORITY_PATH.read_text(encoding="utf-8"))
+
+
 def catalog_evidence(runtime_policy: BenchFlowRuntimePolicy) -> dict[str, object]:
     return fetch_github_model_catalog_evidence(
         token=TOKEN,
         policy=runtime_policy,
-        fetched_at=NOW,
+        retirement_authority=retirement_authority(),
         opener=lambda request, timeout: Response(catalog_rows(runtime_policy)),
     )
 
@@ -388,13 +417,421 @@ def test_catalog_evidence_is_exact_and_digested() -> None:
     tampered = dict(evidence, version="changed")
     with pytest.raises(ExperimentError, match="digest"):
         validate_catalog_evidence(tampered, runtime_policy)
-    with pytest.raises(ExperimentError, match="exactly one"):
+    with pytest.raises(
+        ExperimentError,
+        match="provider_catalog_schema_error model_cardinality",
+    ):
         fetch_github_model_catalog_evidence(
             token=TOKEN,
             policy=runtime_policy,
-            fetched_at=NOW,
+            retirement_authority=retirement_authority(),
             opener=lambda request, timeout: Response(catalog_rows(runtime_policy) * 2),
         )
+
+
+def test_catalog_fetch_requires_retirement_authority() -> None:
+    runtime_policy = policy()
+    with pytest.raises(ExperimentError, match="retirement authority is required"):
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=runtime_policy,
+            opener=lambda request, timeout: Response(catalog_rows(runtime_policy)),
+        )
+
+
+def test_retired_provider_is_rejected_before_catalog_network_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    opener_called = False
+
+    def opener(request: object, timeout: int) -> Response:
+        nonlocal opener_called
+        opener_called = True
+        return Response(catalog_rows(policy()))
+
+    monkeypatch.setattr(
+        benchflow_adapter_module,
+        "_UTC_CLOCK",
+        lambda: RETIREMENT_BOUNDARY,
+    )
+
+    with pytest.raises(ExperimentError, match="provider_retired"):
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=opener,
+        )
+
+    assert opener_called is False
+
+
+def test_retirement_boundary_preserves_pre_cutoff_replay(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime_policy = policy()
+    monkeypatch.setattr(
+        benchflow_adapter_module,
+        "_UTC_CLOCK",
+        lambda: datetime(2026, 7, 30, 23, 59, 59, tzinfo=timezone.utc),
+    )
+    evidence = fetch_github_model_catalog_evidence(
+        token=TOKEN,
+        policy=runtime_policy,
+        retirement_authority=retirement_authority(),
+        opener=lambda request, timeout: Response(catalog_rows(runtime_policy)),
+    )
+
+    assert evidence["model_id"] == runtime_policy.catalog_model_id
+
+
+def test_catalog_network_rechecks_clock_immediately_before_opener(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    times = iter([BEFORE_RETIREMENT, NOW])
+    opener_called = False
+
+    def opener(request: object, timeout: int) -> Response:
+        nonlocal opener_called
+        opener_called = True
+        return Response(catalog_rows(policy()))
+
+    monkeypatch.setattr(
+        benchflow_adapter_module,
+        "_UTC_CLOCK",
+        lambda: next(times),
+    )
+    with pytest.raises(ExperimentError, match="provider_retired"):
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=opener,
+        )
+
+    assert opener_called is False
+
+
+def test_tampered_retirement_authority_cannot_inject_secret_into_diagnostic() -> None:
+    tampered = retirement_authority()
+    source = dict(tampered["source_statement"])
+    source["source_url"] = f"https://example.invalid/?token={TOKEN}"
+    source["statement_digest"] = sha256_json(
+        {key: value for key, value in source.items() if key != "statement_digest"}
+    )
+    enforcement = dict(tampered["enforcement_policy"])
+    enforcement["source_statement_digest"] = source["statement_digest"]
+    enforcement["policy_digest"] = sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
+    tampered["source_statement"] = source
+    tampered["enforcement_policy"] = enforcement
+    tampered["record_digest"] = sha256_json(
+        {key: value for key, value in tampered.items() if key != "record_digest"}
+    )
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=tampered,
+            opener=lambda request, timeout: Response(catalog_rows(policy())),
+        )
+
+    assert str(captured.value) == (
+        "GitHub Models retirement authority digest mismatch"
+    )
+    assert TOKEN not in str(captured.value)
+
+    extra_field = retirement_authority()
+    extra_field[f"credential-{TOKEN}"] = "present"
+    with pytest.raises(ExperimentError) as extra_captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=extra_field,
+            opener=lambda request, timeout: Response(catalog_rows(policy())),
+        )
+    assert str(extra_captured.value) == (
+        "GitHub Models retirement authority fields are invalid"
+    )
+    assert TOKEN not in str(extra_captured.value)
+
+
+def test_catalog_identity_cannot_be_tampered_with_authority() -> None:
+    malicious_url = f"https://example.invalid/catalog?token={TOKEN}"
+    tampered_policy = replace(policy(), catalog_url=malicious_url)
+    tampered_authority = retirement_authority()
+    enforcement = dict(tampered_authority["enforcement_policy"])
+    enforcement["catalog_url"] = malicious_url
+    enforcement["policy_digest"] = sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
+    tampered_authority["enforcement_policy"] = enforcement
+    tampered_authority["record_digest"] = sha256_json(
+        {
+            key: value
+            for key, value in tampered_authority.items()
+            if key != "record_digest"
+        }
+    )
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=tampered_policy,
+            retirement_authority=tampered_authority,
+            opener=lambda request, timeout: Response(catalog_rows(tampered_policy)),
+        )
+
+    assert str(captured.value) == "GitHub Models retirement authority digest mismatch"
+    assert TOKEN not in str(captured.value)
+
+
+def test_retirement_authority_is_repository_readable_and_schema_valid() -> None:
+    authority = json.loads(RETIREMENT_AUTHORITY_PATH.read_text(encoding="utf-8"))
+    schema = json.loads(
+        RETIREMENT_AUTHORITY_SCHEMA_PATH.read_text(encoding="utf-8")
+    )
+
+    assert list(Draft202012Validator(schema).iter_errors(authority)) == []
+    assert authority["schema_version"] == "github-models-retirement-authority@4"
+    source = authority["source_statement"]
+    enforcement = authority["enforcement_policy"]
+    assert isinstance(source, dict)
+    assert isinstance(enforcement, dict)
+    assert source["retired_on"] == "2026-07-30"
+    assert source["observer"]["database_id"] == 30064024
+    assert source["revocation"]["canonical_path"] == (
+        "data/arena/github-models-retirement.json"
+    )
+    assert source["statement_digest"] == sha256_json(
+        {key: value for key, value in source.items() if key != "statement_digest"}
+    )
+    assert enforcement["effective_at"] == "2026-07-31T00:00:00Z"
+    assert enforcement["decision_authority"]["node_id"] == (
+        "MDQ6VXNlcjMwMDY0MDI0"
+    )
+    assert enforcement["revocation"]["method"] == (
+        "superseding-reviewed-record"
+    )
+    assert enforcement["source_statement_digest"] == source["statement_digest"]
+    assert enforcement["policy_digest"] == sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
+    assert authority["record_digest"] == sha256_json(
+        {key: value for key, value in authority.items() if key != "record_digest"}
+    )
+
+
+def test_runtime_cli_fails_closed_on_retired_provider_without_leaking_token(
+    tmp_path: Path,
+) -> None:
+    bundles = tmp_path / "bundles"
+    bundle = bundles / "dialogue-parser"
+    bundle.mkdir(parents=True)
+    (bundles / "index.json").write_text(
+        json.dumps(
+            {
+                "bundles": [
+                    {
+                        "task_id": "dialogue-parser",
+                        "bundle_path": "dialogue-parser",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    bench = tmp_path / "bench"
+    bench.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_arena_benchflow_experiment.py"),
+            "--runtime-policy",
+            str(POLICY_PATH),
+            "--retirement-authority",
+            str(RETIREMENT_AUTHORITY_PATH),
+            "--bundles-root",
+            str(bundles),
+            "--task-id",
+            "dialogue-parser",
+            "--bench-bin",
+            str(bench),
+            "--output-root",
+            str(tmp_path / "output"),
+            "--run-identity",
+            "retired-provider-control",
+        ],
+        cwd=ROOT,
+        env={**os.environ, "GITHUB_TOKEN": TOKEN},
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode == 2
+    assert (
+        "provider_retired provider=github-models "
+        "effective_at=2026-07-31T00:00:00Z "
+        "authority_url=https://github.blog/changelog/"
+    ) in completed.stderr
+    assert TOKEN not in completed.stderr
+    assert not (tmp_path / "output" / "model-catalog-evidence.json").exists()
+
+
+def test_runtime_cli_checks_retirement_before_token_or_filesystem_prerequisites(
+    tmp_path: Path,
+) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_arena_benchflow_experiment.py"),
+            "--runtime-policy",
+            str(POLICY_PATH),
+            "--retirement-authority",
+            str(RETIREMENT_AUTHORITY_PATH),
+            "--bundles-root",
+            str(tmp_path / "missing-bundles"),
+            "--task-id",
+            "dialogue-parser",
+            "--bench-bin",
+            str(tmp_path / "missing-bench"),
+            "--output-root",
+            str(tmp_path / "output"),
+            "--run-identity",
+            "retirement-priority-control",
+        ],
+        cwd=ROOT,
+        env={key: value for key, value in os.environ.items() if key != "GITHUB_TOKEN"},
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode == 2
+    assert "provider_retired provider=github-models" in completed.stderr
+    assert "token environment variable is absent" not in completed.stderr
+    assert "missing-bench" not in completed.stderr
+
+
+def test_retired_profile_workflow_cannot_schedule_a_physical_provider_job() -> None:
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    assert "  contract:\n" in workflow
+    assert "tests/test_arena_experiment_benchflow_adapter.py" in workflow
+    assert "  paired-runtime:\n" in workflow
+    assert "    if: ${{ false }} # retired provider; archival specification only\n" in workflow
+    assert "models: read" not in workflow
+
+
+def test_catalog_authorization_failure_is_sanitized_and_classified() -> None:
+    def opener(request: object, timeout: int) -> Response:
+        raise urllib.error.HTTPError(
+            policy().catalog_url,
+            403,
+            f"forbidden token={TOKEN}",
+            hdrs=None,
+            fp=None,
+        )
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=opener,
+        )
+
+    message = str(captured.value)
+    assert message == (
+        "provider_catalog_authorization_failed provider=github-models status=403"
+    )
+    assert TOKEN not in message
+
+
+def test_catalog_http_failure_is_sanitized_and_classified() -> None:
+    def opener(request: object, timeout: int) -> Response:
+        raise urllib.error.HTTPError(
+            policy().catalog_url,
+            410,
+            f"gone token={TOKEN}",
+            hdrs=None,
+            fp=None,
+        )
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=opener,
+        )
+
+    message = str(captured.value)
+    assert message == "provider_catalog_http_error provider=github-models status=410"
+    assert TOKEN not in message
+
+
+def test_catalog_transport_failure_is_sanitized_and_classified() -> None:
+    def opener(request: object, timeout: int) -> Response:
+        raise urllib.error.URLError(f"connection failed token={TOKEN}")
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=opener,
+        )
+
+    message = str(captured.value)
+    assert message == "provider_catalog_transport_error provider=github-models"
+    assert TOKEN not in message
+
+
+def test_catalog_schema_failure_is_classified_separately() -> None:
+    with pytest.raises(
+        ExperimentError,
+        match="provider_catalog_schema_error root_must_be_array",
+    ):
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=lambda request, timeout: Response(
+                {"models": catalog_rows(policy())}
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    ("response", "expected_code"),
+    [
+        (RawResponse(b"not-json"), "invalid_json"),
+        (Response([]), "model_cardinality"),
+        (
+            Response([{**catalog_rows(policy())[0], "capabilities": "tools"}]),
+            "capabilities",
+        ),
+        (Response([{**catalog_rows(policy())[0], "limits": []}]), "limits"),
+        (Response([{**catalog_rows(policy())[0], "name": ""}]), "name"),
+    ],
+)
+def test_all_catalog_shape_failures_use_schema_error_classification(
+    response: Response | RawResponse,
+    expected_code: str,
+) -> None:
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            retirement_authority=retirement_authority(),
+            opener=lambda request, timeout: response,
+        )
+
+    assert str(captured.value) == f"provider_catalog_schema_error {expected_code}"
+    assert TOKEN not in str(captured.value)
 
 
 def test_skill_digest_and_full_bundle_validator_are_load_bearing(
