@@ -10,8 +10,32 @@
     "enforcement_policy",
     "record_digest"
   ],
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "login", "database_id", "node_id", "profile_url"],
+      "properties": {
+        "kind": {"const": "github-account"},
+        "login": {"pattern": "^[A-Za-z0-9-]+$"},
+        "database_id": {"type": "integer", "minimum": 1},
+        "node_id": {"type": "string", "minLength": 1},
+        "profile_url": {"pattern": "^https://github\\.com/[A-Za-z0-9-]+$"}
+      }
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "canonical_path", "coordination_issue_url"],
+      "properties": {
+        "method": {"const": "superseding-reviewed-record"},
+        "canonical_path": {"const": "data/arena/github-models-retirement.json"},
+        "coordination_issue_url": {"pattern": "^https://github\\.com/[^/]+/[^/]+/issues/[0-9]+$"}
+      }
+    }
+  },
   "properties": {
-    "schema_version": {"const": "github-models-retirement-authority@3"},
+    "schema_version": {"const": "github-models-retirement-authority@4"},
     "source_statement": {
       "type": "object",
       "additionalProperties": false,
@@ -20,7 +44,8 @@
         "source_url",
         "retired_on",
         "observed_at",
-        "observed_by",
+        "observer",
+        "revocation",
         "statement_digest"
       ],
       "properties": {
@@ -28,7 +53,8 @@
         "source_url": {"pattern": "^https://github\\.blog/changelog/[^?#]+/$"},
         "retired_on": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
         "observed_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
-        "observed_by": {"pattern": "^[^/]+/[^#]+#[0-9]+$"},
+        "observer": {"$ref": "#/$defs/actor"},
+        "revocation": {"$ref": "#/$defs/revocation"},
         "statement_digest": {"pattern": "^sha256:[0-9a-f]{64}$"}
       }
     },
@@ -42,11 +68,11 @@
         "model_prefix",
         "effective_at",
         "decided_at",
-        "decided_by",
+        "decision_authority",
         "rationale",
         "historical_run_handling",
-        "supersession_issue_url",
         "source_statement_digest",
+        "revocation",
         "policy_digest"
       ],
       "properties": {
@@ -56,11 +82,11 @@
         "model_prefix": {"pattern": "^[a-z0-9][a-z0-9-]*/$"},
         "effective_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
         "decided_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
-        "decided_by": {"pattern": "^[^/]+/[^#]+#[0-9]+$"},
+        "decision_authority": {"$ref": "#/$defs/actor"},
         "rationale": {"const": "day-after-announced-retirement-date"},
         "historical_run_handling": {"const": "preserve-no-rejudging"},
-        "supersession_issue_url": {"pattern": "^https://github\\.com/[^/]+/[^/]+/issues/[0-9]+$"},
         "source_statement_digest": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "revocation": {"$ref": "#/$defs/revocation"},
         "policy_digest": {"pattern": "^sha256:[0-9a-f]{64}$"}
       }
     },

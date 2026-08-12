@@ -47,7 +47,7 @@ BENCHFLOW_CONFIG_SCHEMA = "arena-benchflow-invocation-config@1"
 
 _GITHUB_MODELS_PROVIDER_ID = "github-models"
 _GITHUB_MODELS_RETIREMENT_RECORD_DIGEST = (
-    "sha256:bc11b48bed0aaff5841029fac3c16e860831d068f7bdbde7444015cc8c1b14ce"
+    "sha256:7b3947df521c273192846c2811330c5099c938dccb34a426cd98648c8b5a29d0"
 )
 
 _POLICY_FIELDS = {
@@ -117,7 +117,8 @@ _RETIREMENT_SOURCE_FIELDS = {
     "source_url",
     "retired_on",
     "observed_at",
-    "observed_by",
+    "observer",
+    "revocation",
     "statement_digest",
 }
 _RETIREMENT_POLICY_FIELDS = {
@@ -127,12 +128,24 @@ _RETIREMENT_POLICY_FIELDS = {
     "model_prefix",
     "effective_at",
     "decided_at",
-    "decided_by",
+    "decision_authority",
     "rationale",
     "historical_run_handling",
-    "supersession_issue_url",
     "source_statement_digest",
+    "revocation",
     "policy_digest",
+}
+_RETIREMENT_ACTOR_FIELDS = {
+    "kind",
+    "login",
+    "database_id",
+    "node_id",
+    "profile_url",
+}
+_RETIREMENT_REVOCATION_FIELDS = {
+    "method",
+    "canonical_path",
+    "coordination_issue_url",
 }
 
 _SECRET_KEY_RE = re.compile(
@@ -167,6 +180,14 @@ _VERIFIER_INFRA_CATEGORIES = {
 
 CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 UrlOpener = Callable[..., object]
+Clock = Callable[[], datetime]
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+_UTC_CLOCK: Clock = _utc_now
 
 
 def _run_text(
@@ -411,7 +432,7 @@ def enforce_github_models_retirement(
         "GitHub Models retirement authority",
     )
     if retirement_authority.get("schema_version") != (
-        "github-models-retirement-authority@3"
+        "github-models-retirement-authority@4"
     ):
         raise ExperimentError("GitHub Models retirement authority schema is unsupported")
     record_digest = require_sha256(
@@ -434,6 +455,35 @@ def enforce_github_models_retirement(
         _RETIREMENT_POLICY_FIELDS,
         "GitHub Models retirement enforcement policy",
     )
+    observer = _safe_exact_fields(
+        source.get("observer"),
+        _RETIREMENT_ACTOR_FIELDS,
+        "GitHub Models retirement observer",
+    )
+    decision_authority = _safe_exact_fields(
+        enforcement.get("decision_authority"),
+        _RETIREMENT_ACTOR_FIELDS,
+        "GitHub Models retirement decision authority",
+    )
+    for actor in (observer, decision_authority):
+        if (
+            actor.get("kind") != "github-account"
+            or actor.get("database_id") != 30064024
+            or actor.get("node_id") != "MDQ6VXNlcjMwMDY0MDI0"
+        ):
+            raise ExperimentError("GitHub Models retirement actor is unsupported")
+    for value in (source.get("revocation"), enforcement.get("revocation")):
+        revocation = _safe_exact_fields(
+            value,
+            _RETIREMENT_REVOCATION_FIELDS,
+            "GitHub Models retirement revocation authority",
+        )
+        if (
+            revocation.get("method") != "superseding-reviewed-record"
+            or revocation.get("canonical_path")
+            != "data/arena/github-models-retirement.json"
+        ):
+            raise ExperimentError("GitHub Models retirement revocation is unsupported")
     statement_digest = require_sha256(
         source.get("statement_digest"), "retirement statement_digest"
     )
@@ -507,7 +557,6 @@ def fetch_github_model_catalog_evidence(
     *,
     token: str,
     policy: BenchFlowRuntimePolicy,
-    fetched_at: datetime,
     retirement_authority: Mapping[str, object] | None = None,
     opener: UrlOpener = urllib.request.urlopen,
 ) -> dict[str, object]:
@@ -515,7 +564,7 @@ def fetch_github_model_catalog_evidence(
         raise ExperimentError("GitHub Models retirement authority is required")
     enforce_github_models_retirement(
         policy=policy,
-        checked_at=fetched_at,
+        checked_at=_UTC_CLOCK(),
         retirement_authority=retirement_authority,
     )
     if not token:
@@ -530,6 +579,12 @@ def fetch_github_model_catalog_evidence(
         },
     )
     try:
+        fetched_at = _UTC_CLOCK()
+        enforce_github_models_retirement(
+            policy=policy,
+            checked_at=fetched_at,
+            retirement_authority=retirement_authority,
+        )
         response = opener(request, timeout=30)
         raw = response.read()  # type: ignore[attr-defined]
     except urllib.error.HTTPError as exc:

@@ -41,13 +41,15 @@ The official retirement statement is materialized as
 `data/arena/github-models-retirement.json` and constrained by
 `contracts/github-models-retirement-authority.schema.json`. The record keeps two
 explicit states. `source_statement` binds the date-only claim, official URL,
-observer, observation timestamp, and statement digest. `enforcement_policy`
-binds the exact provider, catalog endpoint, model prefix, policy timestamp,
-decision actor/time, source-statement digest, rationale, supersession issue, and
-policy digest. The outer record has its own canonical digest. These are source
-and fail-closed execution-policy authorities reviewed through repository
-delivery; neither is sandbox admission, lifecycle, routing, or ranking
-authority.
+observer's stable GitHub account identity, observation timestamp, statement
+digest, and its own revocation mechanism. `enforcement_policy` binds the exact
+provider, catalog endpoint, model prefix, policy timestamp, stable decision
+authority/time, source-statement digest, rationale, policy digest, and its own
+revocation mechanism. Revocation requires a superseding reviewed record at the
+same canonical repository path; #46 is only its coordination pointer. The outer
+record has its own canonical digest. These are source and fail-closed
+execution-policy authorities reviewed through repository delivery; neither is
+sandbox admission, lifecycle, routing, or ranking authority.
 
 The runtime CLI requires this authority explicitly. At or after the effective
 timestamp it refuses the profile before token, filesystem, catalog, or model
@@ -55,6 +57,13 @@ prerequisites. The diagnostic names the fixed provider, policy timestamp,
 digest-pinned official authority URL, and record digest. The catalog endpoint,
 response body, exception reason, and credential values are never copied into
 diagnostics.
+
+Network fetch uses an internal UTC clock and rechecks the retirement policy
+immediately before opening the endpoint. A caller cannot supply an historical
+evidence timestamp to reopen network access, and the CLI does not reuse its
+earlier prerequisite-check time. Historical evidence replay uses the separate
+offline evidence validator and never reopens the provider endpoint. Tests may
+inject a deterministic clock solely to exercise the pre-cutoff contract.
 
 HTTP authorization, other HTTP status, transport, and catalog-schema failures
 use separate sanitized diagnostics. Response bodies, exception reasons, and

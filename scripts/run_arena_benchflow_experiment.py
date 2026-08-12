@@ -181,7 +181,6 @@ def command_run(args: argparse.Namespace) -> int:
     catalog = fetch_github_model_catalog_evidence(
         token=token,
         policy=policy,
-        fetched_at=started_at,
         retirement_authority=retirement_authority,
     )
     _write_object(destination / "model-catalog-evidence.json", catalog)

@@ -1,12 +1,23 @@
 {
-  "schema_version": "github-models-retirement-authority@3",
+  "schema_version": "github-models-retirement-authority@4",
   "source_statement": {
     "status": "source-observation",
     "source_url": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/",
     "retired_on": "2026-07-30",
     "observed_at": "2026-08-12T03:25:10Z",
-    "observed_by": "ed3c/agent-skills-repo#47",
-    "statement_digest": "sha256:b8e4f548b77e88390496982535e060ac6e97012c26bd7d39a058c8cd9fa8731d"
+    "observer": {
+      "kind": "github-account",
+      "login": "ed3c",
+      "database_id": 30064024,
+      "node_id": "MDQ6VXNlcjMwMDY0MDI0",
+      "profile_url": "https://github.com/ed3c"
+    },
+    "revocation": {
+      "method": "superseding-reviewed-record",
+      "canonical_path": "data/arena/github-models-retirement.json",
+      "coordination_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/46"
+    },
+    "statement_digest": "sha256:e59e3c17f00d89c2c78f1d1cdb8d7c1b6e2b0ce19b16b8519778b629a36dbff6"
   },
   "enforcement_policy": {
     "status": "fail-closed-enforcement-policy",
@@ -15,12 +26,22 @@
     "model_prefix": "github-models/",
     "effective_at": "2026-07-31T00:00:00Z",
     "decided_at": "2026-08-12T03:25:10Z",
-    "decided_by": "ed3c/agent-skills-repo#47",
+    "decision_authority": {
+      "kind": "github-account",
+      "login": "ed3c",
+      "database_id": 30064024,
+      "node_id": "MDQ6VXNlcjMwMDY0MDI0",
+      "profile_url": "https://github.com/ed3c"
+    },
     "rationale": "day-after-announced-retirement-date",
     "historical_run_handling": "preserve-no-rejudging",
-    "supersession_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/46",
-    "source_statement_digest": "sha256:b8e4f548b77e88390496982535e060ac6e97012c26bd7d39a058c8cd9fa8731d",
-    "policy_digest": "sha256:f8397f1810b8b5fcb044ff5dfc5f0949a210ddd57f29c782e016a50dcb4332ab"
+    "source_statement_digest": "sha256:e59e3c17f00d89c2c78f1d1cdb8d7c1b6e2b0ce19b16b8519778b629a36dbff6",
+    "revocation": {
+      "method": "superseding-reviewed-record",
+      "canonical_path": "data/arena/github-models-retirement.json",
+      "coordination_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/46"
+    },
+    "policy_digest": "sha256:9c56417f6511574bcf6eba2a06a433415bb2a6c81d5457e624111c1ca4e11762"
   },
-  "record_digest": "sha256:bc11b48bed0aaff5841029fac3c16e860831d068f7bdbde7444015cc8c1b14ce"
+  "record_digest": "sha256:7b3947df521c273192846c2811330c5099c938dccb34a426cd98648c8b5a29d0"
 }
