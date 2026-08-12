@@ -1,0 +1,20 @@
+{
+  "attempt_digest": "sha256:dcc95265ea874b3f916165bd0e717104de5b0f03a25740cb50dbfc0ca6f1d816",
+  "attempt_id": "provider-preflight-4cfec553-0fef-477d-9dd7-400fe589f5d4",
+  "completed_at": "2026-08-12T08:22:30.035723Z",
+  "coordination_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/46",
+  "diagnostic": null,
+  "model_invocation_count": 1,
+  "observation_authority_id": "repository-owner-review@1",
+  "observer_actor_id": "github:ed3c",
+  "observer_host_digest": "sha256:94f2314125ecdc721c33c87a7492152a8ba170e754cf3723ce48cffa755d8ca7",
+  "observer_kind": "local-owner-session",
+  "policy_digest": "sha256:23eeb227509e73d11f38bc4796851238a8638bb3b93a128f33a34a8d3e8ac3ed",
+  "policy_id": "ollama-qwen3-4b-local@1",
+  "receipt_digest": "sha256:bbdf774f3e457a3ae2861c9ad6e5686df981fe28a58f1bc0cebe019954140ad3",
+  "revocation_registry_digest": "sha256:f3141888e5a3203de93b8b92cbc0f37a3d2b0f0bfde223836ed32ce15075e40c",
+  "runtime_identity": "darwin-arm64-python-3.14.6",
+  "schema_version": "arena-provider-attempt@1",
+  "started_at": "2026-08-12T08:22:07.338595Z",
+  "status": "succeeded"
+}

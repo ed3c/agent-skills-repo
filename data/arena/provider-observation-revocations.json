@@ -1,0 +1,10 @@
+{
+  "schema_version": "arena-provider-observation-revocations@1",
+  "registry_id": "local-provider-observation-revocations@1",
+  "actor_id": "github:ed3c",
+  "authority_id": "repository-owner-review@1",
+  "updated_at": "2026-08-12T08:20:00Z",
+  "revoked_attempt_ids": [],
+  "superseded_attempt_ids": [],
+  "registry_digest": "sha256:f3141888e5a3203de93b8b92cbc0f37a3d2b0f0bfde223836ed32ce15075e40c"
+}

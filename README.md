@@ -34,6 +34,7 @@ The comparative Arena roadmap and interim dashboard are tracked in [issue #11](h
 - Qualification pipeline: [`openwiki/qualification-pipeline.md`](openwiki/qualification-pipeline.md)
 - Sandbox executor contract and physical-evidence boundary: [`docs/sandbox-executor.md`](docs/sandbox-executor.md)
 - Arena feasibility study and architecture: [`docs/research/skill-arena-feasibility-and-roadmap.md`](docs/research/skill-arena-feasibility-and-roadmap.md)
+- Arena local provider policy and capability boundary: [`docs/arena-provider-policy.md`](docs/arena-provider-policy.md)
 - Agent Skills portability contract: [`docs/agent-skills-portability.md`](docs/agent-skills-portability.md)
 - Portable skill registry: [`dist/agent-skills/registry.json`](dist/agent-skills/registry.json)
 - Machine-readable roadmap: [`data/project/skill-arena-roadmap.json`](data/project/skill-arena-roadmap.json)

@@ -1,0 +1,29 @@
+{
+  "attempt_id": "provider-preflight-4cfec553-0fef-477d-9dd7-400fe589f5d4",
+  "base_url": "http://127.0.0.1:11434/v1",
+  "capabilities": {
+    "chat_completions": true,
+    "model_digest": true,
+    "tool_calls": true,
+    "usage": true
+  },
+  "checked_at": "2026-08-12T08:22:07.339271Z",
+  "credential_used": false,
+  "endpoint_kind": "openai-chat-completions",
+  "experiment_execution_authorized": false,
+  "external_api_cost_microunits": 0,
+  "model_digest": "sha256:359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+  "model_id": "qwen3:4b",
+  "policy_digest": "sha256:23eeb227509e73d11f38bc4796851238a8638bb3b93a128f33a34a8d3e8ac3ed",
+  "policy_id": "ollama-qwen3-4b-local@1",
+  "provider_id": "ollama-local",
+  "provider_version": "0.15.5",
+  "ready": true,
+  "receipt_digest": "sha256:bbdf774f3e457a3ae2861c9ad6e5686df981fe28a58f1bc0cebe019954140ad3",
+  "schema_version": "arena-provider-preflight@1",
+  "token_usage": {
+    "completion_tokens": 630,
+    "prompt_tokens": 145,
+    "total_tokens": 775
+  }
+}
