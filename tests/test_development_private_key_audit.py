@@ -30,12 +30,14 @@ def git(root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def repository(tmp_path: Path) -> Path:
+def repository(tmp_path: Path, *, reflog: bool = True) -> Path:
     root = tmp_path / "repo"
     root.mkdir()
     git(root, "init", "-b", "main")
     git(root, "config", "user.email", "key-audit@example.invalid")
     git(root, "config", "user.name", "Key Audit")
+    if not reflog:
+        git(root, "config", "core.logAllRefUpdates", "false")
     (root / "README.md").write_text("key audit fixture\n")
     git(root, "add", "README.md")
     git(root, "commit", "-m", "fixture")
@@ -69,12 +71,30 @@ def test_clean_audit_is_reproducible_and_schema_valid(tmp_path: Path) -> None:
 
 
 def test_commit_message_leak_is_rejected(tmp_path: Path) -> None:
-    root = repository(tmp_path)
+    root = repository(tmp_path, reflog=False)
     key, key_path = private_key(tmp_path)
     leaked = key.private_bytes_raw().hex()
     git(root, "commit", "--allow-empty", "-m", leaked)
 
     with pytest.raises(KeyAuditError, match="commit object"):
+        audit_development_private_key(root, key_path)
+
+
+def test_reflog_message_leak_is_rejected(tmp_path: Path) -> None:
+    root = repository(tmp_path)
+    key, key_path = private_key(tmp_path)
+    leaked = key.private_bytes_raw().hex()
+    git(
+        root,
+        "update-ref",
+        "--create-reflog",
+        "-m",
+        leaked,
+        "refs/heads/reflog-fixture",
+        "HEAD",
+    )
+
+    with pytest.raises(KeyAuditError, match="Git reflog"):
         audit_development_private_key(root, key_path)
 
 
