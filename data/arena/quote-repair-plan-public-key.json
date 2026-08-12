@@ -1,0 +1,17 @@
+{
+  "actor_id": "github:ed3c",
+  "algorithm": "ed25519",
+  "authority_id": "repository-owner-review@1",
+  "document_digest": "sha256:46499cbb8b029e93cd74569184f7f4cc10df92690716a4da4496404bd465f18c",
+  "execution_authorized": false,
+  "issued_at": "2026-08-12T08:59:49Z",
+  "key_id": "github-ed3c-quote-repair-plan-20260812",
+  "plan_digest": "sha256:a2c9f65ecdcdf8334aec981ea59bb3d4f70d3d3de54da21639b9d6f463302050",
+  "plan_hash": "sha256:bb161fb92b37b83d87a6f2a3d8f0b6b27c823cedbd05ee818b8f8755a5823040",
+  "public_key_base64": "c1Oe2fBNruheh+ycuqu2QNo/qXwdr+8sAVxt13+fyl8=",
+  "public_key_digest": "sha256:ebcb4c05c0569f2110de270bbfff80401316c2ddb157fcffe1c9a6941aac84e7",
+  "purpose": "experiment-preregistration",
+  "schema_version": "quote-repair-plan-public-key@1",
+  "trust_registry_digest_at_issue": "sha256:89b6a5b01f9f9e7450a349602cada0deaf1537055c4760e95e14c093d834a134",
+  "trust_registry_path": "data/arena/quote-repair-plan-trust.json"
+}

@@ -46,7 +46,15 @@ Every invocation binds:
 
 The plan is generated before execution. Baseline and candidate invocations in a
 block share the same pairing key and agent seed; only arm identity and randomized
-order differ. An optional placebo arm is explicit in the spec and never inferred.
+order differ. In version 1, an optional placebo arm is explicit in the spec and
+never inferred.
+
+Version 1 defines `baseline` as `no-skill`. Version 2 is additive and supports
+studies whose control is an earlier immutable Skill artifact: it requires
+`baseline_skill_artifact_digest` and a `study_protocol_digest`, and uses a
+separate v2 signature domain. Version 2 deliberately permits exactly two arms,
+baseline and candidate; it rejects a placebo digest. A verifier must never
+reinterpret a v1 no-skill baseline as an artifact baseline.
 
 The randomization algorithm is versioned as `sha256-arm-sort@1`. Re-signing a
 post-hoc arm order or policy edit does not make it admissible because plan

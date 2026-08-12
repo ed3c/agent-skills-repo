@@ -15,7 +15,7 @@ from skill_arena.experiment import (
     run_experiment, sign_plan, verify_plan_envelope,
 )
 from skill_arena.experiment.model import (
-    METRICS_SCHEMA, PLAN_SIGNATURE_DOMAIN, SPEC_SCHEMA, TRAJECTORY_SCHEMA,
+    METRICS_SCHEMA, PLAN_SIGNATURE_DOMAIN, SPEC_SCHEMA, SPEC_SCHEMA_V2, TRAJECTORY_SCHEMA,
     VERIFIER_SCHEMA, canonical_bytes, sha256_bytes, sha256_json,
 )
 
@@ -47,6 +47,15 @@ def spec(*, placebo=False) -> dict[str, object]:
         "allowed_tools_digest": sha256_bytes(b"tools"), "repetitions": 3,
         "randomization_seed": 42, "agent_seed_mode": "deterministic",
         "preregistered_at": "2026-08-07T00:00:00Z",
+    }
+
+
+def version_two_spec() -> dict[str, object]:
+    return {
+        **spec(),
+        "schema_version": SPEC_SCHEMA_V2,
+        "baseline_skill_artifact_digest": sha256_bytes(b"baseline-skill"),
+        "study_protocol_digest": sha256_bytes(b"frozen-study-protocol"),
     }
 
 
@@ -127,6 +136,36 @@ def test_plan_is_complete_paired_randomized_and_forward_only() -> None:
     changed["signature"] = base64.b64encode(key.sign(PLAN_SIGNATURE_DOMAIN + raw)).decode()
     with pytest.raises(ExperimentError, match="preregistration"):
         verify_plan_envelope(changed, {"plan-key": pub(key)})
+
+
+def test_version_two_plan_binds_artifact_baseline_and_protocol() -> None:
+    key = Ed25519PrivateKey.generate()
+    plan = generate_plan(version_two_spec())
+
+    assert plan["schema_version"] == "arena-experiment-plan@2"
+    assert plan["spec"]["study_protocol_digest"] == sha256_bytes(
+        b"frozen-study-protocol"
+    )
+    assert {
+        row["skill_artifact_digest"]
+        for row in plan["invocations"]
+        if row["arm"] == "baseline"
+    } == {sha256_bytes(b"baseline-skill")}
+    envelope = sign_plan(plan, private_key=key, issuer_key_id="v2-plan-key")
+    assert envelope["schema_version"] == "arena-experiment-plan-envelope@2"
+    assert verify_plan_envelope(envelope, {"v2-plan-key": pub(key)}) == plan
+
+    changed = version_two_spec()
+    changed["baseline_skill_artifact_digest"] = changed[
+        "candidate_skill_artifact_digest"
+    ]
+    with pytest.raises(ExperimentError, match="digests must differ"):
+        generate_plan(changed)
+
+    placebo = version_two_spec()
+    placebo["placebo_skill_artifact_digest"] = sha256_bytes(b"placebo")
+    with pytest.raises(ExperimentError, match="do not support placebo"):
+        generate_plan(placebo)
 
 
 def test_runner_preserves_denominator_failures_and_fresh_workspaces(tmp_path: Path) -> None:

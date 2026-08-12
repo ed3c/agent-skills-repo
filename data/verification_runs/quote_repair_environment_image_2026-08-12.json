@@ -1,0 +1,19 @@
+{
+  "schema_version": "quote-repair-environment-receipt@1",
+  "receipt_id": "quote-repair-local-docker-arm64-20260812",
+  "environment_id": "quote-repair-local-docker-arm64@1",
+  "dockerfile_digest": "sha256:851b794d1996c70e317497bce68031a48613dd3a2c355a2392286feeb896f701",
+  "verifier_digest": "sha256:4a92454485d0ae59b81743ba610e86aaf17d37ccaa272bb9e75c996f07f79a31",
+  "base_image": "python:3.12-slim@sha256:423ed6ab25b1921a477529254bfeeabf5855151dc2c3141699a1bfc852199fbf",
+  "image_digest": "sha256:808f6a9296f8d66e3017329b54aceb85a178ccc64d530d3e22c40ae5c3951571",
+  "platform": "linux/arm64",
+  "docker_server_version": "29.4.0",
+  "built_at": "2026-08-12T08:59:12Z",
+  "network_policy": "allowlisted-local-provider-only",
+  "cleanup_proof": "not-run-preregistration-only",
+  "observer_actor_id": "github:ed3c",
+  "observation_authority_id": "repository-owner-review@1",
+  "trust_registry_path": "data/arena/quote-repair-environment-trust.json",
+  "trust_registry_digest_at_observation": "sha256:746fe0ce48efa7a1558a5ff19fe9b92b3c104dcac158dc2633ffcee4c363e6e4",
+  "receipt_digest": "sha256:aa7166320977ecb9e7132751f1a60eeb36fcfe57efe29d8c1536ed62813951a0"
+}

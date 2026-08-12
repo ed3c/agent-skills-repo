@@ -5,18 +5,32 @@ on:
     paths:
       - 'skill_arena/experiment/**'
       - 'scripts/arena_experiment.py'
+      - 'scripts/check_quote_repair_preregistration.py'
+      - 'scripts/preregister_quote_repair.py'
       - 'contracts/arena-experiment.schema.json'
+      - 'contracts/arena-experiment-v2.schema.json'
+      - 'data/arena/quote-repair-**'
+      - 'data/verification_runs/quote_repair_**'
       - 'tests/test_arena_experiment.py'
+      - 'tests/test_quote_repair_preregistration.py'
       - 'docs/arena-experiment-runner.md'
+      - 'docs/quote-repair-preregistration.md'
       - '.github/workflows/arena-experiment-contract.yml'
   push:
     branches: [main]
     paths:
       - 'skill_arena/experiment/**'
       - 'scripts/arena_experiment.py'
+      - 'scripts/check_quote_repair_preregistration.py'
+      - 'scripts/preregister_quote_repair.py'
       - 'contracts/arena-experiment.schema.json'
+      - 'contracts/arena-experiment-v2.schema.json'
+      - 'data/arena/quote-repair-**'
+      - 'data/verification_runs/quote_repair_**'
       - 'tests/test_arena_experiment.py'
+      - 'tests/test_quote_repair_preregistration.py'
       - 'docs/arena-experiment-runner.md'
+      - 'docs/quote-repair-preregistration.md'
       - '.github/workflows/arena-experiment-contract.yml'
   workflow_dispatch:
 
@@ -32,7 +46,17 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install pytest==8.4.1 -r requirements.lock
-      - run: python -m pytest -q tests/test_arena_experiment.py
+      - run: python -m pytest -q tests/test_arena_experiment.py tests/test_quote_repair_preregistration.py
       - run: python -m compileall -q skill_arena scripts
       - run: python scripts/arena_experiment.py selftest
       - run: python -m json.tool contracts/arena-experiment.schema.json >/dev/null
+      - run: python -m json.tool contracts/arena-experiment-v2.schema.json >/dev/null
+      - name: Verify signed quote-repair preregistration offline
+        run: |
+          python scripts/check_quote_repair_preregistration.py \
+            --task-bundle data/arena/quote-repair-interior-elision-tasks.json \
+            --protocol data/arena/quote-repair-study-protocol.json \
+            --provider-policy data/arena/ollama-qwen3-4b-local.json \
+            --environment-receipt data/verification_runs/quote_repair_environment_image_2026-08-12.json \
+            --plan data/verification_runs/quote_repair_preregistered_plan_2026-08-12.json \
+            --public-key data/arena/quote-repair-plan-public-key.json

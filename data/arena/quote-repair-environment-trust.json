@@ -1,0 +1,13 @@
+{
+  "schema_version": "quote-repair-environment-trust@1",
+  "registry_id": "quote-repair-environment-trust@1",
+  "actor_id": "github:ed3c",
+  "authority_id": "repository-owner-review@1",
+  "updated_at": "2026-08-12T08:56:31Z",
+  "active_receipt_ids": [
+    "quote-repair-local-docker-arm64-20260812"
+  ],
+  "revoked_receipt_ids": [],
+  "superseded_receipt_ids": [],
+  "registry_digest": "sha256:746fe0ce48efa7a1558a5ff19fe9b92b3c104dcac158dc2633ffcee4c363e6e4"
+}

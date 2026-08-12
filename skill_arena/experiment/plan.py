@@ -17,10 +17,14 @@ from .model import (
     INVOCATION_SCHEMA,
     NO_SKILL,
     PLAN_SCHEMA,
+    PLAN_SCHEMA_V2,
     PLAN_SIGNATURE_DOMAIN,
+    PLAN_SIGNATURE_DOMAIN_V2,
     RANDOMIZATION_ALGORITHM,
     REQUIRED_EVIDENCE_FILES,
     SIGNED_PLAN_SCHEMA,
+    SIGNED_PLAN_SCHEMA_V2,
+    SPEC_SCHEMA_V2,
     WORKSPACE_POLICY,
     ExperimentError,
     _PLAN_ENVELOPE_FIELDS,
@@ -117,7 +121,11 @@ def generate_plan(spec: Mapping[str, object]) -> dict[str, object]:
             invocation_ids: list[str] = []
             for order_index, arm in enumerate(order):
                 if arm == "baseline":
-                    artifact = NO_SKILL
+                    artifact = (
+                        normalized["baseline_skill_artifact_digest"]
+                        if normalized["schema_version"] == SPEC_SCHEMA_V2
+                        else NO_SKILL
+                    )
                 elif arm == "candidate":
                     artifact = normalized["candidate_skill_artifact_digest"]
                 else:
@@ -181,7 +189,11 @@ def generate_plan(spec: Mapping[str, object]) -> dict[str, object]:
             )
 
     plan_without_digest: dict[str, object] = {
-        "schema_version": PLAN_SCHEMA,
+        "schema_version": (
+            PLAN_SCHEMA_V2
+            if normalized["schema_version"] == SPEC_SCHEMA_V2
+            else PLAN_SCHEMA
+        ),
         "randomization_algorithm": RANDOMIZATION_ALGORITHM,
         "failure_denominator_policy": FAILURE_DENOMINATOR_POLICY,
         "workspace_policy": WORKSPACE_POLICY,
@@ -199,7 +211,10 @@ def generate_plan(spec: Mapping[str, object]) -> dict[str, object]:
 
 
 def validate_plan(plan: Mapping[str, object]) -> dict[str, object]:
-    if set(plan) != _PLAN_FIELDS or plan.get("schema_version") != PLAN_SCHEMA:
+    if set(plan) != _PLAN_FIELDS or plan.get("schema_version") not in {
+        PLAN_SCHEMA,
+        PLAN_SCHEMA_V2,
+    }:
         raise ExperimentError("experiment plan schema or fields are invalid")
     if not isinstance(plan.get("spec"), Mapping):
         raise ExperimentError("experiment plan spec is absent")
@@ -218,13 +233,16 @@ def sign_plan(
     validated = validate_plan(plan)
     issuer = identifier(issuer_key_id, "issuer_key_id")
     raw = canonical_bytes(validated)
+    is_v2 = validated["schema_version"] == PLAN_SCHEMA_V2
     return {
-        "schema_version": SIGNED_PLAN_SCHEMA,
+        "schema_version": SIGNED_PLAN_SCHEMA_V2 if is_v2 else SIGNED_PLAN_SCHEMA,
         "payload": validated,
         "plan_hash": sha256_bytes(raw),
         "issuer_key_id": issuer,
         "signature": base64.b64encode(
-            private_key.sign(PLAN_SIGNATURE_DOMAIN + raw)
+            private_key.sign(
+                (PLAN_SIGNATURE_DOMAIN_V2 if is_v2 else PLAN_SIGNATURE_DOMAIN) + raw
+            )
         ).decode("ascii"),
     }
 
@@ -235,7 +253,10 @@ def verify_plan_envelope(
 ) -> dict[str, object]:
     if (
         set(envelope) != _PLAN_ENVELOPE_FIELDS
-        or envelope.get("schema_version") != SIGNED_PLAN_SCHEMA
+        or envelope.get("schema_version") not in {
+            SIGNED_PLAN_SCHEMA,
+            SIGNED_PLAN_SCHEMA_V2,
+        }
     ):
         raise ExperimentError("signed plan envelope fields are invalid")
     payload = envelope.get("payload")
@@ -243,6 +264,10 @@ def verify_plan_envelope(
         raise ExperimentError("signed plan payload is absent")
     plan = validate_plan(payload)
     raw = canonical_bytes(plan)
+    is_v2 = plan["schema_version"] == PLAN_SCHEMA_V2
+    expected_envelope_schema = SIGNED_PLAN_SCHEMA_V2 if is_v2 else SIGNED_PLAN_SCHEMA
+    if envelope.get("schema_version") != expected_envelope_schema:
+        raise ExperimentError("signed plan schema version mismatch")
     if envelope.get("plan_hash") != sha256_bytes(raw):
         raise ExperimentError("signed plan hash mismatch")
     key_id = identifier(envelope.get("issuer_key_id"), "plan issuer_key_id")
@@ -256,7 +281,7 @@ def verify_plan_envelope(
         signature = base64.b64decode(signature_value, validate=True)
         Ed25519PublicKey.from_public_bytes(key).verify(
             signature,
-            PLAN_SIGNATURE_DOMAIN + raw,
+            (PLAN_SIGNATURE_DOMAIN_V2 if is_v2 else PLAN_SIGNATURE_DOMAIN) + raw,
         )
     except (InvalidSignature, ValueError, TypeError, binascii.Error) as exc:
         raise ExperimentError("signed plan signature is invalid") from exc
