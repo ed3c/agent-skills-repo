@@ -80,6 +80,24 @@ def test_commit_message_leak_is_rejected(tmp_path: Path) -> None:
         audit_development_private_key(root, key_path)
 
 
+def test_reflog_message_leak_is_rejected(tmp_path: Path) -> None:
+    root = repository(tmp_path)
+    key, key_path = private_key(tmp_path)
+    leaked = key.private_bytes_raw().hex()
+    git(
+        root,
+        "update-ref",
+        "--create-reflog",
+        "-m",
+        leaked,
+        "refs/heads/reflog-fixture",
+        "HEAD",
+    )
+
+    with pytest.raises(KeyAuditError, match="Git reflog"):
+        audit_development_private_key(root, key_path)
+
+
 def test_annotated_tag_leak_is_rejected(tmp_path: Path) -> None:
     root = repository(tmp_path)
     key, key_path = private_key(tmp_path)
