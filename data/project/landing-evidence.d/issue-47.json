@@ -28,12 +28,11 @@
           "python -m pytest -q tests/test_arena_experiment.py tests/test_arena_experiment_benchflow_adapter.py",
           "python -m compileall -q skill_arena scripts",
           "python scripts/arena_experiment.py selftest",
-          "python scripts/git_gate.py",
-          "python scripts/export_agent_skills.py --check"
+          "python scripts/git_gate.py"
         ],
-        "result_summary": "PR #48 head 8c22bb8033f384593e486e72886fc77efb4150e7 passed arena-experiment-benchflow contract run 31561387548, arena-experiment-contract run 31561387550, and skill-ci run 31561387574; the retired paired-runtime job was skipped by policy. Local focused Arena tests passed 47/47, compileall and Arena selftest passed, and two independent code-review axes reported no blockers. This is contract evidence only: no replacement-provider physical run, signed bundle, offline replay, admission, ranking, or production-routing claim is made.",
+        "result_summary": "PR #48 head 8c22bb8033f384593e486e72886fc77efb4150e7 workflow logs read back 47 focused tests passed, compileall passed, and the Arena selftest passed in arena-experiment-benchflow run 31561387548; skill-ci run 31561387574 read back PASS for git gate defenses. Arena-experiment-contract run 31561387550 also passed, while paired-runtime was skipped by the retired-provider policy. This is contract evidence only: no replacement-provider physical run, signed bundle, offline replay, admission, ranking, or production-routing claim is made.",
         "independently_verified": true,
-        "digest": "sha256:4f9b4fe38c2d98c8586c4b2ee4d430778a8d51e9b6257ffd1a928fc8ab93d6df"
+        "digest": "sha256:be7fadd7e53be87118d60dc15268e158df96a14c8fec5169b47c6ef2024d1a1b"
       }
     }
   }
