@@ -3,6 +3,7 @@
 from .benchflow_adapter import (
     BenchFlowExperimentAdapter,
     BenchFlowRuntimePolicy,
+    enforce_github_models_retirement,
     fetch_github_model_catalog_evidence,
     load_runtime_policy,
     prepare_benchflow_runtime,
@@ -25,6 +26,7 @@ __all__ = [
     "ExperimentAdapter",
     "ExperimentError",
     "InvocationCapture",
+    "enforce_github_models_retirement",
     "fetch_github_model_catalog_evidence",
     "generate_plan",
     "load_runtime_policy",

@@ -44,7 +44,7 @@ jobs:
       - run: python -m json.tool contracts/github-models-retirement-authority.schema.json >/dev/null
       - run: python -m json.tool data/arena/github-models-retirement.json >/dev/null
 
-  # Retained as the immutable specification of PR #42's failed physical attempt.
+  # Retained as an archival outline of PR #42's failed physical attempt.
   # GitHub Models is retired, so this job must never be scheduled again.
   paired-runtime:
     if: ${{ false }} # retired provider; archival specification only

@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 from skill_arena.experiment import (  # noqa: E402
     BenchFlowExperimentAdapter,
     ExperimentError,
+    enforce_github_models_retirement,
     fetch_github_model_catalog_evidence,
     generate_plan,
     load_runtime_policy,
@@ -155,6 +156,12 @@ def command_run(args: argparse.Namespace) -> int:
     )
     if args.task_id != policy.task_id:
         raise ExperimentError("requested task differs from runtime policy")
+    started_at = datetime.now(timezone.utc)
+    enforce_github_models_retirement(
+        policy=policy,
+        checked_at=started_at,
+        retirement_authority=retirement_authority,
+    )
     token = os.environ.get(args.github_token_env, "")
     if not token:
         raise ExperimentError(
@@ -171,7 +178,6 @@ def command_run(args: argparse.Namespace) -> int:
             raise ExperimentError("runtime output root must start empty")
     destination.mkdir(parents=True, exist_ok=True)
 
-    started_at = datetime.now(timezone.utc)
     catalog = fetch_github_model_catalog_evidence(
         token=token,
         policy=policy,

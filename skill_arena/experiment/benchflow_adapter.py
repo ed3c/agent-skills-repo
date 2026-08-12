@@ -17,7 +17,7 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Callable, Mapping, Sequence, cast
@@ -47,7 +47,7 @@ BENCHFLOW_CONFIG_SCHEMA = "arena-benchflow-invocation-config@1"
 
 _GITHUB_MODELS_PROVIDER_ID = "github-models"
 _GITHUB_MODELS_RETIREMENT_RECORD_DIGEST = (
-    "sha256:e00840741a7ffe93757e2c8f4ff22d450161ae50e7803b4c5badb04a06dea9ad"
+    "sha256:bc11b48bed0aaff5841029fac3c16e860831d068f7bdbde7444015cc8c1b14ce"
 )
 
 _POLICY_FIELDS = {
@@ -108,17 +108,31 @@ _PREPARATION_FIELDS = {
 }
 _RETIREMENT_AUTHORITY_FIELDS = {
     "schema_version",
+    "source_statement",
+    "enforcement_policy",
+    "record_digest",
+}
+_RETIREMENT_SOURCE_FIELDS = {
+    "status",
+    "source_url",
+    "retired_on",
+    "observed_at",
+    "observed_by",
+    "statement_digest",
+}
+_RETIREMENT_POLICY_FIELDS = {
+    "status",
     "provider_id",
     "catalog_url",
     "model_prefix",
     "effective_at",
-    "source_url",
-    "observed_at",
-    "recorded_by",
-    "status",
+    "decided_at",
+    "decided_by",
+    "rationale",
     "historical_run_handling",
     "supersession_issue_url",
-    "record_digest",
+    "source_statement_digest",
+    "policy_digest",
 }
 
 _SECRET_KEY_RE = re.compile(
@@ -205,6 +219,16 @@ def _utc_timestamp(value: object, label: str) -> tuple[str, datetime]:
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         raise ExperimentError(f"{label} must include a timezone")
     return raw, parsed.astimezone(timezone.utc)
+
+
+def _safe_exact_fields(
+    value: object,
+    expected: set[str],
+    label: str,
+) -> Mapping[str, object]:
+    if not isinstance(value, Mapping) or set(value) != expected:
+        raise ExperimentError(f"{label} fields are invalid")
+    return value
 
 
 @dataclass(frozen=True)
@@ -375,6 +399,110 @@ def load_runtime_policy(path: Path | str) -> BenchFlowRuntimePolicy:
     return BenchFlowRuntimePolicy.from_mapping(value)
 
 
+def enforce_github_models_retirement(
+    *,
+    policy: BenchFlowRuntimePolicy,
+    checked_at: datetime,
+    retirement_authority: Mapping[str, object],
+) -> None:
+    _safe_exact_fields(
+        retirement_authority,
+        _RETIREMENT_AUTHORITY_FIELDS,
+        "GitHub Models retirement authority",
+    )
+    if retirement_authority.get("schema_version") != (
+        "github-models-retirement-authority@3"
+    ):
+        raise ExperimentError("GitHub Models retirement authority schema is unsupported")
+    record_digest = require_sha256(
+        retirement_authority.get("record_digest"), "retirement record_digest"
+    )
+    if (
+        record_digest != _GITHUB_MODELS_RETIREMENT_RECORD_DIGEST
+        or record_digest
+        != _canonical_digest_without(retirement_authority, "record_digest")
+    ):
+        raise ExperimentError("GitHub Models retirement authority digest mismatch")
+
+    source = _safe_exact_fields(
+        retirement_authority.get("source_statement"),
+        _RETIREMENT_SOURCE_FIELDS,
+        "GitHub Models retirement source statement",
+    )
+    enforcement = _safe_exact_fields(
+        retirement_authority.get("enforcement_policy"),
+        _RETIREMENT_POLICY_FIELDS,
+        "GitHub Models retirement enforcement policy",
+    )
+    statement_digest = require_sha256(
+        source.get("statement_digest"), "retirement statement_digest"
+    )
+    if statement_digest != _canonical_digest_without(source, "statement_digest"):
+        raise ExperimentError("GitHub Models retirement source digest mismatch")
+    policy_digest = require_sha256(
+        enforcement.get("policy_digest"), "retirement policy_digest"
+    )
+    if (
+        policy_digest != _canonical_digest_without(enforcement, "policy_digest")
+        or enforcement.get("source_statement_digest") != statement_digest
+    ):
+        raise ExperimentError("GitHub Models retirement policy digest mismatch")
+
+    provider_id = _nonempty_string(
+        enforcement.get("provider_id"), "retirement provider_id"
+    )
+    catalog_url = _nonempty_string(
+        enforcement.get("catalog_url"), "retirement catalog_url"
+    )
+    model_prefix = _nonempty_string(
+        enforcement.get("model_prefix"), "retirement model_prefix"
+    )
+    if (
+        provider_id != _GITHUB_MODELS_PROVIDER_ID
+        or policy.catalog_url != catalog_url
+        or policy.model != f"{model_prefix}{policy.catalog_model_id}"
+    ):
+        raise ExperimentError(
+            "GitHub Models retirement authority does not match the pinned provider identity"
+        )
+
+    retired_on_raw = _nonempty_string(
+        source.get("retired_on"), "retirement source retired_on"
+    )
+    try:
+        retired_on = date.fromisoformat(retired_on_raw)
+    except ValueError as exc:
+        raise ExperimentError("retirement source retired_on must be an ISO date") from exc
+    source_url = _nonempty_string(
+        source.get("source_url"), "retirement source_url"
+    )
+    _, observed_at = _utc_timestamp(
+        source.get("observed_at"), "retirement observed_at"
+    )
+    effective_at_raw, effective_at = _utc_timestamp(
+        enforcement.get("effective_at"), "retirement effective_at"
+    )
+    _, decided_at = _utc_timestamp(
+        enforcement.get("decided_at"), "retirement decided_at"
+    )
+    if (
+        effective_at.date() != retired_on + timedelta(days=1)
+        or effective_at.time().isoformat() != "00:00:00"
+    ):
+        raise ExperimentError("retirement policy cutoff must follow the source date")
+    if observed_at < effective_at or decided_at < observed_at:
+        raise ExperimentError("retirement authority timestamps are inconsistent")
+    if checked_at.tzinfo is None or checked_at.utcoffset() is None:
+        raise ExperimentError("catalog fetched_at must be timezone-aware")
+    if checked_at.astimezone(timezone.utc) >= effective_at:
+        raise ExperimentError(
+            "provider_retired "
+            f"provider={_GITHUB_MODELS_PROVIDER_ID} "
+            f"effective_at={effective_at_raw} authority_url={source_url} "
+            f"authority_digest={record_digest}"
+        )
+
+
 def fetch_github_model_catalog_evidence(
     *,
     token: str,
@@ -385,50 +513,11 @@ def fetch_github_model_catalog_evidence(
 ) -> dict[str, object]:
     if retirement_authority is None:
         raise ExperimentError("GitHub Models retirement authority is required")
-    if set(retirement_authority) != _RETIREMENT_AUTHORITY_FIELDS:
-        raise ExperimentError("GitHub Models retirement authority fields are invalid")
-    record_digest = require_sha256(
-        retirement_authority.get("record_digest"), "retirement record_digest"
+    enforce_github_models_retirement(
+        policy=policy,
+        checked_at=fetched_at,
+        retirement_authority=retirement_authority,
     )
-    if (
-        record_digest != _GITHUB_MODELS_RETIREMENT_RECORD_DIGEST
-        or record_digest
-        != _canonical_digest_without(retirement_authority, "record_digest")
-    ):
-        raise ExperimentError("GitHub Models retirement authority digest mismatch")
-    provider_id = _nonempty_string(
-        retirement_authority.get("provider_id"), "retirement provider_id"
-    )
-    catalog_url = _nonempty_string(
-        retirement_authority.get("catalog_url"), "retirement catalog_url"
-    )
-    model_prefix = _nonempty_string(
-        retirement_authority.get("model_prefix"), "retirement model_prefix"
-    )
-    if (
-        provider_id != _GITHUB_MODELS_PROVIDER_ID
-        or policy.catalog_url != catalog_url
-        or policy.model != f"{model_prefix}{policy.catalog_model_id}"
-    ):
-        raise ExperimentError(
-            "GitHub Models retirement authority does not match the pinned provider identity"
-        )
-    effective_at_raw, effective_at = _utc_timestamp(
-        retirement_authority.get("effective_at"), "retirement effective_at"
-    )
-    _, observed_at = _utc_timestamp(
-        retirement_authority.get("observed_at"), "retirement observed_at"
-    )
-    if observed_at < effective_at:
-        raise ExperimentError("retirement observation predates its effective boundary")
-    if fetched_at.tzinfo is None or fetched_at.utcoffset() is None:
-        raise ExperimentError("catalog fetched_at must be timezone-aware")
-    if fetched_at.astimezone(timezone.utc) >= effective_at:
-        raise ExperimentError(
-            "provider_retired "
-            f"provider={_GITHUB_MODELS_PROVIDER_ID} "
-            f"effective_at={effective_at_raw} authority_digest={record_digest}"
-        )
     if not token:
         raise ExperimentError("GitHub Models token is absent")
     request = urllib.request.Request(

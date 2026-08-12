@@ -31,24 +31,30 @@ meaning.
 ## Provider retirement boundary
 
 GitHub's source statement says that GitHub Models, including its catalog and
-inference APIs, was retired on 2026-07-30. Because the source gives a date but
-not a time of day, this repository adopts `2026-07-30T00:00:00Z` as the
-conservative fail-closed policy boundary. Fetches before that instant retain
-their historical replay semantics; fetches at or after it are refused.
+inference APIs, was retired on 2026-07-30. The statement gives a date but not a
+time of day. The repository therefore keeps that observation as the date-only
+`retired_on` fact and separately adopts `2026-07-31T00:00:00Z` as its
+fail-closed enforcement policy. This preserves every possible 2026-07-30
+historical fetch; fetches at or after the policy timestamp are refused.
 
 The official retirement statement is materialized as
 `data/arena/github-models-retirement.json` and constrained by
-`contracts/github-models-retirement-authority.schema.json`. The record binds the
-exact provider, catalog endpoint, model prefix, effective timestamp, observer,
-observation timestamp, supersession issue, and canonical content digest. It is
-a provider-status source authority reviewed through repository delivery; it is
-not sandbox admission, lifecycle, routing, or ranking authority.
+`contracts/github-models-retirement-authority.schema.json`. The record keeps two
+explicit states. `source_statement` binds the date-only claim, official URL,
+observer, observation timestamp, and statement digest. `enforcement_policy`
+binds the exact provider, catalog endpoint, model prefix, policy timestamp,
+decision actor/time, source-statement digest, rationale, supersession issue, and
+policy digest. The outer record has its own canonical digest. These are source
+and fail-closed execution-policy authorities reviewed through repository
+delivery; neither is sandbox admission, lifecycle, routing, or ranking
+authority.
 
 The runtime CLI requires this authority explicitly. At or after the effective
-timestamp it refuses the profile before opening the catalog URL and emits only
-fixed identifiers, the effective timestamp, and the record digest. The source
-URL, endpoint URL, response body, exception reason, and credential values are
-never copied into diagnostics.
+timestamp it refuses the profile before token, filesystem, catalog, or model
+prerequisites. The diagnostic names the fixed provider, policy timestamp,
+digest-pinned official authority URL, and record digest. The catalog endpoint,
+response body, exception reason, and credential values are never copied into
+diagnostics.
 
 HTTP authorization, other HTTP status, transport, and catalog-schema failures
 use separate sanitized diagnostics. Response bodies, exception reasons, and
@@ -61,9 +67,10 @@ replay, non-secret evidence landing, and repository-local delivery authority.
 
 The workflow consequently requests no `models: read` permission and cannot
 schedule the retired provider. Its contract job exercises the fail-closed guard.
-The former `paired-runtime` body remains visibly disabled as the immutable
-execution specification of PR #42; a replacement provider must add a new
-physical job under its own reviewed policy rather than silently reviving it.
+The former `paired-runtime` body remains visibly disabled as an archival
+outline of PR #42; the full commit above is the exact historical identity. A
+replacement provider must add a new physical job under its own reviewed policy
+rather than silently reviving it.
 
 ### PR #42 failed-attempt evidence gap
 

@@ -54,7 +54,7 @@ TASK_DIGEST = "sha256:" + "2" * 64
 TOKEN = "ghp_abcdefghijklmnopqrstuvwxyz123456"
 NOW = datetime(2026, 8, 9, tzinfo=timezone.utc)
 BEFORE_RETIREMENT = datetime(2026, 7, 29, tzinfo=timezone.utc)
-RETIREMENT_BOUNDARY = datetime(2026, 7, 30, tzinfo=timezone.utc)
+RETIREMENT_BOUNDARY = datetime(2026, 7, 31, tzinfo=timezone.utc)
 
 
 @pytest.fixture(autouse=True)
@@ -461,7 +461,7 @@ def test_retirement_boundary_preserves_pre_cutoff_replay() -> None:
     evidence = fetch_github_model_catalog_evidence(
         token=TOKEN,
         policy=runtime_policy,
-        fetched_at=datetime(2026, 7, 29, 23, 59, 59, tzinfo=timezone.utc),
+        fetched_at=datetime(2026, 7, 30, 23, 59, 59, tzinfo=timezone.utc),
         retirement_authority=retirement_authority(),
         opener=lambda request, timeout: Response(catalog_rows(runtime_policy)),
     )
@@ -471,7 +471,21 @@ def test_retirement_boundary_preserves_pre_cutoff_replay() -> None:
 
 def test_tampered_retirement_authority_cannot_inject_secret_into_diagnostic() -> None:
     tampered = retirement_authority()
-    tampered["source_url"] = f"https://example.invalid/?token={TOKEN}"
+    source = dict(tampered["source_statement"])
+    source["source_url"] = f"https://example.invalid/?token={TOKEN}"
+    source["statement_digest"] = sha256_json(
+        {key: value for key, value in source.items() if key != "statement_digest"}
+    )
+    enforcement = dict(tampered["enforcement_policy"])
+    enforcement["source_statement_digest"] = source["statement_digest"]
+    enforcement["policy_digest"] = sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
+    tampered["source_statement"] = source
+    tampered["enforcement_policy"] = enforcement
+    tampered["record_digest"] = sha256_json(
+        {key: value for key, value in tampered.items() if key != "record_digest"}
+    )
 
     with pytest.raises(ExperimentError) as captured:
         fetch_github_model_catalog_evidence(
@@ -507,7 +521,12 @@ def test_catalog_identity_cannot_be_tampered_with_authority() -> None:
     malicious_url = f"https://example.invalid/catalog?token={TOKEN}"
     tampered_policy = replace(policy(), catalog_url=malicious_url)
     tampered_authority = retirement_authority()
-    tampered_authority["catalog_url"] = malicious_url
+    enforcement = dict(tampered_authority["enforcement_policy"])
+    enforcement["catalog_url"] = malicious_url
+    enforcement["policy_digest"] = sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
+    tampered_authority["enforcement_policy"] = enforcement
     tampered_authority["record_digest"] = sha256_json(
         {
             key: value
@@ -536,11 +555,20 @@ def test_retirement_authority_is_repository_readable_and_schema_valid() -> None:
     )
 
     assert list(Draft202012Validator(schema).iter_errors(authority)) == []
-    assert authority["schema_version"] == "github-models-retirement-authority@2"
-    assert authority["effective_at"] == "2026-07-30T00:00:00Z"
-    assert authority["observed_at"] == "2026-08-12T03:25:10Z"
-    assert authority["status"] == "source-observation"
-    assert authority["supersession_issue_url"].endswith("/issues/46")
+    assert authority["schema_version"] == "github-models-retirement-authority@3"
+    source = authority["source_statement"]
+    enforcement = authority["enforcement_policy"]
+    assert isinstance(source, dict)
+    assert isinstance(enforcement, dict)
+    assert source["retired_on"] == "2026-07-30"
+    assert source["statement_digest"] == sha256_json(
+        {key: value for key, value in source.items() if key != "statement_digest"}
+    )
+    assert enforcement["effective_at"] == "2026-07-31T00:00:00Z"
+    assert enforcement["source_statement_digest"] == source["statement_digest"]
+    assert enforcement["policy_digest"] == sha256_json(
+        {key: value for key, value in enforcement.items() if key != "policy_digest"}
+    )
     assert authority["record_digest"] == sha256_json(
         {key: value for key, value in authority.items() if key != "record_digest"}
     )
@@ -596,10 +624,45 @@ def test_runtime_cli_fails_closed_on_retired_provider_without_leaking_token(
     assert completed.returncode == 2
     assert (
         "provider_retired provider=github-models "
-        "effective_at=2026-07-30T00:00:00Z"
+        "effective_at=2026-07-31T00:00:00Z "
+        "authority_url=https://github.blog/changelog/"
     ) in completed.stderr
     assert TOKEN not in completed.stderr
     assert not (tmp_path / "output" / "model-catalog-evidence.json").exists()
+
+
+def test_runtime_cli_checks_retirement_before_token_or_filesystem_prerequisites(
+    tmp_path: Path,
+) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_arena_benchflow_experiment.py"),
+            "--runtime-policy",
+            str(POLICY_PATH),
+            "--retirement-authority",
+            str(RETIREMENT_AUTHORITY_PATH),
+            "--bundles-root",
+            str(tmp_path / "missing-bundles"),
+            "--task-id",
+            "dialogue-parser",
+            "--bench-bin",
+            str(tmp_path / "missing-bench"),
+            "--output-root",
+            str(tmp_path / "output"),
+            "--run-identity",
+            "retirement-priority-control",
+        ],
+        cwd=ROOT,
+        env={key: value for key, value in os.environ.items() if key != "GITHUB_TOKEN"},
+        text=True,
+        capture_output=True,
+    )
+
+    assert completed.returncode == 2
+    assert "provider_retired provider=github-models" in completed.stderr
+    assert "token environment variable is absent" not in completed.stderr
+    assert "missing-bench" not in completed.stderr
 
 
 def test_retired_profile_workflow_cannot_schedule_a_physical_provider_job() -> None:
