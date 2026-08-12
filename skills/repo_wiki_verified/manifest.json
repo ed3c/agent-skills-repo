@@ -1,5 +1,5 @@
 {
-  "artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+  "artifact_digest": "sha256:0f86a29fed777610db3697f9c36be8a45757ff7b6b71342d52029be47abc3f6f",
   "artifact_digest_spec": {
     "algorithm": "sha256 over canonical JSON",
     "artifact_files": "skills.md plus every regular file under references/, recursively",
@@ -40,5 +40,5 @@
   "qualification_receipt_id": "pending-qualification",
   "schema_version": "skill-manifest@1",
   "skill_id": "repo_wiki_verified",
-  "skill_version": "0.1.0"
+  "skill_version": "0.1.1"
 }

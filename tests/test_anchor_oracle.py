@@ -12,6 +12,14 @@ from pathlib import Path
 import pytest
 
 from anchor_oracle import (
+    SPAN_EDGES_DO_NOT_COVER_QUOTE,
+    SPAN_ELISION_EXCEEDS_BOUND,
+    SPAN_NO_ANCHORED_EDGE,
+    SPAN_QUOTE_EMPTY,
+    SPAN_QUOTE_PRESENT,
+    SPAN_SEARCH_BOUND_EXHAUSTED,
+    SPAN_SOURCE_EMPTY,
+    SPAN_TEXT_NOT_UTF8,
     CircularDenylistInvalid,
     EmptyWiki,
     FixtureDirty,
@@ -25,6 +33,7 @@ from anchor_oracle import (
     evaluate_page,
     evaluate_wiki,
     extract_anchors,
+    nearest_source_span,
     validate_okf_frontmatter,
     verify_fixture_head,
 )
@@ -936,3 +945,233 @@ class TestCliCircularDenylist:
         )
         assert result.returncode == 64
         assert not output.exists()
+
+
+ELISION_SOURCE = b"# the ingest queue -- the ingest queue drains oldest-first\n"
+ELIDED_QUOTE = "# the ingest queue drains oldest-first"
+ELISION_SPAN = "# the ingest queue -- the ingest queue drains oldest-first"
+
+
+class TestNearestSourceSpan:
+    def test_interior_elision_recovers_a_real_contiguous_span(self) -> None:
+        diagnostic = nearest_source_span(ELIDED_QUOTE, ELISION_SOURCE)
+
+        assert diagnostic["kind"] == "nearest-source-span@1"
+        assert diagnostic["status"] == "interior_elision"
+        assert diagnostic["reason"] is None
+        span = diagnostic["span"]
+        assert span["text"] == ELISION_SPAN
+        assert ELISION_SOURCE[span["start"] : span["end"]] == ELISION_SPAN.encode()
+
+    def test_alignment_names_the_elided_bytes(self) -> None:
+        diagnostic = nearest_source_span(ELIDED_QUOTE, ELISION_SOURCE)
+        alignment = diagnostic["alignment"]
+
+        assert alignment["elided_text"] == "-- the ingest queue "
+        assert alignment["elided_bytes"] == len(alignment["elided_text"])
+        assert alignment["divergence_source_offset"] > 0
+
+    def test_offsets_are_bytes_and_undecodable_text_is_explicit(self) -> None:
+        utf8_source = "# la señal -- la señal se pierde\n".encode()
+        utf8 = nearest_source_span("# la señal se pierde", utf8_source)
+        utf8_span = utf8["span"]
+        assert utf8_source[utf8_span["start"] : utf8_span["end"]] == (
+            utf8_span["text"].encode()
+        )
+
+        binary_source = b"head \xff\xfe tail\n"
+        binary = nearest_source_span("head tail", binary_source)
+        binary_span = binary["span"]
+        assert binary_span["text"] is None
+        assert binary_span["text_absent_reason"] == SPAN_TEXT_NOT_UTF8
+        assert binary_source[binary_span["start"] : binary_span["end"]] == (
+            b"head \xff\xfe tail"
+        )
+
+    def test_no_candidate_states_are_named(self) -> None:
+        absent = nearest_source_span("ZZ nothing of the sort ZZ", ELISION_SOURCE)
+        rewritten = nearest_source_span(
+            "the ingest queue drains newest-first", ELISION_SOURCE
+        )
+
+        assert absent["reason"] == SPAN_NO_ANCHORED_EDGE
+        assert rewritten["reason"] == SPAN_EDGES_DO_NOT_COVER_QUOTE
+        assert nearest_source_span("", ELISION_SOURCE)["reason"] == SPAN_QUOTE_EMPTY
+        assert nearest_source_span("the ingest queue", ELISION_SOURCE)[
+            "reason"
+        ] == SPAN_QUOTE_PRESENT
+        assert nearest_source_span(ELIDED_QUOTE, b"")["reason"] == SPAN_SOURCE_EMPTY
+
+    def test_elision_bound_is_explicit_and_overridable(self) -> None:
+        source = b"AAA" + b"x" * 500 + b"BBB"
+        bounded = nearest_source_span("AAABBB", source)
+        widened = nearest_source_span("AAABBB", source, max_elided_bytes=500)
+
+        assert bounded["reason"] == SPAN_ELISION_EXCEEDS_BOUND
+        assert bounded["search"]["best_elided_bytes"] == 500
+        assert widened["status"] == "interior_elision"
+
+    def test_split_probe_cap_reports_unknown_instead_of_absent(self) -> None:
+        quote = "A" * 140
+        source = (
+            quote[-130:].encode()
+            + b"|"
+            + quote[:130].encode()
+            + b"|"
+            + quote[:120].encode()
+            + b"X"
+            + quote[120:].encode()
+        )
+
+        diagnostic = nearest_source_span(quote, source)
+
+        assert diagnostic["status"] == "search_incomplete"
+        assert diagnostic["reason"] == SPAN_SEARCH_BOUND_EXHAUSTED
+        assert diagnostic["search"]["search_truncated"] is True
+        assert diagnostic["search"]["splits_examined"] == 64
+
+    def test_occurrence_cap_reports_unknown_instead_of_wrong_bound(self) -> None:
+        source = (b"A_" * 32) + b"A_XB"
+
+        diagnostic = nearest_source_span("AB", source)
+
+        assert diagnostic["status"] == "search_incomplete"
+        assert diagnostic["reason"] == SPAN_SEARCH_BOUND_EXHAUSTED
+        assert diagnostic["search"]["search_truncated"] is True
+
+    def test_negative_elision_bound_fails_fast(self) -> None:
+        with pytest.raises(ValueError, match="non-negative integer"):
+            nearest_source_span(
+                ELIDED_QUOTE,
+                ELISION_SOURCE,
+                max_elided_bytes=-1,
+            )
+
+    def test_search_is_deterministic(self) -> None:
+        first = nearest_source_span(ELIDED_QUOTE, ELISION_SOURCE)
+        second = nearest_source_span(ELIDED_QUOTE, ELISION_SOURCE)
+        assert canonical_bytes(first) == canonical_bytes(second)
+
+    def test_real_wrap_restatement_failure_recovers_source_bytes(self) -> None:
+        source = (
+            PROJECT
+            / "tests/fixtures/repo_wiki_verified/public_fixture_subset"
+            / "scripts/git_gate.py"
+        ).read_bytes()
+        quote = "not in this repository has no .git of its own"
+
+        diagnostic = nearest_source_span(quote, source)
+        span = diagnostic["span"]
+
+        assert diagnostic["status"] == "interior_elision"
+        assert source[span["start"] : span["end"]].decode() == span["text"]
+        assert quote not in span["text"]
+
+
+class TestNearestSpanInAnchorChecks:
+    def test_only_quote_not_found_carries_the_diagnostic(
+        self, tmp_path: Path
+    ) -> None:
+        fixture = tmp_path / "fixture"
+        fixture.mkdir()
+        (fixture / "queue.md").write_bytes(ELISION_SOURCE)
+
+        missing_quote = check_anchor(
+            fixture,
+            anchor_for(f"(src: queue.md `{ELIDED_QUOTE}`)"),
+        )
+        resolved = check_anchor(
+            fixture,
+            anchor_for("(src: queue.md `the ingest queue drains oldest-first`)"),
+        )
+        missing_file = check_anchor(
+            fixture,
+            anchor_for("(src: absent.md `whatever`)"),
+        )
+
+        assert missing_quote["status"] == "quote_not_found"
+        assert missing_quote["nearest_source_span"]["status"] == "interior_elision"
+        assert "nearest_source_span" not in resolved
+        assert "nearest_source_span" not in missing_file
+
+    def test_every_other_status_keeps_its_complete_original_shape(
+        self, tmp_path: Path
+    ) -> None:
+        import hashlib
+
+        fixture = tmp_path / "fixture"
+        fixture.mkdir()
+        text = b"hello\nworld\n"
+        binary = b"\xffhello"
+        (fixture / "text.txt").write_bytes(text)
+        (fixture / "binary.bin").write_bytes(binary)
+        (fixture / "directory").mkdir()
+        (fixture / "generated").mkdir()
+        (fixture / "generated/page.md").write_text("generated\n")
+        outside = tmp_path / "outside.txt"
+        outside.write_text("outside\n")
+        (fixture / "escape.txt").symlink_to(outside)
+
+        def digest(data: bytes) -> str:
+            return "sha256:" + hashlib.sha256(data).hexdigest()
+
+        cases = (
+            ("(src: ../outside.txt `x`)", (), "path_escapes_fixture", None),
+            ("(src: escape.txt `outside`)", (), "symlink_escapes_fixture", None),
+            (
+                "(src: generated/page.md `generated`)",
+                ("generated",),
+                "circular_evidence",
+                None,
+            ),
+            ("(src: absent.txt `x`)", (), "file_missing", None),
+            ("(src: directory `x`)", (), "not_a_regular_file", None),
+            (
+                "(src: text.txt:3-2 `x`)",
+                (),
+                "invalid_line_ref",
+                digest(text),
+            ),
+            (
+                "(src: binary.bin:1 `hello`)",
+                (),
+                "line_ref_on_undecodable_file",
+                digest(binary),
+            ),
+            (
+                "(src: text.txt:1 `world`)",
+                (),
+                "quote_outside_line_ref",
+                digest(text),
+            ),
+        )
+        for raw, denylist, status, target_digest in cases:
+            anchor = anchor_for(raw)
+            check = check_anchor(
+                fixture,
+                anchor,
+                circular_denylist=denylist,
+            )
+            assert check == {
+                "index": anchor.index,
+                "path": anchor.path,
+                "source_path": anchor.source_path,
+                "line_ref": anchor.line_ref,
+                "quote": anchor.quote,
+                "status": status,
+                "target_sha256": target_digest,
+            }
+
+    def test_passing_page_evidence_digests_are_unchanged(self) -> None:
+        verdict = evaluate_wiki(WIKI_GOOD, FIXTURE_REPO, fixture_sha=FIXTURE_SHA)
+        digests = {
+            case["case_id"]: case["evidence_digest"] for case in verdict["cases"]
+        }
+        assert digests == {
+            "architecture/overview.md": (
+                "sha256:f3a2bf1bb9a2351489018c4c2388c34151aa13367ceea86c89b9bebdb0152fea"
+            ),
+            "index.md": (
+                "sha256:781fa89967c590a7fc35a8fc30e941d19908a6cb8674681213200b5db2446e07"
+            ),
+        }

@@ -87,7 +87,7 @@ qualification by themselves.
 - A mechanical guard fails closed if blind seed content ever reaches the
   exportable corpus (src: skill_arena/skill_assets.py `def assert_corpus_exportable(`).
 - Completion requires a reachable commit plus digested paths and tests
-  (src: data/project/landing-evidence.json `"completion_rule": "reachable-commit-plus-digested-paths-and-tests"`).
+  (src: data/project/landing-evidence.json `"completion_rule":"reachable-commit-plus-digested-paths-and-tests"`).
 - The validator derives the path set from the commit rather than trusting prose
   (src: skill_arena/landing_evidence.py `def actual_changed_paths(`).
 - The executor package describes itself as fail-closed evidence machinery

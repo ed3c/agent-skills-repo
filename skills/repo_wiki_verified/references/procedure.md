@@ -67,7 +67,7 @@ verdict file is written; `64` usage error. Absence is never a verdict.
 | `no_anchors` | Anchor at least one claim per page. |
 | `path_escapes_fixture` / `symlink_escapes_fixture` | Anchor only paths inside the fixture. |
 | `file_missing` / `not_a_regular_file` | Point at a real regular file at the pinned sha. |
-| `quote_not_found` | Re-copy the quote byte-for-byte from the pinned file. |
+| `quote_not_found` | Inspect `nearest_source_span`. If its status is `interior_elision`, use its byte offsets to locate the real contiguous source span, then copy an appropriate contiguous quote from that span. If it is `no_candidate` or `search_incomplete`, re-copy directly from the pinned file; never synthesize a repair. |
 | `invalid_line_ref` / `quote_outside_line_ref` | Correct or drop the `:N-M` suffix. |
 | `line_ref_on_undecodable_file` | Drop the line ref; binary targets take whole-file quotes only. |
 | `page_not_utf8` | Re-encode the page as UTF-8. |
@@ -75,6 +75,13 @@ verdict file is written; `64` usage error. Absence is never a verdict.
 Repeat run-and-repair until exit 0. Only then hand the wiki to any human or
 downstream gate — and hand it as "lexically anchored at <sha>", never as
 "verified true".
+
+The span diagnostic is advisory repair evidence, not a mutation. It is added
+only to `quote_not_found` checks and cannot change an anchor's pass/fail state.
+All offsets are byte offsets into the cited file. A recovered span is bounded
+and contiguous; an absent candidate has a named reason instead of a guessed
+replacement. A bounded search that exhausts its probe cap reports
+`search_incomplete`, not the stronger claim that no candidate exists.
 
 ## 6. Corpus and pool discipline
 
