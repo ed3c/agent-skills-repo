@@ -1,0 +1,34 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 45,
+    "title": "ci: openshell physical-evidence workflow fails before job creation",
+    "status": "completed",
+    "evidence_level": "independently_verified",
+    "notes": "PR #50 restored GitHub workflow evaluation by moving runner-dependent path initialization into a runner step and added load-bearing context, commit-object, and reflog controls. Completion is limited to issue #45's CI evaluation defect; the protected physical job did not run and issues #3/#30 remain open.",
+    "landing": {
+      "commit_sha": "6c803f1cfa3822ef8cda93863cdc3f055bb9b216",
+      "pull_request": 50,
+      "changed_paths": [
+        ".github/workflows/openshell-physical-evidence.yml",
+        "tests/test_development_private_key_audit.py",
+        "tests/test_openshell_physical_evidence_workflow.py"
+      ],
+      "changed_paths_digest": "sha256:88236a4594a1a49e02c321fea875b60afa3365708c0b29b3b21e003a81f388b0",
+      "test_evidence": {
+        "source": "workflow",
+        "commands": [
+          "python -m pytest -q tests/test_openshell_evidence_pair.py tests/test_development_private_key_audit.py tests/test_openshell_physical_evidence_workflow.py",
+          "python -m compileall -q skill_arena scripts",
+          "python scripts/verify_openshell_evidence_pair.py --help",
+          "python scripts/audit_development_private_key.py --help"
+        ],
+        "result_summary": "PR #50 head a74214370a1360488e8dce8de257bf3ff4b6e570 workflow run 31562516866 materialized both jobs; offline-contract read back 17 tests passed plus compile and CLI help checks, while physical-pair was skipped by its manual-main gate. This proves workflow evaluation and offline contract recovery only; no OpenShell physical execution, cleanup, reproduction, signing, verification, admission, or #3/#30 completion is claimed.",
+        "independently_verified": true,
+        "digest": "sha256:a209152c29f4f336f85aeda70720f7af8d8171ef7c05ddd8ee55ff5c373e294c"
+      }
+    }
+  }
+}
