@@ -1,0 +1,13 @@
+{
+  "schema_version": "quote-repair-plan-trust@1",
+  "registry_id": "quote-repair-plan-trust@1",
+  "actor_id": "github:ed3c",
+  "authority_id": "repository-owner-review@1",
+  "updated_at": "2026-08-12T08:59:49Z",
+  "active_keys": {
+    "github-ed3c-quote-repair-plan-20260812": "sha256:ebcb4c05c0569f2110de270bbfff80401316c2ddb157fcffe1c9a6941aac84e7"
+  },
+  "revoked_key_ids": [],
+  "superseded_key_ids": [],
+  "registry_digest": "sha256:89b6a5b01f9f9e7450a349602cada0deaf1537055c4760e95e14c093d834a134"
+}

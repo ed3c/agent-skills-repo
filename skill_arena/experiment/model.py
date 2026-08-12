@@ -11,8 +11,11 @@ from pathlib import Path, PurePosixPath
 from typing import Mapping, Protocol, Sequence
 
 SPEC_SCHEMA = "arena-experiment-spec@1"
+SPEC_SCHEMA_V2 = "arena-experiment-spec@2"
 PLAN_SCHEMA = "arena-experiment-plan@1"
+PLAN_SCHEMA_V2 = "arena-experiment-plan@2"
 SIGNED_PLAN_SCHEMA = "arena-experiment-plan-envelope@1"
+SIGNED_PLAN_SCHEMA_V2 = "arena-experiment-plan-envelope@2"
 INVOCATION_SCHEMA = "arena-experiment-invocation@1"
 OUTCOME_SCHEMA = "arena-experiment-outcome@1"
 METRICS_SCHEMA = "arena-experiment-metrics@1"
@@ -24,6 +27,7 @@ BUNDLE_MANIFEST_SCHEMA = "arena-experiment-bundle-manifest@1"
 SIGNED_BUNDLE_SCHEMA = "arena-experiment-bundle-envelope@1"
 
 PLAN_SIGNATURE_DOMAIN = b"agent-skills-repo:arena-experiment-plan:v1\x00"
+PLAN_SIGNATURE_DOMAIN_V2 = b"agent-skills-repo:arena-experiment-plan:v2\x00"
 BUNDLE_SIGNATURE_DOMAIN = b"agent-skills-repo:arena-experiment-bundle:v1\x00"
 RANDOMIZATION_ALGORITHM = "sha256-arm-sort@1"
 FAILURE_DENOMINATOR_POLICY = "all-preregistered-invocations-count"
@@ -76,6 +80,10 @@ _SPEC_FIELDS = {
     "randomization_seed",
     "agent_seed_mode",
     "preregistered_at",
+}
+_SPEC_FIELDS_V2 = _SPEC_FIELDS | {
+    "baseline_skill_artifact_digest",
+    "study_protocol_digest",
 }
 _TASK_FIELDS = {"task_id", "task_family", "task_bundle_digest"}
 _PLAN_FIELDS = {
@@ -186,11 +194,18 @@ def regular_file(path: Path, label: str) -> bytes:
 
 
 def validate_spec(spec: Mapping[str, object]) -> dict[str, object]:
-    if set(spec) != _SPEC_FIELDS or spec.get("schema_version") != SPEC_SCHEMA:
+    schema_version = spec.get("schema_version")
+    expected_fields = (
+        _SPEC_FIELDS_V2 if schema_version == SPEC_SCHEMA_V2 else _SPEC_FIELDS
+    )
+    if set(spec) != expected_fields or schema_version not in {
+        SPEC_SCHEMA,
+        SPEC_SCHEMA_V2,
+    }:
         raise ExperimentError("experiment spec schema or fields are invalid")
 
     normalized: dict[str, object] = {
-        "schema_version": SPEC_SCHEMA,
+        "schema_version": schema_version,
         "experiment_id": identifier(spec.get("experiment_id"), "experiment_id"),
     }
     raw_tasks = spec.get("tasks")
@@ -236,6 +251,19 @@ def validate_spec(spec: Mapping[str, object]) -> dict[str, object]:
         raise ExperimentError("candidate and placebo skill digests must differ")
     normalized["candidate_skill_artifact_digest"] = candidate
     normalized["placebo_skill_artifact_digest"] = placebo
+    if schema_version == SPEC_SCHEMA_V2:
+        if placebo is not None:
+            raise ExperimentError("version 2 experiment specs do not support placebo arms")
+        baseline = require_sha256(
+            spec.get("baseline_skill_artifact_digest"),
+            "baseline_skill_artifact_digest",
+        )
+        if baseline in {candidate, placebo}:
+            raise ExperimentError("baseline, candidate, and placebo digests must differ")
+        normalized["baseline_skill_artifact_digest"] = baseline
+        normalized["study_protocol_digest"] = require_sha256(
+            spec.get("study_protocol_digest"), "study_protocol_digest"
+        )
 
     for field in (
         "agent_id",

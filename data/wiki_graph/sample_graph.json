@@ -1781,7 +1781,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/qualification-pipeline.md:0",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Qualification pipeline — structure and dataflow"
@@ -1791,7 +1791,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/qualification-pipeline.md:1",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
@@ -1802,7 +1802,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/qualification-pipeline.md:2",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
@@ -1813,7 +1813,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/qualification-pipeline.md:3",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
@@ -1824,7 +1824,7 @@
     },
     {
       "chunk_id": "chunk:openwiki/qualification-pipeline.md:4",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "embedding_model_id": "local-hash-embedding@0.1.0",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
@@ -5452,42 +5452,42 @@
       "commit_sha": "local-dev",
       "dst": "section:openwiki/qualification-pipeline.md:0",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/qualification-pipeline.md:1",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/qualification-pipeline.md:2",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/qualification-pipeline.md:3",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "section:openwiki/qualification-pipeline.md:4",
       "edge_type": "HAS_SECTION",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
       "commit_sha": "local-dev",
       "dst": "wiki-graph-schema@0.1.0",
       "edge_type": "USES_SCHEMA",
-      "source_event_id": "evt:327caa226fb1964250e67776",
+      "source_event_id": "evt:31eb01905934c9f9951b68d9",
       "src": "doc:openwiki/qualification-pipeline.md"
     },
     {
@@ -9250,7 +9250,7 @@
     },
     {
       "commit_sha": "local-dev",
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "license": {
         "code_license": "MIT",
         "commercial_use": "allowed-local-artifact",
@@ -9265,7 +9265,7 @@
       "title": "Qualification pipeline — structure and dataflow"
     },
     {
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "heading_path": [
         "Qualification pipeline — structure and dataflow"
       ],
@@ -9275,7 +9275,7 @@
       "source_path": "openwiki/qualification-pipeline.md"
     },
     {
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
         "Directory structure"
@@ -9286,7 +9286,7 @@
       "source_path": "openwiki/qualification-pipeline.md"
     },
     {
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
         "Dataflow (executed ✅ / pending ⛔)"
@@ -9297,7 +9297,7 @@
       "source_path": "openwiki/qualification-pipeline.md"
     },
     {
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
         "Anchored claims"
@@ -9308,7 +9308,7 @@
       "source_path": "openwiki/qualification-pipeline.md"
     },
     {
-      "content_sha256": "cda1947121779f10d3d946e321079fd2e90e9a2cec874d8e7b7d23a8cb2d6577",
+      "content_sha256": "ad377c0597904d8898c63c93f9d412b1e762fb31bcee26c1c1767b1005e8358e",
       "heading_path": [
         "Qualification pipeline — structure and dataflow",
         "Tracking contract"

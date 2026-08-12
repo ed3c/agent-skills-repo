@@ -31,10 +31,15 @@ agent-skills-repo/
 │   └── sandbox_executor/           # contract, adapter, signing, publication
 ├── contracts/
 │   ├── arena-provider-policy.schema.json
+│   ├── arena-experiment-v2.schema.json
 │   └── sandbox-executor.schema.json
 ├── data/
 │   ├── arena/ollama-qwen3-4b-local.json
 │   ├── arena/provider-observation-revocations.json
+│   ├── arena/quote-repair-environment-trust.json
+│   ├── arena/quote-repair-plan-trust.json
+│   ├── arena/quote-repair-study-protocol.json
+│   ├── arena/quote-repair-interior-elision-tasks.json
 │   ├── project/landing-evidence.json
 │   ├── sandbox_cases/smoke-python.json
 │   ├── sandbox_profiles/
@@ -67,6 +72,9 @@ pinned fixture repo ──vendored subset──▶ tests/fixtures/repo_wiki_veri
         │
         ▼
 ✅ proposed zero-cost local provider policy + one capability preflight
+        │                    (experiment execution remains unauthorized)
+        ▼
+✅ signed 30-invocation quote-repair preregistration
         │                    (experiment execution remains unauthorized)
         ▼
 ✅ OpenShell executor contract + CLI + signed bundle writer + contract tests

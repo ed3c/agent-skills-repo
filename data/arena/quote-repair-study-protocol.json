@@ -1,0 +1,75 @@
+{
+  "schema_version": "quote-repair-study-protocol@1",
+  "study_id": "quote-repair-diagnostic-efficacy@1",
+  "coordination_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/53",
+  "baseline_artifact": {
+    "commit": "7bc9d28c8b2b4b187713654c84c792f2283e3c8e",
+    "source_artifact_digest": "sha256:8e3f18ed0623c7b3fb6b22e7fc3b1884dcc27582477a72c918a5fde833d9d5e6",
+    "portable_artifact_digest": "sha256:8019007c5eb01a1a7c15adc6a2c6afbeae12ba0df3e16d0c370b58120dbb2abb"
+  },
+  "candidate_artifact": {
+    "commit": "5e73c53c0515a3ae982a9c62933903d359c5e9ff",
+    "source_artifact_digest": "sha256:0f86a29fed777610db3697f9c36be8a45757ff7b6b71342d52029be47abc3f6f",
+    "portable_artifact_digest": "sha256:a6a9a1ea9c5337c2d2eb6131e00604c9a08879fe1bae66fa787fbbf2f0fda5da"
+  },
+  "provider_policy_digest": "sha256:23eeb227509e73d11f38bc4796851238a8638bb3b93a128f33a34a8d3e8ac3ed",
+  "task_bundle_digest": "sha256:dc3bed0c6d2052f94dcf8f4bb71737fa5f75d4b7a1453defea0dde0c8567c269",
+  "environment_image_digest": "sha256:808f6a9296f8d66e3017329b54aceb85a178ccc64d530d3e22c40ae5c3951571",
+  "environment_receipt_digest": "sha256:aa7166320977ecb9e7132751f1a60eeb36fcfe57efe29d8c1536ed62813951a0",
+  "allowed_tools": ["edit", "read", "write"],
+  "allowed_tools_digest": "sha256:d7b16822e15096294dcf4d123d9c4ee4e7fca41b7f66b76ca3e6acfbc722f3c6",
+  "repetitions": 5,
+  "max_repair_attempts": 1,
+  "eligibility_rule": "round-0-quote-not-found-and-interior-elision",
+  "failure_denominator_policy": "all-preregistered-invocations-count",
+  "failure_classes": [
+    "succeeded",
+    "task_failure",
+    "verifier_failure",
+    "agent_refusal",
+    "timeout",
+    "transport_loss",
+    "infrastructure_failure",
+    "malformed_repair",
+    "wrong_file_or_span",
+    "no_candidate",
+    "search_incomplete"
+  ],
+  "diagnostic_evidence_contract": {
+    "adapter_diagnostic_path": "/app/adapter-diagnostic.json",
+    "schema_version": "quote-repair-adapter-diagnostic@1",
+    "typed_statuses": [
+      "no_candidate",
+      "search_incomplete"
+    ],
+    "verifier_diagnostic_path": "/logs/verifier/diagnostics.json",
+    "invalid_diagnostic_status": "malformed_repair"
+  },
+  "primary_endpoint": {
+    "name": "eligible-repaired-to-lexical-pass-within-one-attempt",
+    "unit": "binary-per-invocation"
+  },
+  "secondary_endpoints": [
+    "repair_latency_ms",
+    "input_tokens",
+    "output_tokens",
+    "cost_microunits",
+    "malformed_output_rate",
+    "wrong_file_or_span_rate",
+    "no_candidate_rate",
+    "search_incomplete_rate"
+  ],
+  "analysis": {
+    "effect_estimator": "paired-risk-difference-ppm",
+    "success_threshold_ppm": 200000,
+    "uncertainty_method": "cluster-bootstrap-task-repetition-95pct",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 530046,
+    "decision_rule": "point-estimate-gte-threshold-and-ci-lower-bound-gt-zero"
+  },
+  "ranking_claim_allowed": false,
+  "qualification_claim_allowed": false,
+  "experiment_execution_authorized": false,
+  "preregistered_at": "2026-08-12T08:59:49Z",
+  "protocol_digest": "sha256:7e104351ba80e82f3524699bfe46b1ec45d2eba51b9719d03c05d987ced0d6c6"
+}

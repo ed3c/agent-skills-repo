@@ -1,0 +1,43 @@
+{
+  "schema_version": "quote-repair-task-bundle@1",
+  "bundle_id": "quote-repair-interior-elision@1",
+  "tasks": [
+    {
+      "task_id": "quote-repair-cleanup",
+      "task_family": "quote-repair-interior-elision",
+      "source_path": "src/cleanup.py",
+      "source_text": "Cleanup deletes the isolated workspace after verifier artifacts are sealed.\n",
+      "planted_quote": "Cleanup deletes the isolated workspace after artifacts are sealed.",
+      "wiki_template": "Cleanup is mandatory (src: src/cleanup.py `Cleanup deletes the isolated workspace after artifacts are sealed.`).\n",
+      "expected_repair_quote": "Cleanup deletes the isolated workspace after verifier artifacts are sealed.",
+      "expected_round0_status": "quote_not_found",
+      "expected_diagnostic_status": "interior_elision",
+      "task_digest": "sha256:7be9e19d82b8b2c75d45910d5db364c06825ec4e69cc5714f6d7bd495f4ec2a6"
+    },
+    {
+      "task_id": "quote-repair-ingestion",
+      "task_family": "quote-repair-interior-elision",
+      "source_path": "src/ingestion.py",
+      "source_text": "The ingestion pipeline validates every record before committing the batch.\n",
+      "planted_quote": "The ingestion pipeline validates before committing the batch.",
+      "wiki_template": "Validation precedes commit (src: src/ingestion.py `The ingestion pipeline validates before committing the batch.`).\n",
+      "expected_repair_quote": "The ingestion pipeline validates every record before committing the batch.",
+      "expected_round0_status": "quote_not_found",
+      "expected_diagnostic_status": "interior_elision",
+      "task_digest": "sha256:d87ecfc287d49d550e477fc7aab2306ed04d573c1813de5c48e25725028ec84a"
+    },
+    {
+      "task_id": "quote-repair-replay",
+      "task_family": "quote-repair-interior-elision",
+      "source_path": "src/replay.py",
+      "source_text": "The replay checker rejects missing invocations and preserves transport failures.\n",
+      "planted_quote": "The replay checker rejects missing and preserves transport failures.",
+      "wiki_template": "Replay keeps failures visible (src: src/replay.py `The replay checker rejects missing and preserves transport failures.`).\n",
+      "expected_repair_quote": "The replay checker rejects missing invocations and preserves transport failures.",
+      "expected_round0_status": "quote_not_found",
+      "expected_diagnostic_status": "interior_elision",
+      "task_digest": "sha256:078a43f997f84510fefecd9cba12dde2187f06b83d24b305971334ed8ab7d286"
+    }
+  ],
+  "bundle_digest": "sha256:dc3bed0c6d2052f94dcf8f4bb71737fa5f75d4b7a1453defea0dde0c8567c269"
+}
