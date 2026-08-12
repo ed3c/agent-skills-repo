@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ed3c/agent-skills-repo/contracts/github-models-retirement-authority.schema.json",
-  "title": "GitHub Models retirement authority",
+  "title": "GitHub Models retirement source authority",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -9,19 +9,31 @@
     "provider_id",
     "catalog_url",
     "model_prefix",
-    "retired_on",
-    "authority_url",
-    "historical_run_handling"
+    "effective_at",
+    "source_url",
+    "observed_at",
+    "recorded_by",
+    "status",
+    "historical_run_handling",
+    "supersession_issue_url",
+    "record_digest"
   ],
   "properties": {
-    "schema_version": {"const": "github-models-retirement-authority@1"},
-    "provider_id": {"const": "github-models"},
-    "catalog_url": {"const": "https://models.github.ai/catalog/models"},
-    "model_prefix": {"const": "github-models/"},
-    "retired_on": {"const": "2026-07-30"},
-    "authority_url": {
-      "const": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/"
+    "schema_version": {"const": "github-models-retirement-authority@2"},
+    "provider_id": {"pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "catalog_url": {"pattern": "^https://[^?#]+$"},
+    "model_prefix": {"pattern": "^[a-z0-9][a-z0-9-]*/$"},
+    "effective_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "source_url": {
+      "pattern": "^https://github\\.blog/changelog/[^?#]+/$"
     },
-    "historical_run_handling": {"const": "preserve-no-rejudging"}
+    "observed_at": {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "recorded_by": {"pattern": "^[^/]+/[^#]+#[0-9]+$"},
+    "status": {"enum": ["source-observation"]},
+    "historical_run_handling": {"enum": ["preserve-no-rejudging"]},
+    "supersession_issue_url": {
+      "pattern": "^https://github\\.com/[^/]+/[^/]+/issues/[0-9]+$"
+    },
+    "record_digest": {"pattern": "^sha256:[0-9a-f]{64}$"}
   }
 }

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import types
 import urllib.error
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping
@@ -37,6 +38,7 @@ from skill_arena.experiment.model import (
     SPEC_SCHEMA,
     canonical_bytes,
     sha256_bytes,
+    sha256_json,
 )
 from jsonschema import Draft202012Validator
 
@@ -52,6 +54,7 @@ TASK_DIGEST = "sha256:" + "2" * 64
 TOKEN = "ghp_abcdefghijklmnopqrstuvwxyz123456"
 NOW = datetime(2026, 8, 9, tzinfo=timezone.utc)
 BEFORE_RETIREMENT = datetime(2026, 7, 29, tzinfo=timezone.utc)
+RETIREMENT_BOUNDARY = datetime(2026, 7, 30, tzinfo=timezone.utc)
 
 
 @pytest.fixture(autouse=True)
@@ -105,6 +108,14 @@ class Response:
 
     def read(self) -> bytes:
         return json.dumps(self.value).encode("utf-8")
+
+
+class RawResponse:
+    def __init__(self, value: bytes):
+        self.value = value
+
+    def read(self) -> bytes:
+        return self.value
 
 
 def catalog_rows(runtime_policy: BenchFlowRuntimePolicy) -> list[dict[str, object]]:
@@ -401,7 +412,10 @@ def test_catalog_evidence_is_exact_and_digested() -> None:
     tampered = dict(evidence, version="changed")
     with pytest.raises(ExperimentError, match="digest"):
         validate_catalog_evidence(tampered, runtime_policy)
-    with pytest.raises(ExperimentError, match="exactly one"):
+    with pytest.raises(
+        ExperimentError,
+        match="provider_catalog_schema_error model_cardinality",
+    ):
         fetch_github_model_catalog_evidence(
             token=TOKEN,
             policy=runtime_policy,
@@ -434,7 +448,7 @@ def test_retired_provider_is_rejected_before_catalog_network_access() -> None:
         fetch_github_model_catalog_evidence(
             token=TOKEN,
             policy=policy(),
-            fetched_at=datetime(2026, 7, 30, tzinfo=timezone.utc),
+            fetched_at=RETIREMENT_BOUNDARY,
             retirement_authority=retirement_authority(),
             opener=opener,
         )
@@ -442,9 +456,22 @@ def test_retired_provider_is_rejected_before_catalog_network_access() -> None:
     assert opener_called is False
 
 
+def test_retirement_boundary_preserves_pre_cutoff_replay() -> None:
+    runtime_policy = policy()
+    evidence = fetch_github_model_catalog_evidence(
+        token=TOKEN,
+        policy=runtime_policy,
+        fetched_at=datetime(2026, 7, 29, 23, 59, 59, tzinfo=timezone.utc),
+        retirement_authority=retirement_authority(),
+        opener=lambda request, timeout: Response(catalog_rows(runtime_policy)),
+    )
+
+    assert evidence["model_id"] == runtime_policy.catalog_model_id
+
+
 def test_tampered_retirement_authority_cannot_inject_secret_into_diagnostic() -> None:
     tampered = retirement_authority()
-    tampered["authority_url"] = f"https://example.invalid/?token={TOKEN}"
+    tampered["source_url"] = f"https://example.invalid/?token={TOKEN}"
 
     with pytest.raises(ExperimentError) as captured:
         fetch_github_model_catalog_evidence(
@@ -456,8 +483,49 @@ def test_tampered_retirement_authority_cannot_inject_secret_into_diagnostic() ->
         )
 
     assert str(captured.value) == (
-        "GitHub Models retirement authority does not match the runtime policy"
+        "GitHub Models retirement authority digest mismatch"
     )
+    assert TOKEN not in str(captured.value)
+
+    extra_field = retirement_authority()
+    extra_field[f"credential-{TOKEN}"] = "present"
+    with pytest.raises(ExperimentError) as extra_captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            fetched_at=NOW,
+            retirement_authority=extra_field,
+            opener=lambda request, timeout: Response(catalog_rows(policy())),
+        )
+    assert str(extra_captured.value) == (
+        "GitHub Models retirement authority fields are invalid"
+    )
+    assert TOKEN not in str(extra_captured.value)
+
+
+def test_catalog_identity_cannot_be_tampered_with_authority() -> None:
+    malicious_url = f"https://example.invalid/catalog?token={TOKEN}"
+    tampered_policy = replace(policy(), catalog_url=malicious_url)
+    tampered_authority = retirement_authority()
+    tampered_authority["catalog_url"] = malicious_url
+    tampered_authority["record_digest"] = sha256_json(
+        {
+            key: value
+            for key, value in tampered_authority.items()
+            if key != "record_digest"
+        }
+    )
+
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=tampered_policy,
+            fetched_at=BEFORE_RETIREMENT,
+            retirement_authority=tampered_authority,
+            opener=lambda request, timeout: Response(catalog_rows(tampered_policy)),
+        )
+
+    assert str(captured.value) == "GitHub Models retirement authority digest mismatch"
     assert TOKEN not in str(captured.value)
 
 
@@ -468,18 +536,14 @@ def test_retirement_authority_is_repository_readable_and_schema_valid() -> None:
     )
 
     assert list(Draft202012Validator(schema).iter_errors(authority)) == []
-    assert authority == {
-        "schema_version": "github-models-retirement-authority@1",
-        "provider_id": "github-models",
-        "catalog_url": "https://models.github.ai/catalog/models",
-        "model_prefix": "github-models/",
-        "retired_on": "2026-07-30",
-        "authority_url": (
-            "https://github.blog/changelog/2026-07-01-"
-            "github-models-is-being-fully-retired-on-july-30-2026/"
-        ),
-        "historical_run_handling": "preserve-no-rejudging",
-    }
+    assert authority["schema_version"] == "github-models-retirement-authority@2"
+    assert authority["effective_at"] == "2026-07-30T00:00:00Z"
+    assert authority["observed_at"] == "2026-08-12T03:25:10Z"
+    assert authority["status"] == "source-observation"
+    assert authority["supersession_issue_url"].endswith("/issues/46")
+    assert authority["record_digest"] == sha256_json(
+        {key: value for key, value in authority.items() if key != "record_digest"}
+    )
 
 
 def test_runtime_cli_fails_closed_on_retired_provider_without_leaking_token(
@@ -530,7 +594,10 @@ def test_runtime_cli_fails_closed_on_retired_provider_without_leaking_token(
     )
 
     assert completed.returncode == 2
-    assert "provider_retired provider=github-models retired_on=2026-07-30" in completed.stderr
+    assert (
+        "provider_retired provider=github-models "
+        "effective_at=2026-07-30T00:00:00Z"
+    ) in completed.stderr
     assert TOKEN not in completed.stderr
     assert not (tmp_path / "output" / "model-catalog-evidence.json").exists()
 
@@ -540,7 +607,8 @@ def test_retired_profile_workflow_cannot_schedule_a_physical_provider_job() -> N
 
     assert "  contract:\n" in workflow
     assert "tests/test_arena_experiment_benchflow_adapter.py" in workflow
-    assert "  paired-runtime:\n" not in workflow
+    assert "  paired-runtime:\n" in workflow
+    assert "    if: ${{ false }} # retired provider; archival specification only\n" in workflow
     assert "models: read" not in workflow
 
 
@@ -565,8 +633,7 @@ def test_catalog_authorization_failure_is_sanitized_and_classified() -> None:
 
     message = str(captured.value)
     assert message == (
-        "provider_catalog_authorization_failed status=403 "
-        "catalog_url=https://models.github.ai/catalog/models"
+        "provider_catalog_authorization_failed provider=github-models status=403"
     )
     assert TOKEN not in message
 
@@ -591,10 +658,7 @@ def test_catalog_http_failure_is_sanitized_and_classified() -> None:
         )
 
     message = str(captured.value)
-    assert message == (
-        "provider_catalog_http_error status=410 "
-        "catalog_url=https://models.github.ai/catalog/models"
-    )
+    assert message == "provider_catalog_http_error provider=github-models status=410"
     assert TOKEN not in message
 
 
@@ -612,10 +676,7 @@ def test_catalog_transport_failure_is_sanitized_and_classified() -> None:
         )
 
     message = str(captured.value)
-    assert message == (
-        "provider_catalog_transport_error "
-        "catalog_url=https://models.github.ai/catalog/models"
-    )
+    assert message == "provider_catalog_transport_error provider=github-models"
     assert TOKEN not in message
 
 
@@ -633,6 +694,36 @@ def test_catalog_schema_failure_is_classified_separately() -> None:
                 {"models": catalog_rows(policy())}
             ),
         )
+
+
+@pytest.mark.parametrize(
+    ("response", "expected_code"),
+    [
+        (RawResponse(b"not-json"), "invalid_json"),
+        (Response([]), "model_cardinality"),
+        (
+            Response([{**catalog_rows(policy())[0], "capabilities": "tools"}]),
+            "capabilities",
+        ),
+        (Response([{**catalog_rows(policy())[0], "limits": []}]), "limits"),
+        (Response([{**catalog_rows(policy())[0], "name": ""}]), "name"),
+    ],
+)
+def test_all_catalog_shape_failures_use_schema_error_classification(
+    response: Response | RawResponse,
+    expected_code: str,
+) -> None:
+    with pytest.raises(ExperimentError) as captured:
+        fetch_github_model_catalog_evidence(
+            token=TOKEN,
+            policy=policy(),
+            fetched_at=BEFORE_RETIREMENT,
+            retirement_authority=retirement_authority(),
+            opener=lambda request, timeout: response,
+        )
+
+    assert str(captured.value) == f"provider_catalog_schema_error {expected_code}"
+    assert TOKEN not in str(captured.value)
 
 
 def test_skill_digest_and_full_bundle_validator_are_load_bearing(

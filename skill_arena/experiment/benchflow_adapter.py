@@ -17,7 +17,7 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Callable, Mapping, Sequence, cast
@@ -44,6 +44,11 @@ CATALOG_EVIDENCE_SCHEMA = "github-models-catalog-evidence@1"
 PREPARATION_SCHEMA = "arena-benchflow-preparation@1"
 PAIR_SUMMARY_SCHEMA = "arena-paired-result@1"
 BENCHFLOW_CONFIG_SCHEMA = "arena-benchflow-invocation-config@1"
+
+_GITHUB_MODELS_PROVIDER_ID = "github-models"
+_GITHUB_MODELS_RETIREMENT_RECORD_DIGEST = (
+    "sha256:e00840741a7ffe93757e2c8f4ff22d450161ae50e7803b4c5badb04a06dea9ad"
+)
 
 _POLICY_FIELDS = {
     "schema_version",
@@ -106,9 +111,14 @@ _RETIREMENT_AUTHORITY_FIELDS = {
     "provider_id",
     "catalog_url",
     "model_prefix",
-    "retired_on",
-    "authority_url",
+    "effective_at",
+    "source_url",
+    "observed_at",
+    "recorded_by",
+    "status",
     "historical_run_handling",
+    "supersession_issue_url",
+    "record_digest",
 }
 
 _SECRET_KEY_RE = re.compile(
@@ -184,6 +194,17 @@ def _positive_int(value: object, label: str, *, minimum: int = 1) -> int:
 
 def _canonical_digest_without(value: Mapping[str, object], field: str) -> str:
     return sha256_json({key: item for key, item in value.items() if key != field})
+
+
+def _utc_timestamp(value: object, label: str) -> tuple[str, datetime]:
+    raw = _nonempty_string(value, label)
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ExperimentError(f"{label} must be an ISO-8601 timestamp") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ExperimentError(f"{label} must include a timezone")
+    return raw, parsed.astimezone(timezone.utc)
 
 
 @dataclass(frozen=True)
@@ -364,44 +385,49 @@ def fetch_github_model_catalog_evidence(
 ) -> dict[str, object]:
     if retirement_authority is None:
         raise ExperimentError("GitHub Models retirement authority is required")
-    _exact_fields(
-        retirement_authority,
-        _RETIREMENT_AUTHORITY_FIELDS,
-        "GitHub Models retirement authority",
+    if set(retirement_authority) != _RETIREMENT_AUTHORITY_FIELDS:
+        raise ExperimentError("GitHub Models retirement authority fields are invalid")
+    record_digest = require_sha256(
+        retirement_authority.get("record_digest"), "retirement record_digest"
     )
-    exact = {
-        "schema_version": "github-models-retirement-authority@1",
-        "provider_id": "github-models",
-        "catalog_url": policy.catalog_url,
-        "model_prefix": "github-models/",
-        "retired_on": "2026-07-30",
-        "authority_url": (
-            "https://github.blog/changelog/2026-07-01-"
-            "github-models-is-being-fully-retired-on-july-30-2026/"
-        ),
-        "historical_run_handling": "preserve-no-rejudging",
-    }
-    if any(retirement_authority.get(key) != value for key, value in exact.items()):
+    if (
+        record_digest != _GITHUB_MODELS_RETIREMENT_RECORD_DIGEST
+        or record_digest
+        != _canonical_digest_without(retirement_authority, "record_digest")
+    ):
+        raise ExperimentError("GitHub Models retirement authority digest mismatch")
+    provider_id = _nonempty_string(
+        retirement_authority.get("provider_id"), "retirement provider_id"
+    )
+    catalog_url = _nonempty_string(
+        retirement_authority.get("catalog_url"), "retirement catalog_url"
+    )
+    model_prefix = _nonempty_string(
+        retirement_authority.get("model_prefix"), "retirement model_prefix"
+    )
+    if (
+        provider_id != _GITHUB_MODELS_PROVIDER_ID
+        or policy.catalog_url != catalog_url
+        or policy.model != f"{model_prefix}{policy.catalog_model_id}"
+    ):
         raise ExperimentError(
-            "GitHub Models retirement authority does not match the runtime policy"
+            "GitHub Models retirement authority does not match the pinned provider identity"
         )
-    retired_on_raw = _nonempty_string(
-        retirement_authority.get("retired_on"), "retirement retired_on"
+    effective_at_raw, effective_at = _utc_timestamp(
+        retirement_authority.get("effective_at"), "retirement effective_at"
     )
-    authority_url = _nonempty_string(
-        retirement_authority.get("authority_url"), "retirement authority_url"
+    _, observed_at = _utc_timestamp(
+        retirement_authority.get("observed_at"), "retirement observed_at"
     )
-    try:
-        retired_on = date.fromisoformat(retired_on_raw)
-    except ValueError as exc:
-        raise ExperimentError("retirement retired_on must be an ISO date") from exc
-    if fetched_at.tzinfo is None:
+    if observed_at < effective_at:
+        raise ExperimentError("retirement observation predates its effective boundary")
+    if fetched_at.tzinfo is None or fetched_at.utcoffset() is None:
         raise ExperimentError("catalog fetched_at must be timezone-aware")
-    if fetched_at.astimezone(timezone.utc).date() >= retired_on:
+    if fetched_at.astimezone(timezone.utc) >= effective_at:
         raise ExperimentError(
             "provider_retired "
-            f"provider=github-models retired_on={retired_on_raw} "
-            f"authority={authority_url}"
+            f"provider={_GITHUB_MODELS_PROVIDER_ID} "
+            f"effective_at={effective_at_raw} authority_digest={record_digest}"
         )
     if not token:
         raise ExperimentError("GitHub Models token is absent")
@@ -421,49 +447,50 @@ def fetch_github_model_catalog_evidence(
         if exc.code in {401, 403}:
             raise ExperimentError(
                 "provider_catalog_authorization_failed "
-                f"status={exc.code} catalog_url={policy.catalog_url}"
+                f"provider={_GITHUB_MODELS_PROVIDER_ID} status={exc.code}"
             ) from exc
         raise ExperimentError(
             "provider_catalog_http_error "
-            f"status={exc.code} catalog_url={policy.catalog_url}"
+            f"provider={_GITHUB_MODELS_PROVIDER_ID} status={exc.code}"
         ) from exc
     except (OSError, urllib.error.URLError) as exc:
         raise ExperimentError(
-            "provider_catalog_transport_error "
-            f"catalog_url={policy.catalog_url}"
+            f"provider_catalog_transport_error provider={_GITHUB_MODELS_PROVIDER_ID}"
         ) from exc
     try:
         catalog = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ExperimentError("GitHub Models catalog is not valid UTF-8 JSON") from exc
+        raise ExperimentError("provider_catalog_schema_error invalid_json") from exc
     if not isinstance(catalog, list):
         raise ExperimentError("provider_catalog_schema_error root_must_be_array")
     matches = [item for item in catalog if isinstance(item, dict) and item.get("id") == policy.catalog_model_id]
     if len(matches) != 1:
-        raise ExperimentError(
-            f"GitHub Models catalog must contain exactly one {policy.catalog_model_id!r}"
-        )
+        raise ExperimentError("provider_catalog_schema_error model_cardinality")
     model = matches[0]
     capabilities = model.get("capabilities")
     limits = model.get("limits")
     if not isinstance(capabilities, list) or not all(isinstance(item, str) for item in capabilities):
-        raise ExperimentError("catalog model capabilities are invalid")
+        raise ExperimentError("provider_catalog_schema_error capabilities")
     if not isinstance(limits, dict):
-        raise ExperimentError("catalog model limits are invalid")
+        raise ExperimentError("provider_catalog_schema_error limits")
+    string_fields: dict[str, str] = {}
+    for field in ("name", "publisher", "registry", "version", "rate_limit_tier"):
+        value = model.get(field)
+        if not isinstance(value, str) or not value:
+            raise ExperimentError(f"provider_catalog_schema_error {field}")
+        string_fields[field] = value
     evidence_without_digest: dict[str, object] = {
         "schema_version": CATALOG_EVIDENCE_SCHEMA,
         "catalog_url": policy.catalog_url,
         "api_version": policy.catalog_api_version,
         "model_id": policy.catalog_model_id,
-        "name": _nonempty_string(model.get("name"), "catalog model name"),
-        "publisher": _nonempty_string(model.get("publisher"), "catalog model publisher"),
-        "registry": _nonempty_string(model.get("registry"), "catalog model registry"),
-        "version": _nonempty_string(model.get("version"), "catalog model version"),
+        "name": string_fields["name"],
+        "publisher": string_fields["publisher"],
+        "registry": string_fields["registry"],
+        "version": string_fields["version"],
         "capabilities": sorted(capabilities),
         "limits": copy.deepcopy(limits),
-        "rate_limit_tier": _nonempty_string(
-            model.get("rate_limit_tier"), "catalog model rate_limit_tier"
-        ),
+        "rate_limit_tier": string_fields["rate_limit_tier"],
         "fetched_at": fetched_at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     return {

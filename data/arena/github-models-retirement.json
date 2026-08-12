@@ -1,9 +1,14 @@
 {
-  "schema_version": "github-models-retirement-authority@1",
+  "schema_version": "github-models-retirement-authority@2",
   "provider_id": "github-models",
   "catalog_url": "https://models.github.ai/catalog/models",
   "model_prefix": "github-models/",
-  "retired_on": "2026-07-30",
-  "authority_url": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/",
-  "historical_run_handling": "preserve-no-rejudging"
+  "effective_at": "2026-07-30T00:00:00Z",
+  "source_url": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/",
+  "observed_at": "2026-08-12T03:25:10Z",
+  "recorded_by": "ed3c/agent-skills-repo#47",
+  "status": "source-observation",
+  "historical_run_handling": "preserve-no-rejudging",
+  "supersession_issue_url": "https://github.com/ed3c/agent-skills-repo/issues/46",
+  "record_digest": "sha256:e00840741a7ffe93757e2c8f4ff22d450161ae50e7803b4c5badb04a06dea9ad"
 }

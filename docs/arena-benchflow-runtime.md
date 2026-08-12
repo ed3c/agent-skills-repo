@@ -30,18 +30,25 @@ meaning.
 
 ## Provider retirement boundary
 
-GitHub retired GitHub Models, including its catalog and inference APIs, on
-2026-07-30. The first physical workflow attempt on 2026-08-09 therefore failed
-before invocation 1. That failure remains a physical failed attempt; it is not
-deleted, retried under another identity, or reinterpreted as a model outcome.
+GitHub's source statement says that GitHub Models, including its catalog and
+inference APIs, was retired on 2026-07-30. Because the source gives a date but
+not a time of day, this repository adopts `2026-07-30T00:00:00Z` as the
+conservative fail-closed policy boundary. Fetches before that instant retain
+their historical replay semantics; fetches at or after it are refused.
 
 The official retirement statement is materialized as
 `data/arena/github-models-retirement.json` and constrained by
-`contracts/github-models-retirement-authority.schema.json`. The runtime CLI
-requires this authority explicitly. On or after the recorded retirement date,
-it refuses the profile before opening the catalog URL and emits only the fixed
-provider ID, retirement date, and reviewed authority URL. Pre-retirement
-catalog evidence keeps its historical replay semantics.
+`contracts/github-models-retirement-authority.schema.json`. The record binds the
+exact provider, catalog endpoint, model prefix, effective timestamp, observer,
+observation timestamp, supersession issue, and canonical content digest. It is
+a provider-status source authority reviewed through repository delivery; it is
+not sandbox admission, lifecycle, routing, or ranking authority.
+
+The runtime CLI requires this authority explicitly. At or after the effective
+timestamp it refuses the profile before opening the catalog URL and emits only
+fixed identifiers, the effective timestamp, and the record digest. The source
+URL, endpoint URL, response body, exception reason, and credential values are
+never copied into diagnostics.
 
 HTTP authorization, other HTTP status, transport, and catalog-schema failures
 use separate sanitized diagnostics. Response bodies, exception reasons, and
@@ -52,11 +59,29 @@ complete #15 or #46. A new provider requires a new versioned policy, explicit
 credential and budget authority, a fresh six-invocation physical run, offline
 replay, non-secret evidence landing, and repository-local delivery authority.
 
-The active workflow is consequently contract-only: it retains the fail-closed
-CLI negative control but no longer requests `models: read` or schedules the
-impossible GitHub Models physical job. The original job and failed attempt stay
-reachable in PR #42 history. A replacement provider must add a new physical job
-under its own reviewed policy rather than silently reviving this one.
+The workflow consequently requests no `models: read` permission and cannot
+schedule the retired provider. Its contract job exercises the fail-closed guard.
+The former `paired-runtime` body remains visibly disabled as the immutable
+execution specification of PR #42; a replacement provider must add a new
+physical job under its own reviewed policy rather than silently reviving it.
+
+### PR #42 failed-attempt evidence gap
+
+GitHub run `31307442167`, job `93229900533`, at full commit
+`3ecfe059260c96ad1df4d2360775904a32949df1` has a readable external job log
+showing `ATTEMPT_OUTCOME=failure`, offline verification skipped, and the
+observed catalog `HTTPError` before invocation 1. Artifact metadata identifies
+artifact `9036379174`, named `arena-benchflow-dialogue-parser-1`, with upload
+digest `8dc68ad8623a8bb26387e209aee956a11162deac12fb8a541f6130eba9ca60c7`.
+
+That metadata is not a repository-local evidence bundle. During issue #47
+review, two independent archive-download paths both returned HTTP 403, so the
+raw `workflow-attempt.json`, stdout, and stderr cannot be read back or hashed
+here. No full invocation identity, repository-local cleanup proof, or landed
+artifact manifest exists. This is an explicit evidence gap: the observed
+physical failure must not be dropped from the denominator, but it contributes
+no qualification evidence and cannot satisfy #15. PR history, CI state, and
+the metadata above are not substitutes for the missing raw receipt.
 
 ## Why the Arena does not call `bench skills eval`
 
