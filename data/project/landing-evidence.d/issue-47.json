@@ -1,0 +1,39 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 47,
+    "title": "[P1] Fail closed with authority when a runtime provider is retired",
+    "status": "completed",
+    "evidence_level": "independently_verified",
+    "notes": "PR #48 landed the retired-provider fail-closed contract. This completion is limited to issue #47: GitHub Models cannot be retried, replacement-provider work remains open in #46, and #15 still lacks a physical six-invocation run, signed evidence, offline replay, admission, or ranking authority. PR #42's unavailable raw artifact remains an explicit evidence gap.",
+    "landing": {
+      "commit_sha": "4637b607f1ecd39d6aee2f1d0811fcf331e0ec5a",
+      "pull_request": 48,
+      "changed_paths": [
+        ".github/workflows/arena-experiment-benchflow.yml",
+        "contracts/github-models-retirement-authority.schema.json",
+        "data/arena/github-models-retirement.json",
+        "docs/arena-benchflow-runtime.md",
+        "scripts/run_arena_benchflow_experiment.py",
+        "skill_arena/experiment/__init__.py",
+        "skill_arena/experiment/benchflow_adapter.py",
+        "tests/test_arena_experiment_benchflow_adapter.py"
+      ],
+      "changed_paths_digest": "sha256:0e896b69e548702a3d25e16dbd7492a7223a811e28b2adc0c26897709bcd3173",
+      "test_evidence": {
+        "source": "workflow",
+        "commands": [
+          "python -m pytest -q tests/test_arena_experiment.py tests/test_arena_experiment_benchflow_adapter.py",
+          "python -m compileall -q skill_arena scripts",
+          "python scripts/arena_experiment.py selftest",
+          "python scripts/git_gate.py"
+        ],
+        "result_summary": "PR #48 head 8c22bb8033f384593e486e72886fc77efb4150e7 workflow logs read back 47 focused tests passed, compileall passed, and the Arena selftest passed in arena-experiment-benchflow run 31561387548; skill-ci run 31561387574 read back PASS for git gate defenses. Arena-experiment-contract run 31561387550 also passed, while paired-runtime was skipped by the retired-provider policy. This is contract evidence only: no replacement-provider physical run, signed bundle, offline replay, admission, ranking, or production-routing claim is made.",
+        "independently_verified": true,
+        "digest": "sha256:be7fadd7e53be87118d60dc15268e158df96a14c8fec5169b47c6ef2024d1a1b"
+      }
+    }
+  }
+}
