@@ -52,6 +52,12 @@ complete #15 or #46. A new provider requires a new versioned policy, explicit
 credential and budget authority, a fresh six-invocation physical run, offline
 replay, non-secret evidence landing, and repository-local delivery authority.
 
+The active workflow is consequently contract-only: it retains the fail-closed
+CLI negative control but no longer requests `models: read` or schedules the
+impossible GitHub Models physical job. The original job and failed attempt stay
+reachable in PR #42 history. A replacement provider must add a new physical job
+under its own reviewed policy rather than silently reviving this one.
+
 ## Why the Arena does not call `bench skills eval`
 
 BenchFlow's higher-level skill evaluation command owns its own arm scheduling

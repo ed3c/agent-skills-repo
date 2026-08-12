@@ -46,6 +46,7 @@ RETIREMENT_AUTHORITY_PATH = ROOT / "data/arena/github-models-retirement.json"
 RETIREMENT_AUTHORITY_SCHEMA_PATH = (
     ROOT / "contracts/github-models-retirement-authority.schema.json"
 )
+WORKFLOW_PATH = ROOT / ".github/workflows/arena-experiment-benchflow.yml"
 IMAGE = "sha256:" + "1" * 64
 TASK_DIGEST = "sha256:" + "2" * 64
 TOKEN = "ghp_abcdefghijklmnopqrstuvwxyz123456"
@@ -532,6 +533,15 @@ def test_runtime_cli_fails_closed_on_retired_provider_without_leaking_token(
     assert "provider_retired provider=github-models retired_on=2026-07-30" in completed.stderr
     assert TOKEN not in completed.stderr
     assert not (tmp_path / "output" / "model-catalog-evidence.json").exists()
+
+
+def test_retired_profile_workflow_cannot_schedule_a_physical_provider_job() -> None:
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    assert "  contract:\n" in workflow
+    assert "tests/test_arena_experiment_benchflow_adapter.py" in workflow
+    assert "  paired-runtime:\n" not in workflow
+    assert "models: read" not in workflow
 
 
 def test_catalog_authorization_failure_is_sanitized_and_classified() -> None:
