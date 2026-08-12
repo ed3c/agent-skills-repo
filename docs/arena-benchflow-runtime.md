@@ -1,8 +1,8 @@
 # First real Arena baseline/candidate runtime
 
-This document defines the first real execution profile for issue #15. It is a
-single-task runtime proof that the reusable experiment contract can drive a
-real agent, not a public leaderboard claim.
+This document records the first attempted real execution profile for issue
+#15. It remains the immutable description of that attempt, not a public
+leaderboard claim and not a currently executable provider profile.
 
 ## Pinned profile
 
@@ -23,11 +23,34 @@ real agent, not a public leaderboard claim.
 | Internal retries | 0 |
 | Concurrency per invocation | 1 |
 
-GitHub's Models catalog endpoint is queried at runtime with the workflow-scoped
-`GITHUB_TOKEN`, `models: read`, and API version `2026-03-10`. The safe catalog
-fields and their digest are published; the token is not. The repository policy
-pins the model ID, while the catalog evidence records the version actually
-advertised during the run.
+As originally designed, GitHub's Models catalog endpoint was queried with the
+workflow-scoped `GITHUB_TOKEN`, `models: read`, and API version `2026-03-10`.
+The repository policy remains unchanged so the failed attempt keeps its exact
+meaning.
+
+## Provider retirement boundary
+
+GitHub retired GitHub Models, including its catalog and inference APIs, on
+2026-07-30. The first physical workflow attempt on 2026-08-09 therefore failed
+before invocation 1. That failure remains a physical failed attempt; it is not
+deleted, retried under another identity, or reinterpreted as a model outcome.
+
+The official retirement statement is materialized as
+`data/arena/github-models-retirement.json` and constrained by
+`contracts/github-models-retirement-authority.schema.json`. The runtime CLI
+requires this authority explicitly. On or after the recorded retirement date,
+it refuses the profile before opening the catalog URL and emits only the fixed
+provider ID, retirement date, and reviewed authority URL. Pre-retirement
+catalog evidence keeps its historical replay semantics.
+
+HTTP authorization, other HTTP status, transport, and catalog-schema failures
+use separate sanitized diagnostics. Response bodies, exception reasons, and
+credential values are never included.
+
+This retirement guard does not select a replacement provider and does not
+complete #15 or #46. A new provider requires a new versioned policy, explicit
+credential and budget authority, a fresh six-invocation physical run, offline
+replay, non-secret evidence landing, and repository-local delivery authority.
 
 ## Why the Arena does not call `bench skills eval`
 
@@ -65,7 +88,8 @@ Before signing the plan, the runtime:
    and SHA-256 under its directory;
 4. builds the task Docker image and records its immutable image ID and Docker
    server version;
-5. queries and digests the exact GitHub Models catalog entry;
+5. validates provider retirement authority, then queries and digests the exact
+   GitHub Models catalog entry only when the profile was active;
 6. combines runtime-policy and model-catalog digests into one effective policy
    digest.
 
@@ -128,5 +152,7 @@ It does not estimate general skill lift. The paired document is forced to keep:
 ranking_claim_allowed: false
 ```
 
-Issue #15 closes only after this runtime implementation and its non-secret raw
-evidence land on `main` through the repository landing authority.
+Issue #15 closes only after a live replacement-provider implementation and its
+non-secret raw evidence land on `main` through the repository landing
+authority. The retired profile and its failed attempt do not satisfy that
+boundary.

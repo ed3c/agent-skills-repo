@@ -150,6 +150,9 @@ def _artifact_manifest(root: Path) -> dict[str, object]:
 
 def command_run(args: argparse.Namespace) -> int:
     policy = load_runtime_policy(args.runtime_policy)
+    retirement_authority = _load_object(
+        args.retirement_authority, "GitHub Models retirement authority"
+    )
     if args.task_id != policy.task_id:
         raise ExperimentError("requested task differs from runtime policy")
     token = os.environ.get(args.github_token_env, "")
@@ -173,6 +176,7 @@ def command_run(args: argparse.Namespace) -> int:
         token=token,
         policy=policy,
         fetched_at=started_at,
+        retirement_authority=retirement_authority,
     )
     _write_object(destination / "model-catalog-evidence.json", catalog)
     shutil.copyfile(args.runtime_policy, destination / "runtime-policy.json")
@@ -292,6 +296,7 @@ def command_run(args: argparse.Namespace) -> int:
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     root.add_argument("--runtime-policy", type=Path, required=True)
+    root.add_argument("--retirement-authority", type=Path, required=True)
     root.add_argument("--bundles-root", type=Path, required=True)
     root.add_argument("--task-id", required=True)
     root.add_argument("--bench-bin", type=Path, required=True)

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ed3c/agent-skills-repo/contracts/github-models-retirement-authority.schema.json",
+  "title": "GitHub Models retirement authority",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "provider_id",
+    "catalog_url",
+    "model_prefix",
+    "retired_on",
+    "authority_url",
+    "historical_run_handling"
+  ],
+  "properties": {
+    "schema_version": {"const": "github-models-retirement-authority@1"},
+    "provider_id": {"const": "github-models"},
+    "catalog_url": {"const": "https://models.github.ai/catalog/models"},
+    "model_prefix": {"const": "github-models/"},
+    "retired_on": {"const": "2026-07-30"},
+    "authority_url": {
+      "const": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/"
+    },
+    "historical_run_handling": {"const": "preserve-no-rejudging"}
+  }
+}

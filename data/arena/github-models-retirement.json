@@ -1,0 +1,9 @@
+{
+  "schema_version": "github-models-retirement-authority@1",
+  "provider_id": "github-models",
+  "catalog_url": "https://models.github.ai/catalog/models",
+  "model_prefix": "github-models/",
+  "retired_on": "2026-07-30",
+  "authority_url": "https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/",
+  "historical_run_handling": "preserve-no-rejudging"
+}

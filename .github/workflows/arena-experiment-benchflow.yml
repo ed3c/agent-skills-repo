@@ -9,7 +9,9 @@ on:
       - 'scripts/check_arena_benchflow_runtime.py'
       - 'contracts/arena-experiment.schema.json'
       - 'contracts/arena-benchflow-runtime.schema.json'
+      - 'contracts/github-models-retirement-authority.schema.json'
       - 'data/arena/benchflow-dialogue-parser-github-models.json'
+      - 'data/arena/github-models-retirement.json'
       - 'tests/test_arena_experiment.py'
       - 'tests/test_arena_experiment_benchflow_adapter.py'
       - 'docs/arena-benchflow-runtime.md'
@@ -40,6 +42,8 @@ jobs:
       - run: python -m compileall -q skill_arena scripts
       - run: python scripts/arena_experiment.py selftest
       - run: python -m json.tool contracts/arena-benchflow-runtime.schema.json >/dev/null
+      - run: python -m json.tool contracts/github-models-retirement-authority.schema.json >/dev/null
+      - run: python -m json.tool data/arena/github-models-retirement.json >/dev/null
 
   paired-runtime:
     if: >-
@@ -95,6 +99,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/arena-benchflow-runtime" "$RUNNER_TEMP/arena-benchflow-attempt"
           python scripts/run_arena_benchflow_experiment.py \
             --runtime-policy data/arena/benchflow-dialogue-parser-github-models.json \
+            --retirement-authority data/arena/github-models-retirement.json \
             --bundles-root "$RUNNER_TEMP/arena-task-bundles" \
             --task-id dialogue-parser \
             --bench-bin "$RUNNER_TEMP/benchflow-venv/bin/bench" \

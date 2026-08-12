@@ -17,7 +17,7 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Callable, Mapping, Sequence, cast
@@ -100,6 +100,15 @@ _PREPARATION_FIELDS = {
     "effective_policy_digest",
     "allowed_tools_digest",
     "preparation_digest",
+}
+_RETIREMENT_AUTHORITY_FIELDS = {
+    "schema_version",
+    "provider_id",
+    "catalog_url",
+    "model_prefix",
+    "retired_on",
+    "authority_url",
+    "historical_run_handling",
 }
 
 _SECRET_KEY_RE = re.compile(
@@ -350,8 +359,50 @@ def fetch_github_model_catalog_evidence(
     token: str,
     policy: BenchFlowRuntimePolicy,
     fetched_at: datetime,
+    retirement_authority: Mapping[str, object] | None = None,
     opener: UrlOpener = urllib.request.urlopen,
 ) -> dict[str, object]:
+    if retirement_authority is None:
+        raise ExperimentError("GitHub Models retirement authority is required")
+    _exact_fields(
+        retirement_authority,
+        _RETIREMENT_AUTHORITY_FIELDS,
+        "GitHub Models retirement authority",
+    )
+    exact = {
+        "schema_version": "github-models-retirement-authority@1",
+        "provider_id": "github-models",
+        "catalog_url": policy.catalog_url,
+        "model_prefix": "github-models/",
+        "retired_on": "2026-07-30",
+        "authority_url": (
+            "https://github.blog/changelog/2026-07-01-"
+            "github-models-is-being-fully-retired-on-july-30-2026/"
+        ),
+        "historical_run_handling": "preserve-no-rejudging",
+    }
+    if any(retirement_authority.get(key) != value for key, value in exact.items()):
+        raise ExperimentError(
+            "GitHub Models retirement authority does not match the runtime policy"
+        )
+    retired_on_raw = _nonempty_string(
+        retirement_authority.get("retired_on"), "retirement retired_on"
+    )
+    authority_url = _nonempty_string(
+        retirement_authority.get("authority_url"), "retirement authority_url"
+    )
+    try:
+        retired_on = date.fromisoformat(retired_on_raw)
+    except ValueError as exc:
+        raise ExperimentError("retirement retired_on must be an ISO date") from exc
+    if fetched_at.tzinfo is None:
+        raise ExperimentError("catalog fetched_at must be timezone-aware")
+    if fetched_at.astimezone(timezone.utc).date() >= retired_on:
+        raise ExperimentError(
+            "provider_retired "
+            f"provider=github-models retired_on={retired_on_raw} "
+            f"authority={authority_url}"
+        )
     if not token:
         raise ExperimentError("GitHub Models token is absent")
     request = urllib.request.Request(
@@ -366,14 +417,27 @@ def fetch_github_model_catalog_evidence(
     try:
         response = opener(request, timeout=30)
         raw = response.read()  # type: ignore[attr-defined]
-    except (OSError, urllib.error.URLError, urllib.error.HTTPError) as exc:
-        raise ExperimentError(f"cannot fetch GitHub Models catalog: {type(exc).__name__}") from exc
+    except urllib.error.HTTPError as exc:
+        if exc.code in {401, 403}:
+            raise ExperimentError(
+                "provider_catalog_authorization_failed "
+                f"status={exc.code} catalog_url={policy.catalog_url}"
+            ) from exc
+        raise ExperimentError(
+            "provider_catalog_http_error "
+            f"status={exc.code} catalog_url={policy.catalog_url}"
+        ) from exc
+    except (OSError, urllib.error.URLError) as exc:
+        raise ExperimentError(
+            "provider_catalog_transport_error "
+            f"catalog_url={policy.catalog_url}"
+        ) from exc
     try:
         catalog = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ExperimentError("GitHub Models catalog is not valid UTF-8 JSON") from exc
     if not isinstance(catalog, list):
-        raise ExperimentError("GitHub Models catalog root must be an array")
+        raise ExperimentError("provider_catalog_schema_error root_must_be_array")
     matches = [item for item in catalog if isinstance(item, dict) and item.get("id") == policy.catalog_model_id]
     if len(matches) != 1:
         raise ExperimentError(
