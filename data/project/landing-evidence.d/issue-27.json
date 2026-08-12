@@ -1,0 +1,12 @@
+{
+  "schema_version": "landing-evidence-fragment@1",
+  "repository": "ed3c/agent-skills-repo",
+  "operation": "upsert",
+  "work_item": {
+    "issue_number": 27,
+    "title": "Skill misses the critical-group anchor bar single-shot (crit-gates02 quote_not_found)",
+    "status": "blocked",
+    "evidence_level": "reachable_on_main",
+    "notes": "PR #52 landed the bounded quote-repair diagnostic slice at merge commit 5e73c53c0515a3ae982a9c62933903d359c5e9ff. The implementation deterministically exposes nearest-source-span diagnostics for quote_not_found, fails closed when search bounds truncate, and updates canonical plus generated skill artifacts coherently. This is partial delivery only: issue #27 requires a measured calibration rerun before completion. The preregistered efficacy experiment is tracked in #53 and remains blocked on replacement-provider and budget authority in #46; no physical efficacy, qualification, admission, Arena-ranking, or production-routing claim is made."
+  }
+}
