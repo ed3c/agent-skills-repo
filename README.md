@@ -201,6 +201,7 @@ git config core.hooksPath .githooks
 ```sh
 python3 scripts/git_gate.py
 python3 scripts/check_openwiki.py
+python3 scripts/check_readme_index.py
 python3 scripts/check_plan_package_compat.py
 python3 scripts/check_wiki_graph_sync.py
 python3 scripts/export_agent_skills.py --check
@@ -402,6 +403,7 @@ This index covers every supported authority document, public package, schema, wo
 
 #### Qualification, governance, and delivery
 
+- [`skill_arena/__init__.py`](skill_arena/__init__.py) — public qualification and receipt API.
 - [`skill_arena/core.py`](skill_arena/core.py) — schemas, signatures, receipt admission, gates, qualification, lifecycle, and registry snapshots.
 - [`skill_arena/skill_assets.py`](skill_arena/skill_assets.py) — artifact, corpus, digest, public/blind-pool, and conflict guards.
 - [`skill_arena/agent_skills_export.py`](skill_arena/agent_skills_export.py) — canonical portable Agent Skills exporter.
@@ -434,6 +436,7 @@ This index covers every supported authority document, public package, schema, wo
 
 #### SkillsBench adapter
 
+- [`arena_adapters/__init__.py`](arena_adapters/__init__.py) — adapter namespace.
 - [`arena_adapters/skillsbench/task.py`](arena_adapters/skillsbench/task.py) — native `task.md` parsing.
 - [`arena_adapters/skillsbench/policy.py`](arena_adapters/skillsbench/policy.py) — pinned upstream import policy.
 - [`arena_adapters/skillsbench/normalizer.py`](arena_adapters/skillsbench/normalizer.py) — content-addressed normalization and index generation.
@@ -594,6 +597,7 @@ This index covers every supported authority document, public package, schema, wo
 
 - [`scripts/anchor_oracle.py`](scripts/anchor_oracle.py)
 - [`scripts/check_openwiki.py`](scripts/check_openwiki.py)
+- [`scripts/check_readme_index.py`](scripts/check_readme_index.py)
 - [`scripts/sync_wiki_to_graph.py`](scripts/sync_wiki_to_graph.py)
 - [`scripts/check_wiki_graph_sync.py`](scripts/check_wiki_graph_sync.py)
 
@@ -648,6 +652,7 @@ This index covers every supported authority document, public package, schema, wo
 
 | Path | Authority or purpose |
 |---|---|
+| [`data/project/`](data/project/) | Delivery authority, issue fragments, and roadmap projections |
 | [`data/project/landing-evidence.json`](data/project/landing-evidence.json) | Base repository-local delivery authority |
 | [`data/project/landing-evidence.d/`](data/project/landing-evidence.d/) | Later issue-level upsert fragments |
 | [`data/project/skill-arena-roadmap.json`](data/project/skill-arena-roadmap.json) | Roadmap projection; never stronger than landing evidence |
@@ -687,6 +692,7 @@ This index covers every supported authority document, public package, schema, wo
 - [`tests/test_openshell_physical_evidence_workflow.py`](tests/test_openshell_physical_evidence_workflow.py)
 - [`tests/test_quote_repair_preregistration.py`](tests/test_quote_repair_preregistration.py)
 - [`tests/test_real_driver_ablation.py`](tests/test_real_driver_ablation.py)
+- [`tests/test_readme_index.py`](tests/test_readme_index.py)
 - [`tests/test_replicated_hard_gates.py`](tests/test_replicated_hard_gates.py)
 - [`tests/test_repo_wiki_verified_corpus.py`](tests/test_repo_wiki_verified_corpus.py)
 - [`tests/test_sandbox_executor.py`](tests/test_sandbox_executor.py)
