@@ -3,9 +3,21 @@ name: skill-ci
 on:
   pull_request:
     paths:
+      - '.agents/skills/repo-terminal-operator/**'
+      - '.github/workflows/**'
       - 'README.md'
-      - 'skills/**'
+      - 'anchor_oracle/**'
+      - 'arena_adapters/**'
+      - 'artifacts/repo-terminal-operator/**'
+      - 'contracts/**'
+      - 'data/**'
+      - 'dist/agent-skills/**'
+      - 'docs/**'
+      - 'openwiki/**'
       - 'scripts/**'
+      - 'skill_arena/**'
+      - 'skills/**'
+      - 'tests/test_*.py'
 
 jobs:
   skill-ci:
