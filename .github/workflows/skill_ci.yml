@@ -3,6 +3,7 @@ name: skill-ci
 on:
   pull_request:
     paths:
+      - 'README.md'
       - 'skills/**'
       - 'scripts/**'
 
