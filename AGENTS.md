@@ -31,3 +31,12 @@ If a handoff, digest, source/document revision, card registry, compiler/assertio
 - Flag an Atlas handoff that discards material Notes v7 V/X/K state or substitutes a mutable Doc URL for an immutable revision binding.
 - Flag direct generated-export edits without canonical-source and digest updates.
 - Flag any secret leakage, private note/source leakage, unbounded network/production access, stale handoff, replay, trust-root ambiguity, or unsupported host/profile/policy.
+
+<!-- BEGIN SHARED RUNTIME IDENTITY -->
+## Shared runtime identity and dual-forge preflight
+Canonical contract: `ed3c/skills-shared/skills/dual-forge-repository-loop/references/runtime-identity-contract.md`.
+Before mutating delivery state, classify runtime from evidence: `CHATGPT_GITHUB_CONNECTOR | GITHUB_ACTIONS | CLAUDE_CODE_LOCAL | CODEX_CLI_LOCAL | CHATGPT_DESKTOP_WORKTREE | UNKNOWN`.
+Connector ≠ Actions ≠ local worktree. Local claims require observed checkout/remotes/branch/HEAD; Forgejo requires a resolved local binding; Desktop requires an actually created worktree. `UNKNOWN` fails closed. Runtime, model family, and forge authority are separate. One mutable branch has one writer; runtime/HEAD changes require evidence rebinding.
+Dual-forge order: `runtime bind → GitHub ingress → local/Forgejo issue+worktree → verified Forgejo PR → local main → GitHub reconciliation → exact-head Actions → GitHub publication`.
+Three qualifying failures trigger fresh diagnosis + new worktree; no fourth blind patch.
+<!-- END SHARED RUNTIME IDENTITY -->
