@@ -32,6 +32,7 @@ GATES = [
     "scripts/ablation_engine.py",
     "scripts/llm_judge.py",
     "scripts/check_openwiki.py",
+    "scripts/check_readme_index.py",
     "scripts/check_wiki_graph_sync.py",
     "scripts/render_lifecycle_openwiki.py",
     "scripts/check_lifecycle_datasets.py",
