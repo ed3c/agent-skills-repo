@@ -1,0 +1,50 @@
+name: One-time license README sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/license-readme-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Replace stale README license declaration
+        shell: bash
+        run: |
+          python - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+
+          license_path = Path("LICENSE")
+          expected_license_sha256 = "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          actual_license_sha256 = sha256(license_path.read_bytes()).hexdigest()
+          if actual_license_sha256 != expected_license_sha256:
+              raise SystemExit(
+                  "Root LICENSE is not the exact Apache-2.0 reference text: "
+                  f"{actual_license_sha256}"
+              )
+
+          readme_path = Path("README.md")
+          text = readme_path.read_text(encoding="utf-8")
+          old = "MIT License. See [LICENSE](LICENSE) for details."
+          new = "Apache License 2.0. See [LICENSE](LICENSE) for details."
+          matches = text.count(old)
+          if matches != 1:
+              raise SystemExit(f"Expected exactly one stale declaration; found {matches}")
+          readme_path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs(license): update README to Apache-2.0"
+          git push origin HEAD:main
